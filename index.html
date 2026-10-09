@@ -366,6 +366,26 @@ html #v-quote .gi select#g-div{font-size:13px}
 #rows tr.scr td.nm small.cat{color:#1976d2;background:#e3f2fd;border-radius:9px;padding:1px 7px;font-size:10px;margin-left:8px}
 .sf-w{width:260px}
 #f-cat:disabled{color:var(--text);opacity:1;-webkit-text-fill-color:var(--text)}
+/* Preview Quote */
+#qpv .qpb{width:720px;max-width:94vw;max-height:86vh;overflow-y:auto;padding:0 0 24px}
+.qp-hd{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #e6e6e6;position:sticky;top:0;background:#fff;z-index:2}
+.qp-hd .x{background:none;border:0;color:var(--blue);display:flex;padding:2px;cursor:pointer}
+.qp-hd h3{margin:0;font-size:18px;font-weight:500}
+.qp-top{display:flex;justify-content:space-between;gap:24px;padding:22px 28px 14px}
+.qp-top small{display:block;font-size:10px;letter-spacing:.8px;color:#9e9e9e;text-transform:uppercase}
+.qp-top h2{margin:2px 0 6px;font-size:20px;font-weight:500;color:#212121}
+.qp-m{font-size:13px;color:#616161}
+.qp-r{text-align:right;font-size:13px}
+.qp-r b{display:block;margin-bottom:8px;font-weight:500}
+.qp-t{width:calc(100% - 56px);margin:8px 28px 0;border-collapse:collapse;font-size:13px}
+.qp-t th{background:#eee;text-align:left;font-size:11px;font-weight:500;padding:10px 12px;text-transform:uppercase;color:#424242}
+.qp-t td{padding:9px 12px;border-bottom:1px solid #eee;color:#424242}
+.qp-t .r{text-align:right}
+.qp-t td small{display:block;font-size:11px;color:#9e9e9e;margin-top:2px}
+.qp-s td{background:#fafafa;color:#212121;border-top:1px solid #e0e0e0}
+.qp-i td:first-child{padding-left:28px}
+.qp-t tfoot td{background:#eee;font-weight:700;color:#212121;border:0;padding:12px}
+.qp-e{text-align:center;color:#9e9e9e;padding:40px 0;font-size:13px}
 /* Scope: columnas Division y Category alineadas con su encabezado */
 .items > table > thead th{text-align:left}
 .items > table > thead th.n{text-align:right}
@@ -942,7 +962,7 @@ table.scopet thead th.c{text-align:center}
         <span style="flex:1"></span>
         <button class="more" id="more"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
         <button class="save" id="save">Save</button>
-        <div class="menu" id="moremenu" style="right:0;top:60px"><div id="mn-won">Mark as Won</div><div id="mn-create">Create Project</div><div>Duplicar cotización</div><div>Exportar PDF</div><div>Archivar</div></div>
+        <div class="menu" id="moremenu" style="right:0;top:60px"><div id="mn-prev">Preview Quote</div></div>
       </div>
 
       <div class="qbn" id="qbanner" hidden></div>
@@ -1029,6 +1049,7 @@ table.scopet thead th.c{text-align:center}
   <div class="sc-ft"><button class="pillb" id="scd-i">+ New Item</button><button class="pillb" id="scd-s">Save</button></div>
 </div></div>
 <div class="dlg" id="dsc"><div class="bx"><h3>Eliminar scope</h3><div style="font-size:16px;color:#424242;line-height:1.5">¿Está seguro de eliminar el scope <b id="dsc-n"></b>?<br><span style="font-size:14px;color:#757575">Se eliminarán también todos sus ítems.</span></div><div class="bt" style="margin-top:18px"><button id="dsc-c">Cancel</button><button class="ok" id="dsc-ok" style="color:#f44336">Delete</button></div></div></div>
+<div class="dlg" id="qpv"><div class="bx qpb"><div class="qp-hd"><button class="x" id="qpv-x" title="Cerrar"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.400 17.600 5 12 10.600 6.400 5 5 6.400 10.600 12 5 17.600 6.400 19 12 13.400 17.600 19 19 17.600 13.400 12z"/></svg></button><h3>Preview Quote</h3></div><div id="qpv-b"></div></div></div>
 <div class="menu" id="lmenu" style="position:fixed"></div>
 <div class="ov" id="pov"><div class="pmodal" id="pmodal">
   <div class="pm-h"><button class="x" id="pm-x" title="Cerrar"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.4 17.600 5 12 10.600 6.400 5 5 6.400 10.600 12 5 17.600 6.400 19 12 13.400 17.600 19 19 17.600 13.400 12z"/></svg></button><h2>NEW PROJECT</h2></div>
@@ -1443,6 +1464,21 @@ document.addEventListener('drop',e=>{
 });
 document.addEventListener('dragend',()=>{DRAG=null;DRAGI=null;clearDnd();});
 document.addEventListener('change',e=>{if(e.target.id==='scd-d')fillScopeCats('');});
+/* Preview Quote: vista para el cliente (scopes y precios) */
+function openQuotePreview(){
+ const x=current.x;ensureScopes(x);const cur=qCur(x),rows=calcQuote(x).rows,cl=cur==='USD'?'$':'COP';
+ const m=n=>n2(n)+' '+cl;let total=0;
+ const body=x._scopes.map((s,si)=>{
+  const idx=x._sc.map((c,i)=>c===si?i:-1).filter(i=>i>=0);if(!idx.length)return'';
+  const sum=idx.reduce((a,i)=>a+parse(rows[i][8]),0);total+=sum;
+  return `<tr class="qp-s"><td><b>${s.name}</b><small>${s.div}${s.cat?' · '+s.cat:''}</small></td><td class="r"><b>${m(sum)}</b></td></tr>`+idx.map(i=>`<tr class="qp-i"><td>${rows[i][0]}<small>Qty ${rows[i][3]}</small></td><td class="r">${rows[i][8]}</td></tr>`).join('');
+ }).join('');
+ $('#qpv-b').innerHTML=`<div class="qp-top"><div><small>QUOTE</small><h2>${x[2]}</h2><div class="qp-m">Prepared for <b>${x[1]}</b></div></div><div class="qp-r"><small>ID</small><b>${x[0]}</b><small>Date</small><b>${x[3].split(' ').slice(0,2).join(' ')}</b></div></div>
+ ${body?`<table class="qp-t"><thead><tr><th>Scope</th><th class="r">Amount</th></tr></thead><tbody>${body}</tbody><tfoot><tr><td>TOTAL</td><td class="r">${m(total)}</td></tr></tfoot></table>`:'<div class="qp-e">This quote has no scopes yet.</div>'}`;
+ $('#qpv').classList.add('on');
+}
+document.addEventListener('click',e=>{if(e.target.closest('#qpv-x')||e.target.id==='qpv')$('#qpv').classList.remove('on');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#qpv').classList.contains('on'))$('#qpv').classList.remove('on');});
 /* acciones del scope */
 let SCEDIT=null,SCDEL=null;
 function removeScope(x,si){
@@ -2193,7 +2229,7 @@ document.addEventListener('click',e=>{
  if(e.target.closest('#close')){location.hash=current&&current.hl?'#/project/'+current.hl+'/quotes':'';}
  const tab=e.target.closest('.tab'); if(tab&&tab.dataset.t) setTab(tab.dataset.t);
  const mm=$('#moremenu');
- if(e.target.closest('#more')) mm.classList.toggle('on'); else if(e.target.closest('#moremenu')){mm.classList.remove('on');if(!e.target.closest('#mn-create,#mn-won'))toast('Opción de demostración');} else mm.classList.remove('on');
+ if(e.target.closest('#more')) mm.classList.toggle('on'); else if(e.target.closest('#moremenu')){mm.classList.remove('on');if(e.target.closest('#mn-prev'))openQuotePreview();} else mm.classList.remove('on');
  if(e.target.closest('#sw')){const s=$('#sw');s.classList.toggle('on');$('#swl').textContent=s.classList.contains('on')?$('#swl').dataset.c:$('#swl').dataset.o;}
  if(e.target.closest('#fab')) toast('Agregar item');
 });
