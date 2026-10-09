@@ -994,7 +994,7 @@ table.scopet thead th.c{text-align:center}
         <div class="items">
           <h4>Scope <button title="Descargar" data-toast="Descargando items…"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7zM5 18v2h14v-2z"/></svg></button><button class="newitem" id="newitem">+ New Scope</button></h4>
           <table>
-            <thead><tr><th class="c" style="width:60px">#</th><th>SCOPE</th><th>DIVISION</th><th>CATEGORY</th><th class="n">COST</th><th class="n">MARGIN</th><th class="n">GROSS MARGIN</th><th class="n">SALES PRICE</th><th class="c">ACTIONS</th></tr></thead>
+            <thead><tr><th class="c" style="width:60px">#</th><th>SCOPE</th><th>DIVISION</th><th>CATEGORY</th><th class="n">QTY</th><th class="n">COST</th><th class="n">MARGIN</th><th class="n">GROSS MARGIN</th><th class="n">SALES PRICE</th><th class="c">ACTIONS</th></tr></thead>
             <tbody id="rows"></tbody>
             <tfoot id="tot"></tfoot>
           </table>
@@ -1410,20 +1410,20 @@ function buildCosts(x){
  x._scopes.forEach((sc,si)=>{
   const idx=x._sc.map((s,i)=>s===si?i:-1).filter(i=>i>=0),open=x._exp.has(si);
   const C=idx.reduce((a,i)=>a+parse(rows[i][4]),0),G=idx.reduce((a,i)=>a+parse(rows[i][6]),0),S=idx.reduce((a,i)=>a+parse(rows[i][8]),0);
-  const mine=hl&&idx.some(i=>String(x._sp&&x._sp[i])===hl);
-  html+=`<tr class="scr${open?' open':''}${mine?' hl':''}" data-si="${si}"><td class="c gp"><span class="grip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span><span class="no">${si+1}</span></td><td class="nm"><span class="sc-chv">${chvI}</span>${sc.name}${idx.length?` <small>${idx.length} item${idx.length>1?'s':''}</small>`:''}</td><td class="div"><select class="divsel scsel" data-si="${si}" aria-label="Division of ${sc.name}"></select></td><td class="catc">${sc.cat||'—'}</td><td class="n">${idx.length?n2(C)+' '+cur:''}</td><td class="n">${idx.length?(S?(G/S*100).toFixed(2)+'%':'0.00%'):''}</td><td class="n">${idx.length?n2(G)+' '+cur:''}</td><td class="n">${idx.length?n2(S)+' '+cur:''}</td><td class="c"><button class="ib" data-scm="${si}" title="Actions">${kebab}</button></td></tr>`;
+  const Q=idx.reduce((a,i)=>a+(parseFloat(rows[i][3])||0),0);const mine=hl&&idx.some(i=>String(x._sp&&x._sp[i])===hl);
+  html+=`<tr class="scr${open?' open':''}${mine?' hl':''}" data-si="${si}"><td class="c gp"><span class="grip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span><span class="no">${si+1}</span></td><td class="nm"><span class="sc-chv">${chvI}</span>${sc.name}${idx.length?` <small>${idx.length} item${idx.length>1?'s':''}</small>`:''}</td><td class="div"><select class="divsel scsel" data-si="${si}" aria-label="Division of ${sc.name}"></select></td><td class="catc">${sc.cat||'—'}</td><td class="n">${idx.length?(+Q.toFixed(2)).toLocaleString('de-DE',{maximumFractionDigits:2}):''}</td><td class="n">${idx.length?n2(C)+' '+cur:''}</td><td class="n">${idx.length?(S?(G/S*100).toFixed(2)+'%':'0.00%'):''}</td><td class="n">${idx.length?n2(G)+' '+cur:''}</td><td class="n">${idx.length?n2(S)+' '+cur:''}</td><td class="c"><button class="ib" data-scm="${si}" title="Actions">${kebab}</button></td></tr>`;
   if(open){
-   html+=`<tr class="scx"><td></td><td colspan="8"><table class="nx"><thead><tr><th class="c">#</th><th>DESCRIPTION</th><th>CATEGORY</th><th>QTY</th><th>COST</th><th>MARGIN</th><th>GROSS MARGIN</th><th>PRICE PER QUANTITY</th><th>SALE PRICE</th><th class="c">ACTION</th></tr></thead><tbody>`;
+   html+=`<tr class="scx"><td></td><td colspan="9"><table class="nx"><thead><tr><th class="c">#</th><th>DESCRIPTION</th><th>CATEGORY</th><th>QTY</th><th>COST</th><th>MARGIN</th><th>GROSS MARGIN</th><th>PRICE PER QUANTITY</th><th>SALE PRICE</th><th class="c">ACTION</th></tr></thead><tbody>`;
    if(!idx.length)html+=`<tr class="sce"><td colspan="10">No items in this scope yet. Use Add Item in the scope actions.</td></tr>`;
    idx.forEach((i,k)=>{const r=rows[i];html+=`<tr data-ri="${i}"${String(x._sp&&x._sp[i])===hl&&hl?' class="hl"':''}><td class="c gp"><span class="grip igrip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span>${k+1}</td><td>${r[0]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td class="ic"><span data-toast="Ver item">${eye}</span><span data-toast="Eliminar item">${del}</span><span data-toast="Duplicar item">${cp}</span></td></tr>`;});
    html+='</tbody></table></td></tr>';
   }
  });
- if(!x._scopes.length)html='<tr class="sce"><td colspan="9" style="height:64px">This quote has no scopes yet. Use + New Scope to start building it.</td></tr>';
+ if(!x._scopes.length)html='<tr class="sce"><td colspan="10" style="height:64px">This quote has no scopes yet. Use + New Scope to start building it.</td></tr>';
  $('#rows').innerHTML=html;
  fillDivSelects();
  $('#qbanner').hidden=true;
- $('#tot').innerHTML=`<tr><td></td><td>TOTALS</td><td></td><td></td><td class="n">${tot[0]}</td><td class="n">${tot[1]}</td><td class="n">${tot[2]}</td><td class="n">${tot[3]}</td><td></td></tr>`;
+ $('#tot').innerHTML=`<tr><td></td><td>TOTALS</td><td></td><td></td><td></td><td class="n">${tot[0]}</td><td class="n">${tot[1]}</td><td class="n">${tot[2]}</td><td class="n">${tot[3]}</td><td></td></tr>`;
  $('#gt-fx').textContent=cur==='USD'?'USD 3000':'COP 1';
  const conv=cur==='COP'?'USD':'COP';$('#swl').dataset.o='Original ('+cur+')';$('#swl').dataset.c='Converted ('+conv+')';
  $('#sw').classList.remove('on');$('#swl').textContent=$('#swl').dataset.o;
