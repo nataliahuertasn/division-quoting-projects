@@ -382,6 +382,15 @@ html #scd .sf label{font-size:10px;margin-bottom:1px}
 html #scd .sf input,html #scd .sf select{font-size:12px;padding:3px 0;text-transform:none}
 html #scd .sc-ft{padding:16px 16px 0;gap:8px}
 html #scd .sc-ft .pillb{height:28px;font-size:11px;padding:0 14px}
+/* New Scope: descripción */
+html #scd .rte{border:1px solid #e0e0e0;margin-top:4px;display:block}
+html #scd .rte .tb{height:30px;gap:2px;padding:0 6px;font-size:13px}
+html #scd .rte .tb span{width:26px;height:24px}
+html #scd .rte .ed{min-height:76px;max-height:150px;overflow:auto;padding:8px 10px;font-size:12px;line-height:1.4;color:#424242;font-family:Roboto,Arial,sans-serif;outline:0}
+html #scd .rte .ed:focus{box-shadow:inset 0 0 0 1px var(--blue)}
+html #scd .rte .ed ul,html #scd .rte .ed ol{margin:4px 0;padding-left:20px}
+.qp-d{font-size:11.5px;color:#757575;margin-top:4px;font-weight:400}
+.qp-d ul,.qp-d ol{margin:2px 0;padding-left:18px}
 /* Select the language */
 #lgd .lgb{width:452px;max-width:94vw;padding:26px 28px 14px;border-radius:4px}
 #lgd h3{margin:0 0 14px;font-size:24px;font-weight:700;color:#212121}
@@ -1077,6 +1086,7 @@ table.scopet thead th.c{text-align:center}
   <div class="sf"><label for="scd-d">Division <i>*</i></label><div class="sf-s"><select id="scd-d"></select></div></div>
   <div class="sf"><label for="scd-c">Category <i>*</i></label><div class="sf-s sf-w"><select id="scd-c"></select></div></div>
   </div>
+  <div class="sf"><label>Description</label><div class="rte"><div class="tb" id="scd-tb"><span data-cmd="bold" title="Bold"><b>B</b></span><span data-cmd="italic" title="Italic"><i>I</i></span><span data-cmd="underline" title="Underline"><u>U</u></span><span data-cmd="insertUnorderedList" title="Bulleted list">&#9776;</span><span data-cmd="insertOrderedList" title="Numbered list" style="font-size:13px">1.</span><span data-cmd="foreColor" title="Text color" style="text-decoration:underline">A</span><span data-cmd="removeFormat" title="Clear formatting">Tx</span></div><div class="ed" id="scd-ds" contenteditable="true"></div></div></div>
   <div class="sc-ft"><button class="pillb" id="scd-i">+ New Item</button><button class="pillb" id="scd-s">Save</button></div>
 </div></div>
 <div class="dlg" id="dsc"><div class="bx"><h3>Eliminar scope</h3><div style="font-size:16px;color:#424242;line-height:1.5">¿Está seguro de eliminar el scope <b id="dsc-n"></b>?<br><span style="font-size:14px;color:#757575">Se eliminarán también todos sus ítems.</span></div><div class="bt" style="margin-top:18px"><button id="dsc-c">Cancel</button><button class="ok" id="dsc-ok" style="color:#f44336">Delete</button></div></div></div>
@@ -1498,6 +1508,7 @@ document.addEventListener('drop',e=>{
 });
 document.addEventListener('dragend',()=>{DRAG=null;DRAGI=null;clearDnd();});
 document.addEventListener('change',e=>{if(e.target.id==='scd-d')fillScopeCats('');});
+document.addEventListener('mousedown',e=>{const b=e.target.closest('#scd-tb [data-cmd]');if(!b)return;e.preventDefault();const c=b.dataset.cmd;document.execCommand(c,false,c==='foreColor'?'#1976d2':null);});
 /* Preview Quote: vista para el cliente (scopes y precios) */
 const QP_T={
  en:{title:'Preview Quote',quote:'QUOTE',prepared:'Prepared for',id:'ID',date:'Date',scope:'Scope',amount:'Amount',total:'TOTAL',qty:'Qty',empty:'This quote has no scopes yet.'},
@@ -1511,7 +1522,7 @@ function openQuotePreview(lang){
  const body=x._scopes.map((s,si)=>{
   const idx=x._sc.map((c,i)=>c===si?i:-1).filter(i=>i>=0);if(!idx.length)return'';
   const sum=idx.reduce((a,i)=>a+parse(rows[i][8]),0);total+=sum;
-  return `<tr class="qp-s"><td><b>${s.name}</b><small>${s.div}${s.cat?' · '+s.cat:''}</small></td><td class="r"><b>${m(sum)}</b></td></tr>`+idx.map(i=>`<tr class="qp-i"><td>${rows[i][0]}<small>${T.qty} ${rows[i][3]}</small></td><td class="r">${rows[i][8]}</td></tr>`).join('');
+  return `<tr class="qp-s"><td><b>${s.name}</b><small>${s.div}${s.cat?' · '+s.cat:''}</small>${s.desc?`<div class="qp-d">${s.desc}</div>`:''}</td><td class="r"><b>${m(sum)}</b></td></tr>`+idx.map(i=>`<tr class="qp-i"><td>${rows[i][0]}<small>${T.qty} ${rows[i][3]}</small></td><td class="r">${rows[i][8]}</td></tr>`).join('');
  }).join('');
  $('#qpv .qp-hd h3').textContent=T.title;
  $('#qpv-b').innerHTML=`<div class="qp-top"><div><small>${T.quote}</small><h2>${x[2]}</h2><div class="qp-m">${T.prepared} <b>${x[1]}</b></div></div><div class="qp-r"><small>${T.id}</small><b>${x[0]}</b><small>${T.date}</small><b>${dt}</b></div></div>
@@ -1562,6 +1573,7 @@ document.addEventListener('click',e=>{
 function openScopeDlg(sc){
  $('#scd-n').value=sc?sc.name:'';$('#scd-d').innerHTML='<option value=""></option>'+DIVS.map(d=>`<option>${d}</option>`).join('');fillScopeCats('');
  if(sc)$('#scd-d').value=sc.div;fillScopeCats(sc?sc.cat:'');
+ $('#scd-ds').innerHTML=sc?(sc.desc||''):'';
  $('#scd .sc-hd h3').textContent=sc?'Edit Scope':'New Scope';$('#scd-i').style.display=sc?'none':'';
  if(!sc)SCEDIT=null;
  $$('#scd .sf').forEach(f=>f.classList.remove('err'));$('#scd').classList.add('on');setTimeout(()=>$('#scd-n').focus(),0);
@@ -1571,8 +1583,8 @@ function createScope(thenItem){
  $('#scd-n').closest('.sf').classList.toggle('err',!nm);$('#scd-d').closest('.sf').classList.toggle('err',!dv);
  if(!nm||!dv||!cat){toast('Complete nombre, división y categoría del scope');return;}
  ensureScopes(x);
- if(SCEDIT!=null){x._scopes[SCEDIT].name=nm;x._scopes[SCEDIT].div=dv;setScopeCat(x,SCEDIT,cat);syncDiv(x);SCEDIT=null;$('#scd').classList.remove('on');buildCosts(x);toast('Scope actualizado');return;}
- x._scopes.push({name:nm,div:dv,cat});const si=x._scopes.length-1;
+ if(SCEDIT!=null){x._scopes[SCEDIT].name=nm;x._scopes[SCEDIT].div=dv;setScopeCat(x,SCEDIT,cat);x._scopes[SCEDIT].desc=$('#scd-ds').innerHTML.trim();syncDiv(x);SCEDIT=null;$('#scd').classList.remove('on');buildCosts(x);toast('Scope actualizado');return;}
+ x._scopes.push({name:nm,div:dv,cat,desc:$('#scd-ds').innerHTML.trim()});const si=x._scopes.length-1;
  $('#scd').classList.remove('on');buildCosts(x);
  if(thenItem){current.rowIdx=null;x._exp.add(si);buildCosts(x);openItem('',true,si);}else toast('Scope "'+nm+'" creado');
 }
