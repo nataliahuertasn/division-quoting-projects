@@ -366,6 +366,7 @@ html #v-quote .gi select#g-div{font-size:13px}
 #rows tr.scr td.nm small.cat{color:#1976d2;background:#e3f2fd;border-radius:9px;padding:1px 7px;font-size:10px;margin-left:8px}
 .sf-w{width:260px}
 #f-cat:disabled{color:var(--text);opacity:1;-webkit-text-fill-color:var(--text)}
+html .mf .f select#f-pt:disabled{-webkit-text-fill-color:var(--text);color:var(--text);opacity:1}
 /* New Scope: compacto */
 html #scd .bx{width:470px;padding-bottom:12px}
 html #scd .sc-hd{padding:10px 16px;gap:8px}
@@ -1023,7 +1024,7 @@ table.scopet thead th.c{text-align:center}
       <div class="f"><label>Measure *</label><div class="sel"><select id="f-mea"><option>ft2</option><option>m2</option><option>un</option></select></div></div>
       <div class="f"><label>Units *</label><div class="ctl"><input id="f-uni"></div></div>
       <div class="f"><label>Margin *</label><div class="pct"><input id="f-mar"><span>%</span></div></div>
-      <div class="f"><label>Product Type</label><div class="sel"><select id="f-pt" style="color:#9e9e9e"><option value="">Product Type</option><option>Louver</option><option>Panel</option><option>Screen</option></select></div></div>
+      <div class="f"><label>Product Type</label><div class="sel"><select id="f-pt"><option value="">Product Type</option><option>Louver</option><option>Panel</option><option>Screen</option></select></div></div>
       <div class="f"><label>Division *</label><div class="sel"><select id="f-div" class="divsel"></select></div></div>
     </div>
     <div class="rt" style="padding-top:2px">
@@ -1250,9 +1251,9 @@ function openItem(name,isNew,scopeIdx){
 ED={addTo:(isNew&&scopeIdx!=null)?scopeIdx:null,usd:false,adj:src.adj,secs:src.secs.map(s=>({t:s[0],rows:s[1].map(r=>r.slice())}))};
 if(!isNew&&current&&current.x._mat&&current.x._mat[current.rowIdx])ED.secs=JSON.parse(JSON.stringify(current.x._mat[current.rowIdx]));ED.base=totalCost();
  $('#mtitle').textContent=isNew?'New Item':'Edit Item';
- {const xx=current&&current.x;const dv0=isNew?((xx&&scopeIdx!=null&&xx._scopes[scopeIdx])?xx._scopes[scopeIdx].div:""):((xx&&xx._div&&current.rowIdx!=null)?xx._div[current.rowIdx]:"");$("#f-div").dataset.v=dv0;fillDivSelects();$("#f-div").disabled=true;const sci=isNew?scopeIdx:(xx&&xx._sc?xx._sc[current.rowIdx]:null),scat=(xx&&sci!=null&&xx._scopes[sci])?(xx._scopes[sci].cat||""):"";$("#f-cat").innerHTML="<option>"+scat+"</option>";$("#f-cat").value=scat;}
+ {const xx=current&&current.x;const dv0=isNew?((xx&&scopeIdx!=null&&xx._scopes[scopeIdx])?xx._scopes[scopeIdx].div:""):((xx&&xx._div&&current.rowIdx!=null)?xx._div[current.rowIdx]:"");$("#f-div").dataset.v=dv0;fillDivSelects();$("#f-div").disabled=true;const sci=isNew?scopeIdx:(xx&&xx._sc?xx._sc[current.rowIdx]:null),scat=(xx&&sci!=null&&xx._scopes[sci])?(xx._scopes[sci].cat||""):"";$("#f-cat").innerHTML="<option>"+scat+"</option>";$("#f-cat").value=scat;$("#f-pt").innerHTML="<option>"+scat+"</option>";$("#f-pt").value=scat;}
  $('#f-ref').value=isNew?'':name; $('#f-mea').value=src.mea; $('#f-uni').value=src.uni; $('#f-mar').value=src.mar;
- ['#f-ref','#f-cat','#f-mea','#f-uni','#f-mar','#f-pt'].forEach(s=>$(s).disabled=!isNew);$('#f-cat').disabled=true;  // la categoría la define el scope
+ ['#f-ref','#f-cat','#f-mea','#f-uni','#f-mar','#f-pt'].forEach(s=>$(s).disabled=!isNew);$('#f-cat').disabled=true;$('#f-pt').disabled=true;  // categoría y product type los define el scope
  $('#f-desc').innerHTML=src.desc.map(d=>'• '+d).join('<br>');
  $('#msw').classList.remove('on');$('#mswl').textContent='Original (COP)';
  renderSecs(); $('#ov').classList.add('on'); $('#modal').scrollTop=0;
