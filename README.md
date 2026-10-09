@@ -3,11 +3,13 @@
 Mockup navegable (front-end únicamente) de una extensión de **Project Agenda** que permite
 clasificar por **División** cada **Scope** de una cotización y crear después **proyectos separados por división**.
 
+**Ver el mockup en línea:** https://nataliahuertasn.github.io/division-quoting-projects/
+
 No hay backend, base de datos ni APIs: todos los datos son de ejemplo y se pierden al recargar la página.
 
 ## Cómo abrirlo
 
-Es un solo archivo. Basta con abrir `index.html` en el navegador (doble clic).
+Desde el enlace de arriba, o localmente: es un solo archivo, basta con abrir `index.html` en el navegador (doble clic).
 Usa la fuente Roboto desde Google Fonts, por lo que requiere conexión a internet para verse igual que el diseño original.
 
 ## Idea de negocio
