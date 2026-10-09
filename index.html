@@ -1100,37 +1100,54 @@ function buildGeneral(x,c){
  const chip=n=>`<span class="chip">${n}${xs}</span>`;
  const st={bid:['Bidding','#1976d2'],app:['Approval','#ff9800'],fol:['Follow Up','#ffc107']}[c];
  $('#qtitle').textContent=x[2];
+ const L=x._lead,MES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ const fmtD=s=>{if(!s)return '';const[m,d,y]=s.split('/');return MES[+m-1]+'/'+d+'/'+y;};
+ const ini=n=>n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+ const td=new Date(),today=MES[td.getMonth()]+'/'+String(td.getDate()).padStart(2,'0')+'/'+td.getFullYear();
+ const mgrs=L?av(ini(L.am),L.am,'Account Manager')+av(ini(L.pm),L.pm,'Precon Manager'):av('PV','Pedro Velez','Account Manager')+av('PV','Pedro Velez','Account Manager');
+ const est=L?`<button class="blue-add" data-toast="Asignar estimador">${plus}</button>`:av('DP','Daniela Palacio','Account Manager');
+ const collab=L?L.col.map(n=>av(ini(n),n,'Collaborator')).join(''):'';
+ const bidDocs=L?(L.docs?chip(L.docs):''):chip('Solicitud Empire B8.Pdf')+chip('MARK -S6T-.Pdf')+chip('Louvers_Schedule_9389.Xlsx')+chip('Louvers_Sizing_9389.Xlsx');
+ const attached=L?'':chip('Schedule');
+ const cty=L?L.country:'United States',city=L?L.city:'Miami';
+ const clients=[x[1],...OPT.client.filter(c=>c!==x[1])];
+ const cname=L?(L.contact||''):'Wilfredo Pons',cslug=x[1].normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+ const cphone=(cty==='Colombia'?'+57 310 555 0142':'+1 305 555 0142'),cmail=cname?cname.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,'.')+'@'+cslug+'.com':'';
+ const contacts=[...new Set([cname,'Wilfredo Pons','Andrea Salazar','Marcos Ruiz'].filter(Boolean))];
+ const invS=L?fmtD(L.inv):'Oct/06/2026',lastU=L?today:'Oct/06/2026';
+ const dueHtml=L?`<div style="display:flex;align-items:center;gap:26px"><span>${fmtD(L.due)}</span><button class="pen-b" data-toast="Editar fecha">${pen}</button></div>`:`<div style="margin-top:2px"><button class="pen-b" data-toast="Editar fecha">${pen}</button></div>`;
+ const notes=L?L.notes:'Email: '+x[2].toUpperCase().slice(0,24)+' (RETAIL)';
  $('#gen').innerHTML=`
  <div>
-  <div class="r"><span class="lbl">Division *</span><div class="fl" style="width:266px"><small>Division</small><select id="g-div" class="divsel" data-v="LOUVERS" style="appearance:none;border:0;outline:0;background:none;font:inherit;width:100%;padding:2px 20px 4px 0;cursor:pointer"></select></div></div>
+  <div class="r"><span class="lbl">Division *</span><div class="fl" style="width:266px"><small>Division</small><select id="g-div" class="divsel" data-v="${L?'':'LOUVERS'}" style="appearance:none;border:0;outline:0;background:none;font:inherit;width:100%;padding:2px 20px 4px 0;cursor:pointer"></select></div></div>
   <div class="r"><span class="lbl">ID</span><span style="margin-left:0">${x[0].split('.')[0]}</span><button class="tm" data-toast="Timeline"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3a9 9 0 0 0-9 9H1l3.890 3.890.07.140L9 12H6a7 7 0 1 1 2.050 4.950l-1.420 1.420A9 9 0 1 0 13 3zm-1 5v5l4.280 2.540.72-1.210-3.500-2.080V8z"/></svg>Timeline</button></div>
-  <div class="r" style="align-items:flex-start"><span class="lbl">Account<br>Manager<br>Precon<br>Manager</span><div style="margin-top:2px">${av('PV','Pedro Velez','Account Manager')}${av('PV','Pedro Velez','Account Manager')}</div></div>
-  <div class="r"><span class="lbl">Estimator</span>${av('DP','Daniela Palacio','Account Manager')}</div>
-  <div class="r"><span class="lbl">Collaborators</span><button class="blue-add" data-toast="Agregar colaborador">${plus}</button></div>
+  <div class="r" style="align-items:flex-start"><span class="lbl">Account<br>Manager<br>Precon<br>Manager</span><div style="margin-top:2px">${mgrs}</div></div>
+  <div class="r"><span class="lbl">Estimator</span>${est}</div>
+  <div class="r"><span class="lbl">Collaborators</span><div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px">${collab}<button class="blue-add" data-toast="Agregar colaborador">${plus}</button></div></div>
   <div class="r"><span class="lbl">Projects:</span></div>
-  <div class="r" style="align-items:flex-start"><span class="lbl" style="padding-top:14px">Bid Documents</span><div class="chips" style="padding-top:6px">${chip('Solicitud Empire B8.Pdf')}${chip('MARK -S6T-.Pdf')}${chip('Louvers_Schedule_9389.Xlsx')}${chip('Louvers_Sizing_9389.Xlsx')}<button class="blue-add" data-toast="Adjuntar documento">${plus}</button></div></div>
-  <div class="r"><span class="lbl">Attached</span><div class="chips">${chip('Schedule')}<button class="blue-add" data-toast="Adjuntar archivo">${plus}</button></div></div>
+  <div class="r" style="align-items:flex-start"><span class="lbl" style="padding-top:14px">Bid Documents</span><div class="chips" style="padding-top:6px">${bidDocs}<button class="blue-add" data-toast="Adjuntar documento">${plus}</button></div></div>
+  <div class="r"><span class="lbl">Attached</span><div class="chips">${attached}<button class="blue-add" data-toast="Adjuntar archivo">${plus}</button></div></div>
   <div class="r"><span class="lbl">Purchase Order</span></div>
   <div class="r"><span class="lbl">Signed Quote</span></div>
   <div class="r"><span class="lbl">Change Orders</span><button class="nochg" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 7V3.500L18.500 9zM8 13h8v2H8zm0 4h8v2H8z"/></svg>No Change Orders</button></div>
   <div class="r"><span class="lbl">Tags</span><button class="blue-add" data-toast="Agregar etiqueta">${plus}</button></div>
-  <div class="r" style="margin-top:14px"><span class="lbl">Country</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6" style="margin:0 8px 0 -8px"><circle cx="12" cy="12" r="9.500" fill="#757575" stroke="none"/><path d="M5 8c3 0 3 3 6 3s1 3 3 4M14 4c0 3 3 3 5 4" stroke="#fff"/></svg><div class="fl" style="width:266px;margin-left:0"><small>Country</small><select><option>United States</option><option>Colombia</option><option>Panamá</option></select></div></div>
+  <div class="r" style="margin-top:14px"><span class="lbl">Country</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="1.6" style="margin:0 8px 0 -8px"><circle cx="12" cy="12" r="9.500" fill="#757575" stroke="none"/><path d="M5 8c3 0 3 3 6 3s1 3 3 4M14 4c0 3 3 3 5 4" stroke="#fff"/></svg><div class="fl" style="width:266px;margin-left:0"><small>Country</small><select id="g-country">${['United States','Colombia','Panamá'].map(c=>`<option${c===cty?' selected':''}>${c}</option>`).join('')}</select></div></div>
  </div>
  <div class="cinfo">
   <div style="display:flex;justify-content:space-between;align-items:center;height:44px"><h5>Client Information</h5><div class="status">Status:<span class="pill" style="background:${st[1]}">${st[0]}</span></div></div>
-  <div class="r" style="margin-top:6px"><span class="lbl" style="width:148px">Company</span><div class="fl" style="border:0;width:auto"><select style="color:#424242;padding-right:26px"><option>${x[1]==='Energía Solar'?'MTM Glass Concepts':x[1]}</option><option>MTM Glass Concepts</option><option>Berger Windows &amp; Doors</option></select></div><span style="width:0"></span></div>
-  <div class="r" style="margin-top:12px"><span class="lbl" style="width:128px">City</span><span style="color:#424242">Miami</span></div>
+  <div class="r" style="margin-top:6px"><span class="lbl" style="width:148px">Company</span><div class="fl" style="border:0;width:auto"><select style="color:#424242;padding-right:26px">${clients.map(c=>`<option>${c}</option>`).join('')}</select></div><span style="width:0"></span></div>
+  <div class="r" style="margin-top:12px"><span class="lbl" style="width:128px">City</span><span style="color:#424242">${city}</span></div>
   <div class="r" style="margin-top:6px"><span class="lbl" style="width:132px">Language</span><svg width="38" height="38" viewBox="0 0 38 38" style="margin-right:12px"><defs><clipPath id="cf"><circle cx="19" cy="19" r="18"/></clipPath></defs><g clip-path="url(#cf)"><rect width="38" height="38" fill="#fff"/><g fill="#d32f2f"><rect y="0" width="38" height="3.500"/><rect y="7" width="38" height="3.500"/><rect y="14" width="38" height="3.500"/><rect y="21" width="38" height="3.500"/><rect y="28" width="38" height="3.500"/><rect y="35" width="38" height="3.500"/></g><rect width="21" height="19" fill="#3f51b5"/><g fill="#fff"><circle cx="5" cy="5" r="1.200"/><circle cx="11" cy="5" r="1.200"/><circle cx="17" cy="5" r="1.200"/><circle cx="8" cy="10" r="1.200"/><circle cx="14" cy="10" r="1.200"/><circle cx="5" cy="15" r="1.200"/><circle cx="11" cy="15" r="1.200"/><circle cx="17" cy="15" r="1.200"/></g></g></svg><span style="color:#424242">English</span></div>
-  <div class="r" style="align-items:flex-start;margin-top:10px"><span class="lbl" style="width:136px;padding-top:12px">Contacts</span><div class="fl" style="width:632px"><small>Search contact</small><select><option>Wilfredo Pons</option><option>Andrea Salazar</option></select></div></div>
-  <div class="av" style="margin:18px 0 0 134px"><b style="background:none">WP</b><div style="line-height:1.45"><strong>Wilfredo Pons (Civil Engineer)</strong>+17868992839<br>Wilfredo@mtmglassconcepts.com</div></div>
+  <div class="r" style="align-items:flex-start;margin-top:10px"><span class="lbl" style="width:136px;padding-top:12px">Contacts</span><div class="fl" style="width:632px"><small>Search contact</small><select>${contacts.map(c=>`<option>${c}</option>`).join('')}</select></div></div>
+  ${cname?`<div class="av" style="margin:18px 0 0 134px"><b style="background:none">${ini(cname)}</b><div style="line-height:1.45"><strong>${cname}${L?'':' (Civil Engineer)'}</strong>${cphone}<br>${cmail}</div></div>`:''}
   <div class="dates">
-   <div><b>Last updated</b><span>Oct/06/2026</span></div>
-   <div><b>Invitation Date</b><div style="display:flex;align-items:center;gap:26px"><span>Oct/06/2026</span><button class="pen-b" data-toast="Editar fecha">${pen}</button></div></div>
-   <div><b>Due Date</b><div style="margin-top:2px"><button class="pen-b" data-toast="Editar fecha">${pen}</button></div></div>
+   <div><b>Last updated</b><span>${lastU}</span></div>
+   <div><b>Invitation Date</b><div style="display:flex;align-items:center;gap:26px"><span>${invS}</span><button class="pen-b" data-toast="Editar fecha">${pen}</button></div></div>
+   <div><b>Due Date</b>${dueHtml}</div>
    <div><b>Promise Date</b><div style="margin-top:2px"><button class="pen-b" data-toast="Editar fecha">${pen}</button></div></div>
   </div>
-  <div style="margin-top:24px"><b style="font-weight:500;color:#424242">Estimated Execution Date</b><br><span class="lbl">Nov/24/2026</span></div>
-  <div class="notes"><small>Notes</small><textarea>Email: ${x[2].toUpperCase().slice(0,24)} (RETAIL)</textarea></div>
+  <div style="margin-top:24px"><b style="font-weight:500;color:#424242">Estimated Execution Date</b><br><span class="lbl">${L?'':'Nov/24/2026'}</span></div>
+  <div class="notes"><small>Notes</small><textarea>${notes}</textarea></div>
  </div>`;
 }
 /* ---------- Edit Item (modal) ---------- */
@@ -1559,21 +1576,17 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if($('#dlg').classList.contains('on')){if(e.key==='Enter'){if(e.target.id==='dlg-ci'){e.preventDefault();addDcat();}else saveDlg();}if(e.key==='Escape')$('#dlg').classList.remove('on');}});
 renderDivs();
 /* ---- Projects > Main Board ---- */
-const EN='Energía Solar';
 let PROJ=[
- [9346,55002162,'Estero Bay Phase II Add - BM',EN,'Esther Sánchez','Selena Mercado',['Ferney Agudelo'],47877692,'COP',0,47877692,0],
- [9330,55002160,'Glass House  - BM',EN,'Esther Sánchez','Selena Mercado',['Ferney Agudelo'],11811600,'COP',0,11811600,0],
- [9327,55002161,'Waldorf Astoria Add II  - BM',EN,'Esther Sánchez','Manuel Vargas',['Ferney Agudelo'],4174985,'COP',0,4174985,0],
- [9308,55002159,'Cassi Tower Add  - Louvers',EN,'Pedro Velez','Arianis Garcia',['Ferney Agudelo'],2764318,'COP',0,2764318,0],
- [9300,55002153,'Shell Bay Hotel  - BM',EN,'Esther Sánchez','Hermes Calderon',['Ferney Agudelo'],7427432,'COP',0,7427432,993645],
- [9296,55002157,'W11 West Eleventh  - BM/BP',EN,'Esther Sánchez','Hermes Calderon',['Ferney Agudelo'],16925087,'COP',0,16925087,0],
- [9280,55002154,'Sentral Brickell South Podium - Louvers',EN,'Pedro Velez','Hermes Calderon',['Ferney Agudelo'],174892165,'COP',0,174892165,91405211],
- [9252,55002158,'City Of Miami Administration Building – BP/BM',EN,'Esther Sánchez','Hermes Calderon',['Ferney Agudelo'],14004332,'COP',0,14004332,0],
- [9133,55002133,'1001 BBD Sales Center - BM',EN,'Esther Sánchez','Selena Mercado',['Ferney Agudelo'],22483176,'COP',0,22483176,4321257],
- [9125,55002136,'Cassi Tower Add - BM',EN,'Esther Sánchez','Arianis Garcia',['Ferney Agudelo','Pedro Rudas','Laura Giraldo'],88317690,'COP',38318392,49999297,353254],
- [9116,55002132,'Cajuelas - Q4',EN,'Esther Sánchez','Selena Mercado',['Ferney Agudelo','Pedro Rudas'],24841138,'COP',0,24841138,28072757],
- [9112,55002129,'9927 Bay Harbor - Louvers','Division 8 Windows & Doors, Llc','Pedro Velez','Nicolle Padilla',['Ferney Agudelo','Pedro Rudas','Laura Giraldo'],45885,'USD',0,45885,44400367],
- [9095,55002122,'Muntins - Q4',EN,'Esther Sánchez','Selena Mercado',['Ferney Agudelo'],25145785,'COP',10388143,14757642,19066314]
+ [9358,55002170,'Edificio Brisas del Mar - Fachada','Inmobiliaria Horizonte','Esther Sánchez','Selena Mercado',['Ferney Agudelo'],62450000,'COP',0,62450000,0],
+ [9351,55002168,'Hospital Regional del Norte - Louvers','Clínica Los Cedros','Esther Sánchez','Selena Mercado',['Ferney Agudelo'],118300000,'COP',0,118300000,0],
+ [9347,55002167,'Centro Empresarial Bahía - Pérgolas','Parque Norte S.A.S.','Pedro Velez','Manuel Vargas',['Ferney Agudelo'],41780000,'COP',0,41780000,0],
+ [9339,55002164,'Colegio Los Alamos - Fase 1','Fundación Los Alamos','Esther Sánchez','Arianis Garcia',['Ferney Agudelo','Pedro Rudas'],96500000,'COP',38600000,57900000,4200000],
+ [9333,55002162,'Hotel Playa Dorada - Terrazas','Grupo Hotelero Pacífico','Pedro Velez','Nicolle Padilla',['Ferney Agudelo'],84920,'USD',0,84920,0],
+ [9328,55002160,'Residencial Lomas Verdes - Louvers','Desarrollos Santa Elena','Esther Sánchez','Hermes Calderon',['Ferney Agudelo'],215600000,'COP',0,215600000,12800000],
+ [9322,55002157,'Plaza Comercial Santa Elena','Desarrollos Santa Elena','Esther Sánchez','Selena Mercado',['Ferney Agudelo','Pedro Rudas','Laura Giraldo'],330450000,'COP',99135000,231315000,15000000],
+ [9317,55002155,'Centro Logístico Puerto Seco - Cubiertas','Logística Puerto Seco','Pedro Velez','Hermes Calderon',['Ferney Agudelo'],52870,'USD',0,52870,0],
+ [9309,55002152,'Torre Aurora - Nivel 2 Louvers','Constructora Andina','Esther Sánchez','Arianis Garcia',['Ferney Agudelo'],148200000,'COP',0,148200000,0],
+ [9301,55002149,'Parque Empresarial Norte - Fase 1','Parque Norte S.A.S.','Pedro Velez','Manuel Vargas',['Ferney Agudelo'],73640000,'COP',0,73640000,0]
 ];
 let PJ_BASE=188, KPI={cop:[86,29225124400],usd:[102,39854005]}, pjLoaded=false;
 const n0=n=>Math.round(n).toLocaleString('de-DE');
@@ -1588,9 +1601,7 @@ function renderProj(){
   return `<div class="pr" data-ref="${p[0]}"><span>${p[0]}</span><span>${p[1]}</span><span class="nm">${p[2]}</span><span class="dvc">${p[12]||(/Louvers/.test(p[2])?"LOUVERS":"—")}</span><span>${p[3]}</span><span>${p[4]}</span><span>${p[5]}</span><span>${col}</span><span class="r">${n0(p[7])} ${p[8]}</span><span class="r b">${n0(p[9])} (${pct}%)</span><span class="r">${n0(p[10])}</span><span class="r">${n0(p[11])}</span><span class="ac"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-toast="Editar proyecto"><path d="M3 17.250V21h3.750L17.810 9.940l-3.750-3.750zM20.710 7.040a1 1 0 0 0 0-1.410l-2.340-2.340a1 1 0 0 0-1.410 0l-1.830 1.830 3.750 3.750z"/></svg><span data-toast="Facturación" style="display:flex">${eyeInv}</span></span></div>`}).join('')||'<div class="ld">No items</div>';
 }
 function renderKpi(){
- $('#k-n').textContent=PJ_BASE+PROJ.length-13;
- $('#k-cop-n').textContent=KPI.cop[0];$('#k-cop-a').textContent=n0(KPI.cop[1]);
- $('#k-usd-n').textContent=KPI.usd[0];$('#k-usd-a').textContent=n0(KPI.usd[1]);
+const cop=PROJ.filter(p=>p[8]==='COP'&&p[10]>0),usd=PROJ.filter(p=>p[8]==='USD'&&p[10]>0); $('#k-n').textContent=PROJ.length; $('#k-cop-n').textContent=cop.length;$('#k-cop-a').textContent=n0(cop.reduce((a,p)=>a+p[10],0)); $('#k-usd-n').textContent=usd.length;$('#k-usd-a').textContent=n0(usd.reduce((a,p)=>a+p[10],0));
 }
 function loadProj(){ // simula la carga inicial del video
  setProjTab('pr');
@@ -1604,7 +1615,7 @@ function setProjTab(t){
  if(t!=='pr')$('#pj-ot').textContent=$('#pj-tabs .tab.on').textContent+' — pendiente de referencia visual.';
 }
 /* modal New Project */
-const OPT={am:['Esther Sánchez','Pedro Velez','Daniela Palacio'],pm:['Selena Mercado','Manuel Vargas','Arianis Garcia','Hermes Calderon','Nicolle Padilla'],col:['Ferney Agudelo','Pedro Rudas','Laura Giraldo'],client:[EN,'Division 8 Windows & Doors, Llc','Berger Windows & Doors','Hawaii Architectural Sales','Componenti','Consorcio Metro Estadio','Lotspeich Company Inc'],country:['United States','Colombia','Panamá'],cur:['COP','USD'],cls:['Exportación','Nacional']};
+const OPT={am:['Esther Sánchez','Pedro Velez','Daniela Palacio'],pm:['Selena Mercado','Manuel Vargas','Arianis Garcia','Hermes Calderon','Nicolle Padilla'],col:['Ferney Agudelo','Pedro Rudas','Laura Giraldo'],client:['Constructora Andina','Grupo Hotelero Pacífico','Clínica Los Cedros','Inmobiliaria Horizonte','Desarrollos Santa Elena','Constructora Vista Real','Parque Norte S.A.S.','Fundación Los Alamos','Logística Puerto Seco'],country:['United States','Colombia','Panamá'],cur:['COP','USD'],cls:['Exportación','Nacional']};
 const FI={
  doc:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm2 16H8v-2h8zm0-4H8v-2h8zm-3-5V3.500L18.500 9z"/></svg>',
  bar:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h2v14H3zm4 0h1v14H7zm3 0h3v14h-3zm4 0h1v14h-1zm3 0h4v14h-4z"/></svg>',
@@ -1761,7 +1772,7 @@ function openProject(ref,tab){
  const loc=ex.loc||(cur==='USD'?'Miami - Florida - United States':'Barranquilla - Atlantico - Colombia');
  const addr=ex.addr||'Av. Circunvalar 100 Mts Via 40 Las Flores';
  const labels=allCards().map(qLabel);
- const fu=ex.quote||(p[2].startsWith('Estero Bay')?'BM-Reserva: ACC782595 Estero Bay PH2 - Release BM 20-21':(allCards().map(qLabel).find(l=>l.toLowerCase().includes(p[2].toLowerCase().replace(/\s+/g,' ').trim()))||''));
+ const fu=ex.quote||((allCards().find(c=>c[1]===p[3])||[]).length?qLabel(allCards().find(c=>c[1]===p[3])):'');
  const opts=[...new Set([fu,...labels].filter(Boolean))];
  const row=(k,v)=>`<div class="pd-r"><span class="k">${k}</span><span class="v">${v}</span></div>`;
  $('#pd-title').textContent=p[2];
@@ -1797,7 +1808,7 @@ const n2=n=>n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDig
 const mny=(n,cur,d)=>(d===0?n0(n):n2(n))+' '+(cur==='USD'?'$':'COP');
 const CATALOG={LOUVERS:['Louver','Blank Off Panel','Mesh - Insect Screen','Freight'],HPL:['HPL Panel Cladding','Aluminum Subframe','Fasteners & Clips','Freight'],PERGOLAS:['Pergola Structure','Aluminum Louvered Roof','Installation Hardware','Freight'],DIVIDERS:['Divider Panel','Track System','Hardware Kit','Freight']};
 const CATS=['ESM 1.4LS - Ptac','ESM 5LS - H - HP','ESM 3LS - V - STD'],UNITS=['m2','ft2','m'];
-const SPLIT=new Set(['9125','9280','9300','9252','9133']); // proyectos cuya cotización tiene scopes de otras divisiones
+const SPLIT=new Set(['9339','9328','9322','9309']); // proyectos cuya cotización tiene scopes de otras divisiones
 const CO_NAMES=['Adición de Área','Cambio a FOB','Ajuste de Alcance'];
 function mkItems(rng,div,total,prj,n){
  const base=(CATALOG[div]||[div+' Package','Hardware Kit','Freight']).slice(0,n-1).concat('Freight').slice(0,n);
@@ -1924,8 +1935,6 @@ let LEADS=[
  LD('Centro Empresarial Bahía','Parque Norte S.A.S.','Carlos Peña','Carlos González',['Carlos Peña','Esther Sánchez'],'Colombia','Antioquia','Medellin','10/06/2026','10/15/2026','10/08/2026','new',[SC('Fachada Ventilada','Facades','m2',310,'Carlos González','Daniela Palacio'),SC('Pérgola Terraza','Pergolas','m2',85,'Carlos González','Daniela Palacio'),SC('Louver Parqueaderos','Louvers','m2',140,'Carlos González','Daniela Palacio')]),
  LD('Residencial Lomas Verdes','Desarrollos Santa Elena','Diego Pinzon','Karol Pabon',['Diego Pinzon'],'United States','Florida','Tampa','09/28/2026','10/25/2026','10/01/2026','hold',[SC('Balcony Screens','Louvers','ft2',1700,'Karol Pabon','Carolina Molina')]),
  LD('Hotel Playa Dorada','Grupo Hotelero Pacífico','Carlos Peña','Carlos González',['Carlos Peña'],'Colombia','Atlántico','Barranquilla','09/29/2026','10/27/2026','10/02/2026','hold',[SC('Pérgola Piscina','Pergolas','m2',120,'Carlos González','Daniela Palacio')]),
- LD('Torre Aurora II','Constructora Andina','Esther Sánchez','Hermes Calderon',['Esther Sánchez'],'United States','Florida','Miami','09/20/2026','10/10/2026','09/22/2026','approved',[SC('Louver Facade','Louvers','ft2',3100,'Hermes Calderon','Carolina Molina')]),
- LD('Colegio Los Alamos - Fase 2','Fundación Los Alamos','Pedro Velez','Cristina Bacca',['Pedro Velez'],'Colombia','Antioquia','Medellin','09/18/2026','10/08/2026','09/19/2026','approved',[SC('Cubiertas Aulas','Sunshades','m2',640,'Cristina Bacca','Daniela Palacio')]),
  LD('Bodega Zona Franca','Logística Puerto Seco','Greg Underwood','Raul Lascano',['Greg Underwood'],'United States','Florida','Tampa','09/10/2026','09/30/2026','09/11/2026','rejected',[SC('Louver Bodega','Louvers','ft2',880,'Raul Lascano','Carolina Molina')]),
  LD('Centro Cultural del Río','Constructora Vista Real','Pedro Velez','Karol Pabon',['Pedro Velez'],'United States','Florida','Orlando','09/24/2026','10/18/2026','09/25/2026','mod',[SC('Louvers Cubierta','Louvers','ft2',2250,'Karol Pabon','Carolina Molina')])
 ];
@@ -2027,8 +2036,12 @@ function leadAction(l,a){
  else if(a==='Reactivate')mv('new','Lead reactivado');
  else if(a==='Reject')mv('rejected','Lead rechazado');
  else if(a==='Approve'){
-  const bid=COLS.find(c=>c.k==='bid'),id=String(Math.max(...allCards().map(c=>parseInt(c[0])))+1),card=[id,l.client,l.name,'Oct 08/2026 9:00 am','0 COP'];
-  emptyQuote(card);bid.cards.unshift(card);bid.n++;renderBoard();mv('approved',`Lead aprobado · cotización ${id} creada en Bidding`);}
+  // el lead sale de Leads y nace como cotización en Bidding, con General Information completo; los scopes y costos los arma el estimador
+  const bid=COLS.find(c=>c.k==='bid'),id=String(Math.max(...allCards().map(c=>parseInt(c[0])))+1),td=new Date();
+  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],h=td.getHours(),when=M[td.getMonth()]+' '+String(td.getDate()).padStart(2,'0')+'/'+td.getFullYear()+' '+((h+11)%12+1)+':'+String(td.getMinutes()).padStart(2,'0')+(h<12?' am':' pm');
+  const card=[id,l.client,l.name,when,'0 COP'];card._lead=JSON.parse(JSON.stringify(l));
+  emptyQuote(card);bid.cards.unshift(card);bid.n++;renderBoard();
+  LEADS.splice(LEADS.indexOf(l),1);LOPEN.delete(l.id);renderLeads();toast('Lead aprobado · cotización '+id+' creada en Bidding');}
  else if(a==='Delete'){LDEL=l.id;$('#lcf-n').textContent=l.name;$('#lcf').classList.add('on');}
 }
 document.addEventListener('click',e=>{
