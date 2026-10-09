@@ -1026,25 +1026,19 @@ const pie='<svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="1
 
 /* ---- datos mock (valores visibles en el PDF + cotizaciones adicionales realistas) ---- */
 const COLS=[
- {k:'bid',title:'Bidding',n:82,total:'235.172.813.382 COP',cards:[
-  ['9380','Energía Solar','BM-The Well GC Brake Metals Falta info','Oct 06/2026 9:34 am','0 COP'],
-  ['9381','Energía Solar','BM-Shell bay Tower ADD BM 2.0','Oct 06/2026 9:33 am','0 COP'],
-  ['9382','Energía Solar','River Bal Harbour (Rivage) - LV 2 TO 3','Oct 06/2026 9:30 am','0 COP'],
-  ['9348','Componenti','5333 Collins (Aka the perigon) - CO#12 - Add fins','Oct 06/2026 9:27 am','48.915.600 COP'],
-  ['9371','Berger Windows & Doors','Brickell Flatiron - Louvers Level 4','Oct 06/2026 8:41 am','312.480.000 COP'],
-  ['9366','Hawaii Architectural Sales','Kakaako Block C - Sunscreens','Oct 05/2026 5:12 pm','0 COP']]},
- {k:'app',title:'Approval',n:30,total:'134.768.260.929 COP',cards:[
-  ['9390','Berger Windows & Doors','Brickell Heights East - Mullion covers','Oct 05/2026 4:47 pm','510.405,43 $'],
-  ['9361','Berger Windows & Doors','Esprit','Oct 05/2026 4:44 pm','277,10 $'],
-  ['9325','Energía Solar','BM-Maritime Tower - 310 Washington St: PTAC','Oct 05/2026 4:39 pm','1.699.890,14 $'],
-  ['8138.03','Hawaii Architectural Sales','Summerlin City - ACS','Oct 05/2026 4:02 pm','11.646.210,17 $'],
-  ['9344','Berger Windows & Doors','Edition Residences - Grilles','Oct 05/2026 3:15 pm','84.220,00 $']]},
- {k:'fol',title:'Follow Up',n:1238,total:'2.036.798.476.810 COP',pie:true,cards:[
-  ['9375.01','Energía Solar','Louvers-Louvers B1 ADD - PTAC Louver - 659 Grove Street','Oct 06/2026 9:23 am','385.336.303,99 COP'],
-  ['9145.01','Hawaii Architectural Sales','Mahana Ward Village','Oct 06/2026 8:56 am','2.863.647.408,6 COP'],
-  ['9249.01','Consorcio Metro Estadio','Adicional parte en ejecución - Estadio Metropolitano','Oct 06/2026 8:54 am','907.910.128 COP'],
-  ['7927.01','Lotspeich Company Inc','VERVE','Oct 06/2026 8:30 am','1.254.300.870 COP'],
-  ['9302.02','Componenti','Park Grove Tower 2 - Spandrel panels','Oct 05/2026 6:02 pm','436.118.250 COP']]}
+ {k:'bid',title:'Bidding',n:5,total:'',cards:[
+  ['9401','Constructora Andina','Torre Aurora - Fachada Norte','Oct 09/2026 9:12 am','0 COP'],
+  ['9402','Grupo Hotelero Pacífico','Hotel Costa Brava - Terrazas y Pérgolas','Oct 09/2026 8:47 am','0 COP'],
+  ['9403','Clínica Los Cedros','Centro Médico Los Cedros - Celosías','Oct 08/2026 4:20 pm','48.500.000 COP'],
+  ['9404','Inmobiliaria Horizonte','Residencias Mirador del Parque','Oct 08/2026 2:05 pm','312.000.000 COP'],
+  ['9405','Desarrollos Santa Elena','Plaza Comercial Santa Elena - Cubiertas','Oct 08/2026 11:30 am','0 COP']]},
+ {k:'app',title:'Approval',n:2,total:'',cards:[
+  ['9390','Constructora Vista Real','Edificio Vista Real - Louvers y Pérgolas','Oct 08/2026 9:40 am','185.400.000 COP'],
+  ['9391','Parque Norte S.A.S.','Parque Empresarial Norte - Fachada','Oct 07/2026 3:15 pm','96.250,00 $']]},
+ {k:'fol',title:'Follow Up',n:3,total:'',pie:true,cards:[
+  ['9375.01','Constructora Andina','Torre Aurora II - Louvers Nivel 3','Oct 09/2026 9:05 am','385.336.303,99 COP'],
+  ['9360','Fundación Los Alamos','Colegio Los Alamos - Cubiertas','Oct 07/2026 10:18 am','74.800.000 COP'],
+  ['9352','Logística Puerto Seco','Centro Logístico Puerto Seco','Oct 06/2026 5:42 pm','41.320,50 $']]}
 ];
 /* Bidding: la cotización nace vacía, el estimador arma sus scopes */
 function emptyQuote(x){const cl=x[4].includes("$")?"USD":"COP";x._calc={rows:[],tot:["0,00 "+cl,"0.00%","0,00 "+cl,"0,00 "+cl]};x._scopes=[];x._sc=[];x._div=[];x._sp={};x._exp=new Set();return x;}
@@ -1063,11 +1057,12 @@ const fmt=n=>n.toLocaleString('de-DE',{maximumFractionDigits:2});
 let current=null;
 
 /* ---- Main Board ---- */
+const colTotal=c=>n0(c.cards.reduce((a,x)=>a+(parseFloat(x[4].replace(/[^\d,]/g,'').replace(',','.'))||0)*(x[4].includes('$')?3000:1),0))+' COP';
 function renderBoard(){
  $('#board').innerHTML=COLS.map(c=>`
   <div class="col ${c.k}" data-col="${c.k}">
    <div class="col-head">
-    <div class="t">${c.title} (${c.n})</div><div class="s">${c.total}</div>
+    <div class="t">${c.title} (${c.cards.length})</div><div class="s">${colTotal(c)}</div>
     ${c.pie?`<button class="pie" data-toast="Resumen Follow Up">${pie}</button>`:''}
     <label class="search">${search}<input placeholder="Search" data-s="${c.k}"></label>
    </div>
@@ -1924,25 +1919,15 @@ const PRECON=['Raul Lascano','Cristina Bacca','Carlos González','Karol Pabon','
 const SC=(ref,cat,mea,units,rev,by,desc)=>({ref,cat,mea,units,rev,by,desc:desc||'',eng:''});
 const LD=(name,client,am,pm,col,country,state,city,inv,due,created,tab,scopes)=>({id:0,name,client,am,pm,col,country,state,city,inv,due,created,tab,scopes,contact:'',notes:'',docs:''});
 let LEADS=[
- LD('Baycare Select Medical','ESWindows','Greg Underwood','Raul Lascano',['Greg Underwood'],'United States','Florida','Tampa','10/06/2026','10/16/2026','10/08/2026','new',[SC('Sunshade System','Sunshades','ft2',1,'Raul Lascano','Carolina Molina')]),
- LD('Detroit City FC Stadium','Componenti','Andres Julio','Andres Julio',['Andres Julio'],'United States','Michigan','Detroit','10/07/2026','11/04/2026','10/08/2026','new',[SC('Louvers Level 1','Louvers','ft2',1850,'Andres Julio','Carolina Molina'),SC('Sunshade Canopy','Sunshades','ft2',920,'Andres Julio','Carolina Molina')]),
- LD('250 Sw Brickell - Budget','Componenti','Andres Julio','Cristina Bacca',['Andres Julio'],'United States','Florida','Miami','10/05/2026','10/16/2026','10/08/2026','new',[SC('Louver Wall','Louvers','ft2',1240,'Cristina Bacca','Carolina Molina')]),
- LD('Click Clack IOB/Wellness','Convel','Carlos Peña','Carlos González',['Carlos Peña','Esther Sánchez'],'Colombia','Antioquia','Medellin','10/06/2026','10/15/2026','10/08/2026','new',[SC('Fachada Ventilada','Facades','m2',310,'Carlos González','Daniela Palacio'),SC('Pérgola Terraza','Pergolas','m2',85,'Carlos González','Daniela Palacio'),SC('Louver Parqueaderos','Louvers','m2',140,'Carlos González','Daniela Palacio')]),
- LD('U Health Pinecrest ACC','Componenti','Diego Pinzon','Karol Pabon',['Karol Pabon','Diego Pinzon'],'United States','Florida','Miami','10/06/2026','11/03/2026','08/17/2026','new',[SC('Aluminum Louver Screen','Louvers','ft2',2100,'Karol Pabon','Carolina Molina'),SC('Entry Sunshade','Sunshades','ft2',640,'Karol Pabon','Carolina Molina')]),
- LD('Elle At Brickell','Berger Windows & Doors','Greg Underwood','Raul Lascano',['Greg Underwood'],'United States','Florida','Miami','10/05/2026','10/20/2026','10/07/2026','new',[SC('Balcony Railings','Railings','ft2',980,'Raul Lascano','Carolina Molina')]),
- LD('Lotspeich Terrace Phase 2','Lotspeich Company Inc','Pedro Velez','Cristina Bacca',['Pedro Velez'],'United States','Florida','Orlando','10/07/2026','11/10/2026','10/07/2026','new',[SC('Rooftop Pergola','Pergolas','ft2',760,'Cristina Bacca','Carolina Molina'),SC('Louver Enclosure','Louvers','ft2',1320,'Cristina Bacca','Carolina Molina')]),
- LD('Park Grove Amenity Deck','Hawaii Architectural Sales','Esther Sánchez','Hermes Calderon',['Esther Sánchez','Ferney Agudelo'],'United States','Florida','Miami','10/02/2026','10/23/2026','10/06/2026','new',[SC('Spandrel Panels','Facades','ft2',2400,'Hermes Calderon','Carolina Molina')]),
- LD('Torre Poblado 12','Consorcio Metro Estadio','Carlos Peña','Carlos González',['Carlos Peña'],'Colombia','Antioquia','Medellin','10/03/2026','10/28/2026','10/06/2026','new',[SC('Fachada Aluminio','Facades','m2',520,'Carlos González','Daniela Palacio'),SC('Barandas Balcones','Railings','m',410,'Carlos González','Daniela Palacio')]),
- LD('Houston Medical Plaza','Hawaii Architectural Sales','Greg Underwood','Raul Lascano',['Greg Underwood'],'United States','Texas','Houston','10/01/2026','11/12/2026','10/05/2026','new',[SC('Sunshade Louvers','Sunshades','ft2',1560,'Raul Lascano','Carolina Molina')]),
- LD('Barranquilla Logistic Hub','Convel','Carlos Peña','Hermes Calderon',['Carlos Peña'],'Colombia','Atlántico','Barranquilla','10/04/2026','10/30/2026','10/05/2026','new',[SC('Louver Bodega','Louvers','m2',230,'Hermes Calderon','Daniela Palacio')]),
- LD('Sarasota Bay Condos','Componenti','Diego Pinzon','Karol Pabon',['Diego Pinzon'],'United States','Florida','Tampa','09/28/2026','10/25/2026','10/01/2026','hold',[SC('Balcony Screens','Louvers','ft2',1700,'Karol Pabon','Carolina Molina')]),
- LD('Plaza Cartagena Norte','Convel','Carlos Peña','Carlos González',['Carlos Peña'],'Colombia','Atlántico','Barranquilla','09/29/2026','10/27/2026','10/02/2026','hold',[SC('Pérgola Plaza','Pergolas','m2',120,'Carlos González','Daniela Palacio')]),
- LD('Mahana Ward Village','Hawaii Architectural Sales','Esther Sánchez','Hermes Calderon',['Esther Sánchez'],'United States','Florida','Miami','09/20/2026','10/10/2026','09/22/2026','approved',[SC('Louver Facade','Louvers','ft2',3100,'Hermes Calderon','Carolina Molina')]),
- LD('Edition Residences','Berger Windows & Doors','Pedro Velez','Cristina Bacca',['Pedro Velez'],'United States','Florida','Miami','09/18/2026','10/08/2026','09/19/2026','approved',[SC('Grilles','Facades','ft2',1450,'Cristina Bacca','Carolina Molina')]),
- LD('Estadio Metropolitano Fase 3','Consorcio Metro Estadio','Carlos Peña','Carlos González',['Carlos Peña'],'Colombia','Atlántico','Barranquilla','09/15/2026','10/05/2026','09/16/2026','approved',[SC('Adicional Cubierta','Sunshades','m2',640,'Carlos González','Daniela Palacio')]),
- LD('Tampa Riverwalk Hotel','ESWindows','Greg Underwood','Raul Lascano',['Greg Underwood'],'United States','Florida','Tampa','09/10/2026','09/30/2026','09/11/2026','rejected',[SC('Sunshade System','Sunshades','ft2',880,'Raul Lascano','Carolina Molina')]),
- LD('Orlando Convention Annex','Lotspeich Company Inc','Pedro Velez','Karol Pabon',['Pedro Velez'],'United States','Florida','Orlando','09/24/2026','10/18/2026','09/25/2026','mod',[SC('Louvers Roof','Louvers','ft2',2250,'Karol Pabon','Carolina Molina')]),
- LD('Medellín Business Tower','Consorcio Metro Estadio','Carlos Peña','Hermes Calderon',['Carlos Peña','Esther Sánchez'],'Colombia','Antioquia','Medellin','09/26/2026','10/21/2026','09/27/2026','mod',[SC('Fachada Doble Piel','Facades','m2',780,'Hermes Calderon','Daniela Palacio')])
+ LD('Edificio Brisas del Mar','Inmobiliaria Horizonte','Greg Underwood','Raul Lascano',['Greg Underwood'],'United States','Florida','Tampa','10/06/2026','10/16/2026','10/09/2026','new',[SC('Sunshade System','Sunshades','ft2',1,'Raul Lascano','Carolina Molina')]),
+ LD('Hospital Regional del Norte','Clínica Los Cedros','Andres Julio','Cristina Bacca',['Andres Julio'],'United States','Michigan','Detroit','10/07/2026','11/04/2026','10/09/2026','new',[SC('Louvers Nivel 1','Louvers','ft2',1850,'Cristina Bacca','Carolina Molina'),SC('Canopy de Ingreso','Sunshades','ft2',920,'Cristina Bacca','Carolina Molina')]),
+ LD('Centro Empresarial Bahía','Parque Norte S.A.S.','Carlos Peña','Carlos González',['Carlos Peña','Esther Sánchez'],'Colombia','Antioquia','Medellin','10/06/2026','10/15/2026','10/08/2026','new',[SC('Fachada Ventilada','Facades','m2',310,'Carlos González','Daniela Palacio'),SC('Pérgola Terraza','Pergolas','m2',85,'Carlos González','Daniela Palacio'),SC('Louver Parqueaderos','Louvers','m2',140,'Carlos González','Daniela Palacio')]),
+ LD('Residencial Lomas Verdes','Desarrollos Santa Elena','Diego Pinzon','Karol Pabon',['Diego Pinzon'],'United States','Florida','Tampa','09/28/2026','10/25/2026','10/01/2026','hold',[SC('Balcony Screens','Louvers','ft2',1700,'Karol Pabon','Carolina Molina')]),
+ LD('Hotel Playa Dorada','Grupo Hotelero Pacífico','Carlos Peña','Carlos González',['Carlos Peña'],'Colombia','Atlántico','Barranquilla','09/29/2026','10/27/2026','10/02/2026','hold',[SC('Pérgola Piscina','Pergolas','m2',120,'Carlos González','Daniela Palacio')]),
+ LD('Torre Aurora II','Constructora Andina','Esther Sánchez','Hermes Calderon',['Esther Sánchez'],'United States','Florida','Miami','09/20/2026','10/10/2026','09/22/2026','approved',[SC('Louver Facade','Louvers','ft2',3100,'Hermes Calderon','Carolina Molina')]),
+ LD('Colegio Los Alamos - Fase 2','Fundación Los Alamos','Pedro Velez','Cristina Bacca',['Pedro Velez'],'Colombia','Antioquia','Medellin','09/18/2026','10/08/2026','09/19/2026','approved',[SC('Cubiertas Aulas','Sunshades','m2',640,'Cristina Bacca','Daniela Palacio')]),
+ LD('Bodega Zona Franca','Logística Puerto Seco','Greg Underwood','Raul Lascano',['Greg Underwood'],'United States','Florida','Tampa','09/10/2026','09/30/2026','09/11/2026','rejected',[SC('Louver Bodega','Louvers','ft2',880,'Raul Lascano','Carolina Molina')]),
+ LD('Centro Cultural del Río','Constructora Vista Real','Pedro Velez','Karol Pabon',['Pedro Velez'],'United States','Florida','Orlando','09/24/2026','10/18/2026','09/25/2026','mod',[SC('Louvers Cubierta','Louvers','ft2',2250,'Karol Pabon','Carolina Molina')])
 ];
 LEADS.forEach((l,i)=>l.id=300+i);
 let LTAB='new',LOPEN=new Set(),LEDIT=null,LSC=null;
