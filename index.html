@@ -1346,7 +1346,7 @@ function setScopeCat(x,si,cat){ // cambia la categoría del scope y la propaga a
 }
 function fillScopeCats(sel){
  const dv=$('#scd-d').value,list=dv?catsOf(dv):[];
- $('#scd-c').innerHTML='<option value="">'+(dv?'Select category':'Select a division first')+'</option>'+list.map(c=>`<option>${c}</option>`).join('');
+ $('#scd-c').innerHTML='<option value=""></option>'+list.map(c=>`<option>${c}</option>`).join('');
  if(sel&&list.includes(sel))$('#scd-c').value=sel;
 }
 function syncDiv(x){x._div=x._sc.map(si=>(x._scopes[si]||{}).div||'');}
@@ -1477,7 +1477,7 @@ document.addEventListener('click',e=>{
 });
 /* diálogo New Scope / Edit Scope */
 function openScopeDlg(sc){
- $('#scd-n').value=sc?sc.name:'';$('#scd-d').innerHTML='<option value="">Select type of scope</option>'+DIVS.map(d=>`<option>${d}</option>`).join('');fillScopeCats('');
+ $('#scd-n').value=sc?sc.name:'';$('#scd-d').innerHTML='<option value=""></option>'+DIVS.map(d=>`<option>${d}</option>`).join('');fillScopeCats('');
  if(sc)$('#scd-d').value=sc.div;fillScopeCats(sc?sc.cat:'');
  $('#scd .sc-hd h3').textContent=sc?'Edit Scope':'New Scope';$('#scd-i').style.display=sc?'none':'';
  if(!sc)SCEDIT=null;
