@@ -6,6 +6,7 @@
 <title>Project Agenda - Main Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{
   --blue:#1976d2; --orange:#ff9800; --amber:#ffc107;
@@ -382,6 +383,9 @@ html #scd .sf label{font-size:10px;margin-bottom:1px}
 html #scd .sf input,html #scd .sf select{font-size:12px;padding:3px 0;text-transform:none}
 html #scd .sc-ft{padding:16px 16px 0;gap:8px}
 html #scd .sc-ft .pillb{height:28px;font-size:11px;padding:0 14px}
+/* Scope: descripción en una línea bajo el nombre (opción 2) */
+#rows tr.scr td.nm .sdesc{display:block;margin:2px 0 0 24px;max-width:240px;font-size:10.5px;font-weight:400;color:#9e9e9e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rows tr.scr td{padding-top:6px;padding-bottom:6px}
 /* New Scope: descripción */
 html #scd .rte{border:1px solid #e0e0e0;margin-top:4px;display:block}
 html #scd .rte .tb{height:30px;gap:2px;padding:0 6px;font-size:13px}
@@ -872,6 +876,45 @@ table.scopet thead th.c{text-align:center}
 .menu div:hover{background:var(--gray)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#323232;color:#fff;padding:12px 20px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
+.bulkbtn{margin-left:auto;margin-right:0;background:#fff!important;color:var(--blue)!important;border:1px solid var(--blue)!important;border-radius:20px!important;height:34px;padding:0 16px!important;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:6px;cursor:pointer}
+.bulkbtn:hover{background:#e3f2fd!important}
+.bulkbtn+.newitem{margin-left:12px!important}
+#bkd .bkb{width:820px;max-width:94vw;max-height:90vh;display:flex;flex-direction:column;padding:0;border-radius:4px}
+#bkd .bk-h{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #e6e6e6}
+#bkd .bk-h h3{margin:0;font-size:16px;font-weight:500;color:#424242}
+#bkd .bk-h .x{background:none;border:0;color:#90a4c8;padding:0;display:flex;cursor:pointer}
+#bk-b{padding:16px 20px;overflow:auto;font-size:13px;color:#424242;min-height:200px}
+#bk-f{display:flex;justify-content:flex-end;gap:8px;padding:8px 14px;border-top:1px solid #e6e6e6}
+#bk-f button{background:none;border:0;height:36px;padding:0 14px;font-size:13px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:#616161;border-radius:4px;cursor:pointer}
+#bk-f button.ok{color:var(--blue)}#bk-f button:hover{background:#f0f0f0}#bk-f button:disabled{color:#bdbdbd;cursor:not-allowed;background:none}
+.bk-p{margin:0 0 14px;line-height:1.5}
+.bk-st{display:flex;align-items:center;gap:12px;padding:10px 0}
+.bk-st>div{flex:1}.bk-st small{display:block;color:#757575;margin-top:2px;font-size:12px}
+.bk-n{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.bk-b2{background:#fff;border:1px solid var(--blue);color:var(--blue);border-radius:4px;height:34px;padding:0 14px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer}
+.bk-b2:hover{background:#e3f2fd}
+.bk-drop{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px dashed #b0bec5;border-radius:6px;padding:26px;color:#607d8b;cursor:pointer;margin-top:4px}
+.bk-drop u{color:var(--blue)}.bk-drop:hover,.bk-drop.over{border-color:var(--blue);background:#f3f9ff}
+.bk-er{margin-top:10px;color:#c62828;background:#ffebee;border-radius:4px;padding:8px 12px}
+.bk-busy{display:flex;flex-direction:column;align-items:center;gap:10px;padding:50px 0}.bk-busy small{color:#757575}
+.bk-sp{width:36px;height:36px;border:4px solid #e3f2fd;border-top-color:var(--blue);border-radius:50%;animation:bksp .8s linear infinite}
+@keyframes bksp{to{transform:rotate(360deg)}}
+.bk-file{font-size:12px;color:#757575;margin-bottom:8px}
+.bk-bn{padding:8px 12px;border-radius:4px;margin:0 0 10px}
+.bk-bn.err{background:#ffebee;color:#b71c1c}.bk-bn.ok{background:#e8f5e9;color:#1b5e20}.bk-bn.warn{background:#fff8e1;color:#8d6e00;margin-top:12px}
+.bk-sum{display:flex;gap:10px;margin:6px 0 12px;flex-wrap:wrap}
+.bk-sum>div{flex:1;min-width:110px;background:#f5f7fa;border-radius:4px;padding:8px 12px}
+.bk-sum b{display:block;font-size:15px;color:#212121}.bk-sum span{font-size:11px;color:#757575;text-transform:uppercase;letter-spacing:.4px}
+.bk-sc{max-height:240px;overflow:auto;border:1px solid #e6e6e6;border-radius:4px;margin-bottom:6px}
+.bk-t{width:100%;border-collapse:collapse;font-size:12px}
+.bk-t th{position:sticky;top:0;background:#eeeeee;text-align:left;padding:7px 10px;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#616161}
+.bk-t td{padding:6px 10px;border-top:1px solid #eee;vertical-align:top}
+.bk-t .n{text-align:right}.bk-t th.n{text-align:right}
+.bk-t.e td:nth-child(2),.bk-t.w td:nth-child(2){width:46px}
+.bk-t.e td:nth-child(4){color:#b71c1c}
+.bk-t tr.bk-s td{background:#fafafa}.bk-t tr.bk-i td{color:#616161}.bk-t tr.bk-i td:first-child{padding-left:26px}
+.bk-more{padding:6px 10px;color:#757575;font-size:12px}
+.bk-done{text-align:center;padding:14px 0}.bk-done h4{margin:6px 0 10px;font-size:18px;font-weight:500}
 </style>
 </head>
 <body>
@@ -1017,7 +1060,7 @@ table.scopet thead th.c{text-align:center}
           <div class="row"><span class="lbl">View Mode</span><button class="sw" id="sw"><i></i></button><span id="swl" style="font-size:12px">Original (COP)</span></div>
         </div>
         <div class="items">
-          <h4>Scope <button title="Descargar" data-toast="Descargando items…"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7zM5 18v2h14v-2z"/></svg></button><button class="newitem" id="newitem">+ New Scope</button></h4>
+          <h4>Scope <button title="Descargar" data-toast="Descargando items…"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7zM5 18v2h14v-2z"/></svg></button><button class="bulkbtn" id="bulk-open" title="Create several scopes, items and cost lines from an Excel file"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>Bulk Upload</button><button class="newitem" id="newitem">+ New Scope</button></h4>
           <table>
             <thead><tr><th class="c" style="width:60px">#</th><th>SCOPE</th><th>DIVISION</th><th>CATEGORY</th><th class="n">QTY</th><th class="n">COST</th><th class="n">MARGIN</th><th class="n">GROSS MARGIN</th><th class="n">SALES PRICE</th><th class="c">ACTIONS</th></tr></thead>
             <tbody id="rows"></tbody>
@@ -1094,6 +1137,7 @@ table.scopet thead th.c{text-align:center}
 <div class="dlg" id="lgd"><div class="bx lgb"><h3>Select the language</h3><p>Select the language in which you want to generate the preview</p>
   <div class="lg-sel"><select id="lg-s" aria-label="Language"><option value=""></option><option value="en">English</option><option value="es">Español</option></select></div>
   <div class="lg-f"><button id="lg-c">Close</button><button id="lg-g" disabled>Generate</button></div></div></div>
+<div class="dlg" id="bkd"><div class="bx bkb"><div class="bk-h"><button class="x" id="bk-x" title="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.400 17.600 5 12 10.600 6.400 5 5 6.400 10.600 12 5 17.600 6.400 19 12 13.400 17.600 19 19 17.600 13.400 12z"/></svg></button><h3>Bulk Upload</h3></div><div id="bk-b"></div><div id="bk-f"></div></div></div>
 <div class="menu" id="lmenu" style="position:fixed"></div>
 <div class="ov" id="pov"><div class="pmodal" id="pmodal">
   <div class="pm-h"><button class="x" id="pm-x" title="Cerrar"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.4 17.600 5 12 10.600 6.400 5 5 6.400 10.600 12 5 17.600 6.400 19 12 13.400 17.600 19 19 17.600 13.400 12z"/></svg></button><h2>NEW PROJECT</h2></div>
@@ -1275,14 +1319,15 @@ function fillCats(div,sel,isNew){
  $('#f-cat').value=isNew?'':sel;
 }
 function openItem(name,isNew,scopeIdx){
- const src=isNew?{cat:'ESM 5LS - H - HP',mea:'ft2',uni:'',mar:'',desc:[],adj:0,secs:['Materials','Engineering & Design','Fabrication Processes','Installation Equipment & Labor','Permits'].map(t=>[t,[]])}:(ITEMS[name]||ITEMS['Louver']);
+ const meta=(!isNew&&current&&current.x._imeta&&current.x._imeta[current.rowIdx])||null;
+ const src=isNew?{cat:'ESM 5LS - H - HP',mea:'ft2',uni:'',mar:'',desc:[],adj:0,secs:SEC_NAMES.map(t=>[t,[]])}:meta?{cat:'',mea:meta.mea,uni:meta.uni,mar:meta.mar,desc:[],adj:meta.adj||0,secs:SEC_NAMES.map(t=>[t,[]])}:(ITEMS[name]||ITEMS['Louver']);
 ED={addTo:(isNew&&scopeIdx!=null)?scopeIdx:null,usd:false,adj:src.adj,secs:src.secs.map(s=>({t:s[0],rows:s[1].map(r=>r.slice())}))};
-if(!isNew&&current&&current.x._mat&&current.x._mat[current.rowIdx])ED.secs=JSON.parse(JSON.stringify(current.x._mat[current.rowIdx]));ED.base=totalCost();
+if(!isNew&&current&&current.x._mat&&current.x._mat[current.rowIdx])ED.secs=JSON.parse(JSON.stringify(current.x._mat[current.rowIdx]));ED.secs=normSecs(ED.secs);ED.base=totalCost();
  $('#mtitle').textContent=isNew?'New Item':'Edit Item';
  {const xx=current&&current.x;const dv0=isNew?((xx&&scopeIdx!=null&&xx._scopes[scopeIdx])?xx._scopes[scopeIdx].div:""):((xx&&xx._div&&current.rowIdx!=null)?xx._div[current.rowIdx]:"");$("#f-div").dataset.v=dv0;fillDivSelects();$("#f-div").disabled=true;const sci=isNew?scopeIdx:(xx&&xx._sc?xx._sc[current.rowIdx]:null),scat=(xx&&sci!=null&&xx._scopes[sci])?(xx._scopes[sci].cat||""):"";$("#f-cat").innerHTML="<option>"+scat+"</option>";$("#f-cat").value=scat;$("#f-pt").innerHTML="<option>"+scat+"</option>";$("#f-pt").value=scat;}
  $('#f-ref').value=isNew?'':name; $('#f-mea').value=src.mea; $('#f-uni').value=src.uni; $('#f-mar').value=src.mar;
  ['#f-ref','#f-cat','#f-mea','#f-uni','#f-mar','#f-pt'].forEach(s=>$(s).disabled=!isNew);$('#f-cat').disabled=true;$('#f-pt').disabled=true;  // categoría y product type los define el scope
- $('#f-desc').innerHTML=src.desc.map(d=>'• '+d).join('<br>');
+ {let dh=src.desc.map(d=>'• '+d).join('<br>');if(isNew){const xx=current&&current.x,sc=xx&&scopeIdx!=null&&xx._scopes[scopeIdx];dh=sc?(sc.desc||''):'';}else if(meta)dh=meta.desc||'';$('#f-desc').innerHTML=dh;} // la descripción del scope se copia una sola vez; después el ítem es independiente
  $('#msw').classList.remove('on');$('#mswl').textContent='Original (COP)';
  renderSecs(); $('#ov').classList.add('on'); $('#modal').scrollTop=0;
 }
@@ -1385,6 +1430,8 @@ function calcQuote(x){
  return {rows,tot};
 }
 /* ---- Costs: scopes (nombre + división) que agrupan ítems ---- */
+const SCOPE_DESC={LOUVERS:'Horizontal aluminum louvers with bronze finish. Includes mounting brackets, fasteners and insect screen.',PERGOLAS:'Bioclimatic pergola with motorized adjustable blades in anodized aluminum. Includes drainage channels.',HPL:'HPL panel cladding, 10 mm, over aluminum subframe. Includes hidden fixings and trims.',DIVIDERS:'Sliding office partitions with aluminum track system and tempered glass panels.'};
+const plain=h=>{const t=document.createElement('div');t.innerHTML=h||'';return (t.textContent||'').replace(/\s+/g,' ').trim();};
 const SCOPE_NAMES={LOUVERS:['Mechanical Screen','Lobby Louver Wall','Parking Ventilation','Roof Equipment Screen'],PERGOLAS:['Rooftop Terrace','Pool Deck Shade','Amenity Canopy'],HPL:['Facade Cladding','Podium Panels','Soffit Cladding'],DIVIDERS:['Office Partitions','Meeting Room Dividers']};const defScopeName=(d,x)=>{const n=parseInt(x&&x[0])||0,lv=2+(n%9),list=SCOPE_NAMES[d]||['Custom Package','Special Works'];return 'Level '+lv+' - '+list[(Math.floor(n/7))%list.length];};
 const titleCase=s=>!s?'General':(s.length<=3?s:s.charAt(0)+s.slice(1).toLowerCase());
 function qCur(x){return x[4].includes('$')?'USD':'COP';}
@@ -1393,7 +1440,7 @@ function ensureScopes(x){
  if(!x._scopes||!x._sc||x._sc.length!==rows.length){
   if(!x._div||x._div.length!==rows.length)x._div=['LOUVERS','LOUVERS','PERGOLAS','HPL'].map(d=>DIVS.includes(d)?d:'').slice(0,rows.length);
   const uniq=[...new Set(x._div)];
-  x._scopes=uniq.map(d=>({name:defScopeName(d,x),div:d,cat:''}));
+  x._scopes=uniq.map(d=>({name:defScopeName(d,x),div:d,cat:'',desc:SCOPE_DESC[d]||''}));
   x._sc=x._div.map(d=>uniq.indexOf(d));
   // la categoría (producto) pertenece al scope: sus ítems la heredan
   if(rows.length){
@@ -1440,7 +1487,7 @@ function buildCosts(x){
   const idx=x._sc.map((s,i)=>s===si?i:-1).filter(i=>i>=0),open=x._exp.has(si);
   const C=idx.reduce((a,i)=>a+parse(rows[i][4]),0),G=idx.reduce((a,i)=>a+parse(rows[i][6]),0),S=idx.reduce((a,i)=>a+parse(rows[i][8]),0);
   const Q=idx.reduce((a,i)=>a+(parseFloat(rows[i][3])||0),0);const mine=hl&&idx.some(i=>String(x._sp&&x._sp[i])===hl);
-  html+=`<tr class="scr${open?' open':''}${mine?' hl':''}" data-si="${si}"><td class="c gp"><span class="grip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span><span class="no">${si+1}</span></td><td class="nm"><span class="sc-chv">${chvI}</span>${sc.name}${idx.length?` <small>${idx.length} item${idx.length>1?'s':''}</small>`:''}</td><td class="div"><select class="divsel scsel" data-si="${si}" aria-label="Division of ${sc.name}"></select></td><td class="catc">${sc.cat||'—'}</td><td class="n">${idx.length?(+Q.toFixed(2)).toLocaleString('de-DE',{maximumFractionDigits:2}):''}</td><td class="n">${idx.length?n2(C)+' '+cur:''}</td><td class="n">${idx.length?(S?(G/S*100).toFixed(2)+'%':'0.00%'):''}</td><td class="n">${idx.length?n2(G)+' '+cur:''}</td><td class="n">${idx.length?n2(S)+' '+cur:''}</td><td class="c"><button class="ib" data-scm="${si}" title="Actions">${kebab}</button></td></tr>`;
+  html+=`<tr class="scr${open?' open':''}${mine?' hl':''}" data-si="${si}"><td class="c gp"><span class="grip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span><span class="no">${si+1}</span></td><td class="nm"><span class="sc-chv">${chvI}</span>${sc.name}${idx.length?` <small>${idx.length} item${idx.length>1?'s':''}</small>`:''}${plain(sc.desc)?`<span class="sdesc" title="${plain(sc.desc).replace(/"/g,'&quot;')}">${plain(sc.desc)}</span>`:''}</td><td class="div"><select class="divsel scsel" data-si="${si}" aria-label="Division of ${sc.name}"></select></td><td class="catc">${sc.cat||'—'}</td><td class="n">${idx.length?(+Q.toFixed(2)).toLocaleString('de-DE',{maximumFractionDigits:2}):''}</td><td class="n">${idx.length?n2(C)+' '+cur:''}</td><td class="n">${idx.length?(S?(G/S*100).toFixed(2)+'%':'0.00%'):''}</td><td class="n">${idx.length?n2(G)+' '+cur:''}</td><td class="n">${idx.length?n2(S)+' '+cur:''}</td><td class="c"><button class="ib" data-scm="${si}" title="Actions">${kebab}</button></td></tr>`;
   if(open){
    html+=`<tr class="scx"><td></td><td colspan="9"><table class="nx"><thead><tr><th class="c">#</th><th>DESCRIPTION</th><th>CATEGORY</th><th>QTY</th><th>COST</th><th>MARGIN</th><th>GROSS MARGIN</th><th>PRICE PER QUANTITY</th><th>SALE PRICE</th><th class="c">ACTION</th></tr></thead><tbody>`;
    if(!idx.length)html+=`<tr class="sce"><td colspan="10">No items in this scope yet. Use Add Item in the scope actions.</td></tr>`;
@@ -1471,7 +1518,7 @@ function moveItem(x,from,target,before){ // reordena dentro del mismo scope
  const rows=x._calc.rows,n=rows.length,order=[...Array(n).keys()];
  order.splice(order.indexOf(from),1);const p=order.indexOf(target);order.splice(before?p:p+1,0,from);
  const sp={};order.forEach((o,nw)=>{if(x._sp&&x._sp[o]!==undefined)sp[nw]=x._sp[o];});
- x._calc.rows=order.map(o=>rows[o]);x._sc=order.map(o=>x._sc[o]);x._sp=sp;syncDiv(x);
+ x._calc.rows=order.map(o=>rows[o]);remapAux(x,order);x._sc=order.map(o=>x._sc[o]);x._sp=sp;syncDiv(x);
 }
 let DRAG=null,DRAGI=null;
 const clearDnd=()=>$$('#rows tr').forEach(r=>r.classList.remove('dragging','d-top','d-bot'));
@@ -1542,7 +1589,7 @@ let SCEDIT=null,SCDEL=null;
 function removeScope(x,si){
  if(!x._calc)x._calc=JSON.parse(JSON.stringify(calcQuote(x)));
  const keep=x._sc.map((s,i)=>s!==si?i:-1).filter(i=>i>=0);
- x._calc.rows=keep.map(i=>x._calc.rows[i]);
+ x._calc.rows=keep.map(i=>x._calc.rows[i]);remapAux(x,keep);
  const sp={};keep.forEach((o,n)=>{if(x._sp&&x._sp[o]!==undefined)sp[n]=x._sp[o];});x._sp=sp;
  x._sc=keep.map(i=>x._sc[i]>si?x._sc[i]-1:x._sc[i]);x._scopes.splice(si,1);
  x._exp=new Set([...x._exp].filter(s=>s!==si).map(s=>s>si?s-1:s));
@@ -1550,8 +1597,8 @@ function removeScope(x,si){
 }
 function duplicateScope(x,si){
  if(!x._calc)x._calc=JSON.parse(JSON.stringify(calcQuote(x)));
- const sc=x._scopes[si];x._scopes.push({name:sc.name+' (copy)',div:sc.div});const ns=x._scopes.length-1;
- x._sc.map((s,i)=>s===si?i:-1).filter(i=>i>=0).forEach(i=>{x._calc.rows.push(x._calc.rows[i].slice());x._sc.push(ns);});
+ const sc=x._scopes[si];x._scopes.push({name:sc.name+' (copy)',div:sc.div,cat:sc.cat,desc:sc.desc});const ns=x._scopes.length-1;
+ x._sc.map((s,i)=>s===si?i:-1).filter(i=>i>=0).forEach(i=>{x._calc.rows.push(x._calc.rows[i].slice());x._sc.push(ns);const ni=x._calc.rows.length-1;['_mat','_imeta'].forEach(k=>{if(x[k]&&x[k][i])x[k][ni]=JSON.parse(JSON.stringify(x[k][i]));});});
  syncDiv(x);recalcTot(x);return ns;
 }
 function scopeAction(si,a){
@@ -1595,6 +1642,269 @@ document.addEventListener('click',e=>{
  const ai=e.target.closest('[data-addi]');if(ai){current.rowIdx=null;openItem('',true,+ai.dataset.addi);}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#scd').classList.contains('on'))$('#scd').classList.remove('on');if(e.key==='Enter'&&$('#scd').classList.contains('on')&&e.target.id==='scd-n')createScope(false);});
+/* ================= Bulk Upload (Excel) ================= */
+const SEC_NAMES=['Materials','Engineering & Design','Fabrication Processes','Packing Materials','Transportation','Installation Equipment & Labor','Permits'];
+const CL_UNITS=['kg','qt','m2','ft2','h','un'],MEASURES=['ft2','m2','un'],BK_ROWS=200,BK_FIRST=5;
+function normSecs(secs){ // asegura las 7 secciones de costo en orden; conserva lo que ya traiga cada una
+ const by={};secs.forEach(s=>{by[s.t.toLowerCase()]=s;});
+ const out=SEC_NAMES.map(n=>by[n.toLowerCase()]||{t:n,rows:[]});
+ secs.forEach(s=>{if(!SEC_NAMES.some(n=>n.toLowerCase()===s.t.toLowerCase()))out.push(s);});
+ return out;
+}
+const textToHtml=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\r?\n/g,'<br>');
+const esc=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const BK_HEAD={
+ Scopes:['Scope ID','Scope Name','Division','Category','Description'],
+ Items:['Item Reference','Scope ID','Measure','Units','Margin %','Description'],
+ 'Cost Breakdown':['Item Reference','Section','Name','Weight (kg)','Quantity','Unit','Unit Cost (COP)','Parcial (auto)']};
+const BK_REQ={Scopes:[0,1,2,3],Items:[0,1,2,3,4],'Cost Breakdown':[0,1,2,4,5,6]};
+const dvName=d=>'cat_'+String(d).replace(/[^A-Za-z0-9]/g,'_');
+
+/* ---------- plantilla ---------- */
+function buildTemplate(){
+ if(typeof ExcelJS==='undefined')throw new Error('La librería de Excel no se pudo cargar. Revise su conexión e intente de nuevo.');
+ const wb=new ExcelJS.Workbook();wb.creator='Project Agenda';wb.created=new Date();
+ const BLUE='FF1976D2',DARK='FF0D47A1',GRAY='FFEEEEEE';
+ // Hoja oculta con las listas controladas (salen de Settings > Division)
+ const L=wb.addWorksheet('Lists',{state:'hidden'});
+ L.getCell('A1').value='Divisions';DIVS.forEach((d,i)=>L.getCell(2+i,1).value=d);
+ L.getCell('B1').value='Sections';SEC_NAMES.forEach((d,i)=>L.getCell(2+i,2).value=d);
+ L.getCell('C1').value='Units';CL_UNITS.forEach((d,i)=>L.getCell(2+i,3).value=d);
+ L.getCell('D1').value='Measures';MEASURES.forEach((d,i)=>L.getCell(2+i,4).value=d);
+ DIVS.forEach((d,j)=>{const col=5+j;L.getCell(1,col).value=d;const cats=DIV_CATS[d]||[];cats.forEach((c,i)=>L.getCell(2+i,col).value=c);
+  if(cats.length){const cl=L.getColumn(col).letter;wb.definedNames.add(`Lists!$${cl}$2:$${cl}$${1+cats.length}`,dvName(d));}});
+ const colL=n=>L.getColumn(n).letter;
+ // Instrucciones
+ const I=wb.addWorksheet('Instructions',{properties:{tabColor:{argb:BLUE}}});
+ I.columns=[{width:26},{width:62},{width:48}];
+ const put=(r,a,b,c,style)=>{const row=I.getRow(r);row.getCell(1).value=a;if(b!==undefined)row.getCell(2).value=b;if(c!==undefined)row.getCell(3).value=c;
+  if(style==='title'){row.getCell(1).font={bold:true,size:16,color:{argb:BLUE}};}
+  if(style==='h'){[1,2,3].forEach(i=>{row.getCell(i).font={bold:true,color:{argb:'FFFFFFFF'}};row.getCell(i).fill={type:'pattern',pattern:'solid',fgColor:{argb:BLUE}};});}
+  if(style==='b'){row.getCell(1).font={bold:true};}
+  [1,2,3].forEach(i=>row.getCell(i).alignment={vertical:'top',wrapText:true});};
+ let r=1;put(r++,'Bulk Upload - Scopes, Items and Cost Breakdown',undefined,undefined,'title');
+ put(r++,'Fill in the three sheets that follow, save the file and upload it from Costs > Scope > Bulk Upload. Nothing is created until you review the preview and confirm.');I.mergeCells(r-1,1,r-1,3);I.getRow(r-1).height=34;r++;
+ put(r++,'Sheet','Purpose','What you enter','h');
+ put(r++,'Scopes','One row per scope of the quote.','Scope ID (a short code you choose, e.g. S1), name, division, category and an optional description.','b');
+ put(r++,'Items','One row per item. Each item belongs to a scope.','Item Reference (unique in the file), the Scope ID it belongs to, measure, units, margin % and an optional description.','b');
+ put(r++,'Cost Breakdown','One row per cost line of an item.','Item Reference, section, name, weight (only for kg), quantity, unit and unit cost in COP.','b');r++;
+ put(r++,'Field','Rules','Valid values','h');
+ const rules=[
+  ['Scope ID *','Required. Unique within the file. Used only to link Items to Scopes.','Any short text: S1, S2, Level-3...'],
+  ['Division *','Required. Choose from the list.',DIVS.join(', ')],
+  ['Category *','Required. Must be a product of the selected division (the list changes with the division).','See Settings > Division'],
+  ['Description','Optional. Items of this scope that have no description of their own inherit this text (they can edit it later).','Free text'],
+  ['Item Reference *','Required. Unique in the whole file. It is the name of the item.','Free text'],
+  ['Measure *','Required. Unit in which the item is quoted.',MEASURES.join(', ')],
+  ['Units *','Required. Number greater than 0.','e.g. 6.39'],
+  ['Margin % *','Required. Number from 0 to 99.99 (write 33 for 33%).','e.g. 33'],
+  ['Section *','Required. Cost section the line belongs to.',SEC_NAMES.join(', ')],
+  ['Weight (kg)','Optional. Only valid when Unit is kg: the line cost is weight x quantity x unit cost.','Number >= 0'],
+  ['Quantity *','Required. Number greater than 0.','e.g. 41'],
+  ['Unit *','Required. Unit of the cost line.',CL_UNITS.join(', ')],
+  ['Unit Cost (COP) *','Required. Cost of one unit, in COP. Number >= 0.','e.g. 23298'],
+  ['Parcial (auto)','Calculated by the sheet. Do not edit. The system recalculates every amount on import.','-']];
+ rules.forEach(x=>put(r++,x[0],x[1],x[2],'b'));r++;
+ put(r++,'Example (do not copy this row into the sheets as it is):',undefined,undefined,'b');
+ put(r++,'Cost Breakdown','Louver | Materials | 5LS-HV - JAMB-ESM-509 | 8.6738 | 41 | kg | 23298','Parcial = 8.6738 x 41 x 23298');
+ r++;put(r++,'Important',undefined,undefined,'b');
+ ['* marks a required field.','Rows left completely empty are ignored.','The import only adds new scopes and items; it never replaces or deletes existing ones.','If any row has an error, nothing is imported. Fix the file and upload it again.'].forEach(t=>{put(r,t);I.mergeCells(r,1,r,3);r++;});
+ // hojas de datos
+ const mk=(name,widths)=>{const ws=wb.addWorksheet(name);ws.columns=widths.map(w=>({width:w}));
+  ws.getCell('A1').value=name==='Scopes'?'Scopes':name==='Items'?'Items':'Cost Breakdown';ws.getCell('A1').font={bold:true,size:14,color:{argb:BLUE}};
+  ws.getCell('A2').value='Fields with * are required. Start in the first empty row below the headers. Leave unused rows empty.';ws.getCell('A2').font={italic:true,color:{argb:'FF757575'}};
+  BK_HEAD[name].forEach((h,i)=>{const c=ws.getCell(4,i+1);c.value=h+(BK_REQ[name].includes(i)?' *':'');c.font={bold:true,color:{argb:'FFFFFFFF'}};
+   c.fill={type:'pattern',pattern:'solid',fgColor:{argb:BK_REQ[name].includes(i)?DARK:BLUE}};c.alignment={vertical:'middle',wrapText:true};c.border={bottom:{style:'medium',color:{argb:'FF0D47A1'}}};});
+  ws.getRow(4).height=28;ws.views=[{state:'frozen',ySplit:4}];return ws;};
+ const S=mk('Scopes',[14,34,18,30,60]),It=mk('Items',[30,14,12,12,12,60]),C=mk('Cost Breakdown',[30,28,52,13,13,10,18,18]);
+ const last=BK_FIRST+BK_ROWS-1,list=(ws,col,f,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'list',allowBlank:true,formulae:[f],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid value',error:msg};};
+ const num=(ws,col,op,v,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'decimal',operator:op,formulae:Array.isArray(v)?v:[v],allowBlank:true,showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid number',error:msg};};
+ list(S,'C',`Lists!$A$2:$A$${1+DIVS.length}`,'Choose a division from the list.');
+ for(let rr=BK_FIRST;rr<=last;rr++)S.getCell('D'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`INDIRECT("cat_"&SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($C${rr}," ","_"),"&","_"),"-","_"))`],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid category',error:'Choose a category of the selected division (select the division first).'};
+ list(It,'B',`Scopes!$A$${BK_FIRST}:$A$${last}`,'Use a Scope ID defined in the Scopes sheet.');
+ list(It,'C',`Lists!$D$2:$D$${1+MEASURES.length}`,'Choose ft2, m2 or un.');
+ num(It,'D','greaterThan',0,'Units must be a number greater than 0.');
+ num(It,'E','between',[0,99.99],'Margin must be a number from 0 to 99.99.');
+ list(C,'A',`Items!$A$${BK_FIRST}:$A$${last}`,'Use an Item Reference defined in the Items sheet.');
+ list(C,'B',`Lists!$B$2:$B$${1+SEC_NAMES.length}`,'Choose a cost section from the list.');
+ num(C,'D','greaterThanOrEqual',0,'Weight must be a number >= 0.');
+ num(C,'E','greaterThan',0,'Quantity must be a number greater than 0.');
+ list(C,'F',`Lists!$C$2:$C$${1+CL_UNITS.length}`,'Choose a unit from the list.');
+ num(C,'G','greaterThanOrEqual',0,'Unit cost must be a number >= 0.');
+ for(let rr=BK_FIRST;rr<=last;rr++){const c=C.getCell('H'+rr);c.value={formula:`IF(OR(E${rr}="",G${rr}=""),"",IF(AND(F${rr}="kg",D${rr}<>""),D${rr},1)*E${rr}*G${rr})`};c.numFmt='#,##0.00';c.font={color:{argb:'FF757575'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:GRAY}};
+  C.getCell('G'+rr).numFmt='#,##0.00';C.getCell('D'+rr).numFmt='0.0000';}
+ L.orderNo=100;wb.views=[{activeTab:0}];
+ return wb;
+}
+async function downloadTemplate(){
+ const wb=buildTemplate(),buf=await wb.xlsx.writeBuffer();
+ const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),a=document.createElement('a');
+ let dl=null;try{dl=window.claude&&await window.claude.use('downloads');}catch(e){}
+ if(dl){await dl.save({filename:'Bulk_Upload_Template.xlsx',data:blob});return;} // visor de artifacts: descarga mediada
+ a.href=URL.createObjectURL(blob);a.download='Bulk_Upload_Template.xlsx';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+
+/* ---------- lectura y validación ---------- */
+function cellText(c){let v=c&&c.value;if(v&&typeof v==='object'){if('result' in v)v=v.result;else if(v.richText)v=v.richText.map(t=>t.text).join('');else if(v.text!==undefined)v=v.text;else if(v instanceof Date)v=v.toISOString();}
+ return v==null?'':String(v).trim();}
+function cellNum(c){let v=c&&c.value;if(v&&typeof v==='object'&&'result' in v)v=v.result;if(typeof v==='number')return v;const t=cellText(c);if(t==='')return null;const n=Number(t.replace(/\s/g,'').replace(',','.'));return isNaN(n)?NaN:n;}
+async function parseWorkbook(buf){
+ const res={errors:[],warnings:[],scopes:[],items:[],lines:[]},err=(sheet,row,field,msg)=>res.errors.push({sheet,row,field,msg}),warn=(sheet,row,field,msg)=>res.warnings.push({sheet,row,field,msg});
+ let wb;try{wb=new ExcelJS.Workbook();await wb.xlsx.load(buf);}catch(e){err('File','-','-','The file is not a valid .xlsx workbook. Download the template and use it.');return res;}
+ const sheets={};for(const n of Object.keys(BK_HEAD)){const ws=wb.getWorksheet(n);if(!ws)err('File','-',n,`Sheet "${n}" is missing. The file does not match the template; download it again.`);else{
+  const hs=BK_HEAD[n].map((h,i)=>cellText(ws.getCell(4,i+1)).replace(/\*/g,'').trim().toLowerCase()),want=BK_HEAD[n].map(h=>h.toLowerCase());
+  const bad=want.findIndex((h,i)=>hs[i]!==h);
+  if(bad>=0)err(n,4,BK_HEAD[n][bad],`Column ${bad+1} header must be "${BK_HEAD[n][bad]}". Do not rename or move the template columns.`);else sheets[n]=ws;}}
+ if(res.errors.length)return res;
+ const rowsOf=(ws,cols)=>{const out=[];for(let r=BK_FIRST;r<=ws.rowCount;r++){const vals=[];for(let c=1;c<=cols;c++)vals.push(ws.getCell(r,c));if(vals.slice(0,cols-(ws.name==='Cost Breakdown'?1:0)).every(c=>cellText(c)===''))continue;out.push({r,c:vals});}return out;};
+ // Scopes
+ const seenScope={};
+ rowsOf(sheets.Scopes,5).forEach(({r,c})=>{
+  const id=cellText(c[0]),name=cellText(c[1]),div=cellText(c[2]),cat=cellText(c[3]),desc=cellText(c[4]);let ok=true,dup=false;
+  if(!id){err('Scopes',r,'Scope ID','Scope ID is required.');ok=false;}else if(seenScope[id.toLowerCase()]){err('Scopes',r,'Scope ID',`Scope ID "${id}" is repeated (first used in row ${seenScope[id.toLowerCase()]}).`);ok=false;dup=true;}else seenScope[id.toLowerCase()]=r;
+  if(!name){err('Scopes',r,'Scope Name','Scope Name is required.');ok=false;}
+  const dvm=DIVS.find(d=>d.toLowerCase()===div.toLowerCase());
+  if(!div){err('Scopes',r,'Division','Division is required.');ok=false;}else if(!dvm){err('Scopes',r,'Division',`"${div}" is not a division. Valid: ${DIVS.join(', ')}.`);ok=false;}
+  let catm=null;
+  if(!cat){err('Scopes',r,'Category','Category is required.');ok=false;}else if(dvm){catm=(DIV_CATS[dvm]||[]).find(x=>x.toLowerCase()===cat.toLowerCase());if(!catm){err('Scopes',r,'Category',`"${cat}" is not a product of division ${dvm}. Valid: ${(DIV_CATS[dvm]||[]).join(', ')||'none defined'}.`);ok=false;}}
+  if(id&&!dup)res.scopes.push({id,name,div:dvm||div,cat:catm||cat,desc,row:r,ok,items:[]});
+ });
+ if(!res.scopes.length&&!res.errors.length)err('Scopes',BK_FIRST,'-','The Scopes sheet has no rows. Add at least one scope.');
+ const scopeById={};res.scopes.forEach(s=>{scopeById[s.id.toLowerCase()]=s;});
+ // Items
+ const seenItem={};
+ rowsOf(sheets.Items,6).forEach(({r,c})=>{
+  const ref=cellText(c[0]),sid=cellText(c[1]),mea=cellText(c[2]),units=cellNum(c[3]),mar=cellNum(c[4]),desc=cellText(c[5]);let ok=true;
+  if(!ref){err('Items',r,'Item Reference','Item Reference is required.');ok=false;}else if(seenItem[ref.toLowerCase()]){err('Items',r,'Item Reference',`Item Reference "${ref}" is repeated (first used in row ${seenItem[ref.toLowerCase()].row}). It must be unique in the file.`);ok=false;}
+  let sc=null;
+  if(!sid){err('Items',r,'Scope ID','Scope ID is required.');ok=false;}else{sc=scopeById[sid.toLowerCase()];if(!sc){err('Items',r,'Scope ID',`Scope ID "${sid}" does not exist in the Scopes sheet.`);ok=false;}}
+  const mm=MEASURES.find(m=>m.toLowerCase()===mea.toLowerCase());
+  if(!mea){err('Items',r,'Measure','Measure is required.');ok=false;}else if(!mm){err('Items',r,'Measure',`"${mea}" is not valid. Use ${MEASURES.join(', ')}.`);ok=false;}
+  if(units===null){err('Items',r,'Units','Units is required.');ok=false;}else if(isNaN(units)||units<=0){err('Items',r,'Units','Units must be a number greater than 0.');ok=false;}
+  if(mar===null){err('Items',r,'Margin %','Margin % is required.');ok=false;}else if(isNaN(mar)||mar<0||mar>=100){err('Items',r,'Margin %','Margin % must be a number from 0 to 99.99.');ok=false;}
+  if(ref){const it={ref,sid,scope:sc,mea:mm||mea,units,mar,desc,row:r,ok,lines:[]};if(!seenItem[ref.toLowerCase()])seenItem[ref.toLowerCase()]=it;res.items.push(it);if(sc)sc.items.push(it);}
+ });
+ // Cost Breakdown
+ rowsOf(sheets['Cost Breakdown'],8).forEach(({r,c})=>{
+  const ref=cellText(c[0]),sec=cellText(c[1]),name=cellText(c[2]),w=cellNum(c[3]),q=cellNum(c[4]),unit=cellText(c[5]),cost=cellNum(c[6]);let ok=true;
+  const it=ref?seenItem[ref.toLowerCase()]:null;
+  if(!ref){err('Cost Breakdown',r,'Item Reference','Item Reference is required.');ok=false;}else if(!it){err('Cost Breakdown',r,'Item Reference',`Item "${ref}" does not exist in the Items sheet.`);ok=false;}
+  const sm=SEC_NAMES.find(s=>s.toLowerCase()===sec.toLowerCase());
+  if(!sec){err('Cost Breakdown',r,'Section','Section is required.');ok=false;}else if(!sm){err('Cost Breakdown',r,'Section',`"${sec}" is not a cost section. Valid: ${SEC_NAMES.join(', ')}.`);ok=false;}
+  if(!name){err('Cost Breakdown',r,'Name','Name is required.');ok=false;}
+  const um=CL_UNITS.find(u=>u.toLowerCase()===unit.toLowerCase());
+  if(!unit){err('Cost Breakdown',r,'Unit','Unit is required.');ok=false;}else if(!um){err('Cost Breakdown',r,'Unit',`"${unit}" is not valid. Use ${CL_UNITS.join(', ')}.`);ok=false;}
+  if(q===null){err('Cost Breakdown',r,'Quantity','Quantity is required.');ok=false;}else if(isNaN(q)||q<=0){err('Cost Breakdown',r,'Quantity','Quantity must be a number greater than 0.');ok=false;}
+  if(cost===null){err('Cost Breakdown',r,'Unit Cost (COP)','Unit Cost is required (use 0 if it has no cost).');ok=false;}else if(isNaN(cost)||cost<0){err('Cost Breakdown',r,'Unit Cost (COP)','Unit Cost must be a number >= 0.');ok=false;}
+  if(w!==null){if(isNaN(w)||w<0){err('Cost Breakdown',r,'Weight (kg)','Weight must be a number >= 0.');ok=false;}else if(um&&um!=='kg'){err('Cost Breakdown',r,'Weight (kg)','Weight only applies when the Unit is kg. Clear the weight or change the unit to kg.');ok=false;}}
+  if(ok&&it){const par=((um==='kg'&&w)?w:1)*q*cost;it.lines.push({sec:sm,name,w:um==='kg'&&w?w:null,q,unit:um,cost,par,row:r});}
+ });
+ // avisos
+ res.scopes.forEach(s=>{if(!s.items.length)warn('Scopes',s.row,'Scope ID',`Scope "${s.name}" has no items; it will be created empty.`);
+  const ex=current&&current.x&&current.x._scopes&&current.x._scopes.find(z=>z.name.toLowerCase()===s.name.toLowerCase());if(ex)warn('Scopes',s.row,'Scope Name',`The quote already has a scope called "${s.name}". A new scope with the same name will be added.`);});
+ res.items.forEach(it=>{if(it.ok&&!it.lines.length)warn('Items',it.row,'Item Reference',`Item "${it.ref}" has no cost lines; its cost will be 0.`);});
+ // totales
+ res.items.forEach(it=>{it.cost=it.lines.reduce((a,l)=>a+l.par,0);it.sale=(it.mar!=null&&!isNaN(it.mar))?it.cost/(1-it.mar/100)*1.01:0;});
+ res.scopes.forEach(s=>{s.cost=s.items.reduce((a,i)=>a+i.cost,0);s.sale=s.items.reduce((a,i)=>a+i.sale,0);});
+ res.totals={scopes:res.scopes.length,items:res.items.length,lines:res.items.reduce((a,i)=>a+i.lines.length,0),cost:res.scopes.reduce((a,s)=>a+s.cost,0),sale:res.scopes.reduce((a,s)=>a+s.sale,0)};
+ return res;
+}
+
+/* ---------- importación transaccional ---------- */
+const QKEYS=['_scopes','_sc','_div','_sp','_calc','_mat','_imeta'];
+function snapQuote(x){const o={price:x[4],exp:[...(x._exp||[])]};QKEYS.forEach(k=>{o[k]=x[k]===undefined?undefined:JSON.stringify(x[k]);});return o;}
+function restoreQuote(x,o){x[4]=o.price;x._exp=new Set(o.exp);QKEYS.forEach(k=>{if(o[k]===undefined)delete x[k];else x[k]=JSON.parse(o[k]);});}
+function applyImport(res){
+ const x=current.x;ensureScopes(x);const snap=snapQuote(x),created={scopes:0,items:0,lines:0,cost:0,sale:0};
+ try{
+  const map={};
+  res.scopes.forEach(s=>{x._scopes.push({name:s.name,div:s.div,cat:s.cat,desc:textToHtml(s.desc)});map[s.id.toLowerCase()]=x._scopes.length-1;created.scopes++;});
+  x._exp=x._exp||new Set();
+  res.items.forEach(it=>{
+   const si=map[it.sid.toLowerCase()],sc=it.scope,m=it.mar/100;
+   const k=qCur(x)==='USD'?1/FX:1;
+   addQuoteItem(x,si,{name:it.ref,cat:sc.cat,qty:it.units,unit:it.mea,cost:it.cost*k,sale:it.sale*k,m});
+   const ri=x._calc.rows.length-1,secs=SEC_NAMES.map(n=>({t:n,rows:it.lines.filter(l=>l.sec===n).map(l=>[l.name,l.w,l.q,l.unit,l.cost,l.par])}));
+   x._mat=x._mat||{};x._mat[ri]=secs;
+   x._imeta=x._imeta||{};x._imeta[ri]={mea:it.mea,uni:String(it.units),mar:String(it.mar),desc:it.desc?textToHtml(it.desc):(sc.desc?textToHtml(sc.desc):'')};
+   created.items++;created.lines+=it.lines.length;created.cost+=it.cost;created.sale+=it.sale;
+  });
+  res.scopes.forEach(s=>{if(s.items.length)x._exp.add(map[s.id.toLowerCase()]);});
+  recalcTot(x);
+  return created;
+ }catch(e){restoreQuote(x,snap);throw e;}
+}
+
+/* ---------- diálogo Bulk Upload ---------- */
+let BK={step:'start',res:null,file:'',done:null,msg:''};
+const BK_MAX=5*1024*1024;
+function bkOpen(){if(!current||!current.x)return;BK={step:'start',res:null,file:'',done:null,msg:''};bkRender();$('#bkd').classList.add('on');}
+function bkClose(){if(BK.step==='busy')return;$('#bkd').classList.remove('on');}
+function bkRender(){
+ const b=$('#bk-b'),f=$('#bk-f'),cur=qCur(current.x),m=(n)=>n2(cur==='USD'?n/FX:n)+' '+cur;
+ if(BK.step==='start'){
+  b.innerHTML=`<p class="bk-p">Create several scopes, items and cost lines at once from an Excel file. New data is <b>added</b> to this quote; nothing existing is replaced or deleted.</p>
+  <div class="bk-st"><span class="bk-n">1</span><div><b>Download the template</b><small>Includes instructions, drop-down lists for division, category, measure, section and unit, and an automatic Parcial column.</small></div><button class="bk-b2" id="bk-tpl">Download template</button></div>
+  <div class="bk-st"><span class="bk-n">2</span><div><b>Upload the completed file</b><small>.xlsx, up to 5 MB. You will review it before anything is created.</small></div></div>
+  <label class="bk-drop" id="bk-drop" for="bk-file"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M19.350 10.040A7.490 7.490 0 0 0 12 4C9.110 4 6.600 5.640 5.350 8.040A5.994 5.994 0 0 0 0 14c0 3.310 2.690 6 6 6h13c2.760 0 5-2.240 5-5 0-2.640-2.050-4.780-4.650-4.960zM14 13v4h-4v-4H7l5-5 5 5z"/></svg><span>Drag the file here or <u>choose a file</u></span></label><input type="file" id="bk-file" accept=".xlsx" hidden>
+  ${BK.msg?`<div class="bk-er">${esc(BK.msg)}</div>`:''}`;
+  f.innerHTML='<button id="bk-cl">Cancel</button>';
+ }else if(BK.step==='busy'){
+  b.innerHTML=`<div class="bk-busy"><div class="bk-sp"></div><b>${esc(BK.msg||'Working…')}</b><small>Please wait, do not close this window.</small></div>`;f.innerHTML='';
+ }else if(BK.step==='preview'){
+  const r=BK.res,ne=r.errors.length,nw=r.warnings.length,t=r.totals||{scopes:0,items:0,lines:0,cost:0,sale:0};
+  const tbl=(arr,cls)=>`<div class="bk-sc"><table class="bk-t ${cls}"><thead><tr><th>Sheet</th><th>Row</th><th>Field</th><th>Problem</th></tr></thead><tbody>${arr.slice(0,300).map(e=>`<tr><td>${esc(e.sheet)}</td><td>${esc(e.row)}</td><td>${esc(e.field)}</td><td>${esc(e.msg)}</td></tr>`).join('')}</tbody></table>${arr.length>300?`<div class="bk-more">Showing the first 300 of ${arr.length}.</div>`:''}</div>`;
+  let h=`<div class="bk-file">${esc(BK.file)}</div>`;
+  if(ne){h+=`<div class="bk-bn err"><b>${ne} error${ne>1?'s':''} found.</b> Nothing will be imported until the file is fixed. Correct it and upload it again.</div>${tbl(r.errors,'e')}`;}
+  else h+=`<div class="bk-bn ok"><b>File is valid.</b> Review the summary and confirm to create the data in this quote.</div>`;
+  if(!ne||nw){h+=`<div class="bk-sum"><div><b>${t.scopes}</b><span>Scopes</span></div><div><b>${t.items}</b><span>Items</span></div><div><b>${t.lines}</b><span>Cost lines</span></div><div><b>${m(t.cost)}</b><span>Total cost</span></div><div><b>${m(t.sale)}</b><span>Sale price</span></div></div>`;}
+  if(nw){h+=`<div class="bk-bn warn"><b>${nw} warning${nw>1?'s':''}</b> (they do not block the import)</div>${tbl(r.warnings,'w')}`;}
+  if(!ne){h+=`<div class="bk-sc"><table class="bk-t"><thead><tr><th>Scope</th><th>Division</th><th>Category</th><th class="n">Items</th><th class="n">Cost</th><th class="n">Sale price</th></tr></thead><tbody>${r.scopes.map(s=>`<tr class="bk-s"><td><b>${esc(s.name)}</b></td><td>${esc(s.div)}</td><td>${esc(s.cat)}</td><td class="n">${s.items.length}</td><td class="n">${m(s.cost)}</td><td class="n">${m(s.sale)}</td></tr>`+s.items.map(i=>`<tr class="bk-i"><td>${esc(i.ref)}</td><td>${i.units} ${esc(i.mea)} · ${i.mar}% margin</td><td></td><td class="n">${i.lines.length} lines</td><td class="n">${m(i.cost)}</td><td class="n">${m(i.sale)}</td></tr>`).join('')).join('')}</tbody></table></div>`;}
+  b.innerHTML=h;
+  f.innerHTML=`<button id="bk-again">Upload another file</button><button id="bk-cl">Cancel</button><button class="ok" id="bk-ok"${ne?' disabled':''}>Confirm import</button>`;
+ }else if(BK.step==='done'){
+  const d=BK.done;
+  b.innerHTML=`<div class="bk-done"><svg width="52" height="52" viewBox="0 0 24 24" fill="#2e7d32"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15-5-5 1.400-1.400L10 14.200l7.600-7.600L19 8z"/></svg><h4>Import completed</h4>
+  <div class="bk-sum"><div><b>${d.scopes}</b><span>Scopes created</span></div><div><b>${d.items}</b><span>Items created</span></div><div><b>${d.lines}</b><span>Cost lines created</span></div><div><b>${m(d.cost)}</b><span>Total cost added</span></div><div><b>${m(d.sale)}</b><span>Sale price added</span></div></div>
+  <p class="bk-p">0 records skipped. Existing scopes and items were not modified.</p></div>`;
+  f.innerHTML='<button class="ok" id="bk-cl">Close</button>';
+ }
+}
+async function bkHandle(file){
+ if(!file)return;
+ BK.file=file.name;BK.msg='';
+ if(!/\.xlsx$/i.test(file.name)){BK.step='start';BK.msg='The file must be an Excel workbook (.xlsx).';bkRender();return;}
+ if(file.size>BK_MAX){BK.step='start';BK.msg='The file is larger than 5 MB.';bkRender();return;}
+ if(!file.size){BK.step='start';BK.msg='The file is empty.';bkRender();return;}
+ BK.step='busy';BK.msg='Reading and validating the file…';bkRender();
+ try{const buf=await file.arrayBuffer();BK.res=await parseWorkbook(buf);BK.step='preview';BK.msg='';}
+ catch(e){BK.step='start';BK.msg='The file could not be read: '+(e&&e.message||e);}
+ bkRender();
+}
+async function bkConfirm(){
+ if(BK.step!=='preview'||BK.res.errors.length)return;
+ BK.step='busy';BK.msg='Creating scopes, items and cost lines…';bkRender();
+ await new Promise(r=>setTimeout(r,350));
+ try{BK.done=applyImport(BK.res);BK.step='done';buildCosts(current.x);toast(BK.done.scopes+' scopes · '+BK.done.items+' items imported');}
+ catch(e){BK.step='start';BK.msg='The import failed and nothing was created: '+(e&&e.message||e);}
+ bkRender();
+}
+document.addEventListener('click',e=>{
+ if(e.target.closest('#bulk-open')){bkOpen();return;}
+ if(!$('#bkd').classList.contains('on'))return;
+ if(e.target.closest('#bk-x')||e.target.closest('#bk-cl')||e.target.id==='bkd')bkClose();
+ else if(e.target.closest('#bk-tpl')){downloadTemplate().then(()=>toast('Template downloaded')).catch(er=>{BK.msg=er.message;bkRender();});}
+ else if(e.target.closest('#bk-again')){BK.step='start';BK.msg='';bkRender();}
+ else if(e.target.closest('#bk-ok'))bkConfirm();
+});
+document.addEventListener('change',e=>{if(e.target.id==='bk-file'){const f=e.target.files[0];e.target.value='';bkHandle(f);}});
+document.addEventListener('dragover',e=>{const d=e.target.closest&&e.target.closest('#bk-drop');if(d){e.preventDefault();d.classList.add('over');}});
+document.addEventListener('dragleave',e=>{const d=e.target.closest&&e.target.closest('#bk-drop');if(d)d.classList.remove('over');});
+document.addEventListener('drop',e=>{const d=e.target.closest&&e.target.closest('#bk-drop');if(d){e.preventDefault();d.classList.remove('over');bkHandle(e.dataTransfer.files[0]);}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#bkd').classList.contains('on'))bkClose();});
+
+function remapAux(x,order){['_mat','_imeta'].forEach(k=>{if(!x[k])return;const m={};order.forEach((o,nw)=>{if(x[k][o]!==undefined)m[nw]=x[k][o];});x[k]=m;});}
+function itemMeta(){const d=$('#f-desc').innerHTML.trim();return {mea:$('#f-mea').value,uni:$('#f-uni').value,mar:$('#f-mar').value,desc:plain(d)?d:'',adj:ED.adj||0};}
 function saveItemModal(){
  if(!ED)return;
  if(ED.secs.some(s=>s.rows.some(r=>r.ed))){toast('Guarde o cancele la línea que está editando');return;}
@@ -1606,11 +1916,12 @@ function saveItemModal(){
   x._exp=x._exp||new Set();x._exp.add(ED.addTo);
   addQuoteItem(x,ED.addTo,{name,cat:$('#f-cat').value,qty:units,unit:$('#f-mea').value,cost,sale,m:mar});
   x._mat=x._mat||{};x._mat[x._calc.rows.length-1]=clone();
+  x._imeta=x._imeta||{};x._imeta[x._calc.rows.length-1]=itemMeta();
   closeItem();buildCosts(x);toast('Item agregado al scope');return;
  }
  // ítem existente: los materiales editados cambian su costo; el margen se conserva, así que precio y margen bruto escalan igual
  const ri=current.rowIdx,newCost=totalCost(),oldCost=ED.base;
- x._mat=x._mat||{};x._mat[ri]=clone();
+ x._mat=x._mat||{};x._mat[ri]=clone();x._imeta=x._imeta||{};x._imeta[ri]=itemMeta();
  if(oldCost>0&&Math.abs(newCost-oldCost)>0.005){
   if(!x._calc)x._calc=JSON.parse(JSON.stringify(calcQuote(x)));
   const r=x._calc.rows[ri],k=newCost/oldCost,cl=qCur(x),sc=s=>n2(parse(s)*k)+' '+cl;
