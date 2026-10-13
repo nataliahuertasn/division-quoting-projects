@@ -1067,7 +1067,6 @@ table.scopet thead th.c{text-align:center}
             <tbody id="rows"></tbody>
             <tfoot id="tot"></tfoot>
           </table>
-          <button class="fab" id="fab" hidden title="Agregar item" style="right:auto"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg></button>
         </div>
       </div>
       <div class="pane" data-p="versions"><div class="placeholder">Versions — pendiente de referencia visual.</div></div>
@@ -2549,7 +2548,7 @@ document.addEventListener('click',e=>{
 let tt;function toast(m){const el=$('#toast');el.textContent=m;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),1400);}
 
 /* FAB: se ancla a la columna MARGIN como en el PDF */
-function placeFab(){const f=$('#fab'),th=[...$$('th')].find(h=>h.textContent==='MARGIN'),it=$('.items');if(!th||!f.offsetParent)return;
+function placeFab(){const f=$('#fab'),th=[...$$('th')].find(h=>h.textContent==='MARGIN'),it=$('.items');if(!f||!th||!f.offsetParent)return;
  const a=th.getBoundingClientRect(),b=it.getBoundingClientRect();f.style.left=(a.left-b.left+62)+'px';f.style.top=(b.height-46-60)+'px';}
 window.addEventListener('resize',placeFab);
 new MutationObserver(placeFab).observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
