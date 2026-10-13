@@ -1654,10 +1654,10 @@ function normSecs(secs){ // asegura las 7 secciones de costo en orden; conserva 
 const textToHtml=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\r?\n/g,'<br>');
 const esc=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const BK_HEAD={
- Scopes:['Scope ID','Scope Name','Division','Category','Description'],
- Items:['Item Reference','Scope ID','Measure','Units','Margin %','Description'],
+ Scopes:['Scope Name','Division','Category','Description'],
+ Items:['Item Reference','Scope','Measure','Units','Margin %','Description'],
  'Cost Breakdown':['Item Reference','Section','Name','Weight (kg)','Quantity','Unit','Unit Cost (COP)','Parcial (auto)']};
-const BK_REQ={Scopes:[0,1,2,3],Items:[0,1,2,3,4],'Cost Breakdown':[0,1,2,4,5,6]};
+const BK_REQ={Scopes:[0,1,2],Items:[0,1,2,3,4],'Cost Breakdown':[0,1,2,4,5,6]};
 const dvName=d=>'cat_'+String(d).replace(/[^A-Za-z0-9]/g,'_');
 
 /* ---------- plantilla ---------- */
@@ -1681,12 +1681,12 @@ function buildTemplate(){
   BK_HEAD[name].forEach((h,i)=>{const c=ws.getCell(4,i+1);c.value=h+(BK_REQ[name].includes(i)?' *':'');c.font={bold:true,color:{argb:'FFFFFFFF'}};
    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:BK_REQ[name].includes(i)?DARK:BLUE}};c.alignment={vertical:'middle',wrapText:true};c.border={bottom:{style:'medium',color:{argb:'FF0D47A1'}}};});
   ws.getRow(4).height=28;ws.views=[{state:'frozen',ySplit:4}];return ws;};
- const S=mk('Scopes',[14,34,18,30,60]),It=mk('Items',[30,14,12,12,12,60]),C=mk('Cost Breakdown',[30,28,52,13,13,10,18,18]);
+ const S=mk('Scopes',[34,18,30,60]),It=mk('Items',[30,14,12,12,12,60]),C=mk('Cost Breakdown',[30,28,52,13,13,10,18,18]);
  const last=BK_FIRST+BK_ROWS-1,list=(ws,col,f,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'list',allowBlank:true,formulae:[f],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid value',error:msg};};
  const num=(ws,col,op,v,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'decimal',operator:op,formulae:Array.isArray(v)?v:[v],allowBlank:true,showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid number',error:msg};};
- list(S,'C',`Lists!$A$2:$A$${1+DIVS.length}`,'Choose a division from the list.');
- for(let rr=BK_FIRST;rr<=last;rr++)S.getCell('D'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`INDIRECT("cat_"&SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($C${rr}," ","_"),"&","_"),"-","_"))`],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid category',error:'Choose a category of the selected division (select the division first).'};
- list(It,'B',`Scopes!$A$${BK_FIRST}:$A$${last}`,'Use a Scope ID defined in the Scopes sheet.');
+ list(S,'B',`Lists!$A$2:$A$${1+DIVS.length}`,'Choose a division from the list.');
+ for(let rr=BK_FIRST;rr<=last;rr++)S.getCell('C'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`INDIRECT("cat_"&SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B${rr}," ","_"),"&","_"),"-","_"))`],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid category',error:'Choose a category of the selected division (select the division first).'};
+ list(It,'B',`Scopes!$A$${BK_FIRST}:$A$${last}`,'Choose a scope written in the Scopes sheet.');
  list(It,'C',`Lists!$D$2:$D$${1+MEASURES.length}`,'Choose ft2, m2 or un.');
  num(It,'D','greaterThan',0,'Units must be a number greater than 0.');
  num(It,'E','between',[0,99.99],'Margin must be a number from 0 to 99.99.');
@@ -1724,10 +1724,9 @@ async function parseWorkbook(buf){
  const rowsOf=(ws,cols)=>{const out=[];for(let r=BK_FIRST;r<=ws.rowCount;r++){const vals=[];for(let c=1;c<=cols;c++)vals.push(ws.getCell(r,c));if(vals.slice(0,cols-(ws.name==='Cost Breakdown'?1:0)).every(c=>cellText(c)===''))continue;out.push({r,c:vals});}return out;};
  // Scopes
  const seenScope={};
- rowsOf(sheets.Scopes,5).forEach(({r,c})=>{
-  const id=cellText(c[0]),name=cellText(c[1]),div=cellText(c[2]),cat=cellText(c[3]),desc=cellText(c[4]);let ok=true,dup=false;
-  if(!id){err('Scopes',r,'Scope ID','Scope ID is required.');ok=false;}else if(seenScope[id.toLowerCase()]){err('Scopes',r,'Scope ID',`Scope ID "${id}" is repeated (first used in row ${seenScope[id.toLowerCase()]}).`);ok=false;dup=true;}else seenScope[id.toLowerCase()]=r;
-  if(!name){err('Scopes',r,'Scope Name','Scope Name is required.');ok=false;}
+ rowsOf(sheets.Scopes,4).forEach(({r,c})=>{
+  const name=cellText(c[0]),id=name,div=cellText(c[1]),cat=cellText(c[2]),desc=cellText(c[3]);let ok=true,dup=false;
+  if(!name){err('Scopes',r,'Scope Name','Scope Name is required.');ok=false;}else if(seenScope[name.toLowerCase()]){err('Scopes',r,'Scope Name',`Scope "${name}" is repeated (first used in row ${seenScope[name.toLowerCase()]}).`);ok=false;dup=true;}else seenScope[name.toLowerCase()]=r;
   const dvm=DIVS.find(d=>d.toLowerCase()===div.toLowerCase());
   if(!div){err('Scopes',r,'Division','Division is required.');ok=false;}else if(!dvm){err('Scopes',r,'Division',`"${div}" is not a division. Valid: ${DIVS.join(', ')}.`);ok=false;}
   let catm=null;
@@ -1742,7 +1741,7 @@ async function parseWorkbook(buf){
   const ref=cellText(c[0]),sid=cellText(c[1]),mea=cellText(c[2]),units=cellNum(c[3]),mar=cellNum(c[4]),desc=cellText(c[5]);let ok=true;
   if(!ref){err('Items',r,'Item Reference','Item Reference is required.');ok=false;}else if(seenItem[ref.toLowerCase()]){err('Items',r,'Item Reference',`Item Reference "${ref}" is repeated (first used in row ${seenItem[ref.toLowerCase()].row}). It must be unique in the file.`);ok=false;}
   let sc=null;
-  if(!sid){err('Items',r,'Scope ID','Scope ID is required.');ok=false;}else{sc=scopeById[sid.toLowerCase()];if(!sc){err('Items',r,'Scope ID',`Scope ID "${sid}" does not exist in the Scopes sheet.`);ok=false;}}
+  if(!sid){err('Items',r,'Scope','Scope is required.');ok=false;}else{sc=scopeById[sid.toLowerCase()];if(!sc){err('Items',r,'Scope',`Scope "${sid}" does not exist in the Scopes sheet.`);ok=false;}}
   const mm=MEASURES.find(m=>m.toLowerCase()===mea.toLowerCase());
   if(!mea){err('Items',r,'Measure','Measure is required.');ok=false;}else if(!mm){err('Items',r,'Measure',`"${mea}" is not valid. Use ${MEASURES.join(', ')}.`);ok=false;}
   if(units===null){err('Items',r,'Units','Units is required.');ok=false;}else if(isNaN(units)||units<=0){err('Items',r,'Units','Units must be a number greater than 0.');ok=false;}
@@ -1765,7 +1764,7 @@ async function parseWorkbook(buf){
   if(ok&&it){const par=((um==='kg'&&w)?w:1)*q*cost;it.lines.push({sec:sm,name,w:um==='kg'&&w?w:null,q,unit:um,cost,par,row:r});}
  });
  // avisos
- res.scopes.forEach(s=>{if(!s.items.length)warn('Scopes',s.row,'Scope ID',`Scope "${s.name}" has no items; it will be created empty.`);
+ res.scopes.forEach(s=>{if(!s.items.length)warn('Scopes',s.row,'Scope Name',`Scope "${s.name}" has no items; it will be created empty.`);
   const ex=current&&current.x&&current.x._scopes&&current.x._scopes.find(z=>z.name.toLowerCase()===s.name.toLowerCase());if(ex)warn('Scopes',s.row,'Scope Name',`The quote already has a scope called "${s.name}". A new scope with the same name will be added.`);});
  res.items.forEach(it=>{if(it.ok&&!it.lines.length)warn('Items',it.row,'Item Reference',`Item "${it.ref}" has no cost lines; its cost will be 0.`);});
  // totales
