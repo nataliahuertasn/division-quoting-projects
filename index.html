@@ -1806,48 +1806,34 @@ const BK_MAX=5*1024*1024;
 function bkOpen(){if(!current||!current.x)return;BK={step:'start',res:null,file:'',done:null,msg:''};bkRender();$('#bkd').classList.add('on');}
 function bkClose(){if(BK.step==='busy')return;$('#bkd').classList.remove('on');}
 function bkRender(){
- const b=$('#bk-b'),f=$('#bk-f'),cur=qCur(current.x),m=(n)=>n2(cur==='USD'?n/FX:n)+' '+cur;
- if(BK.step==='start'){
-  b.innerHTML=`<div class="bk-act"><button class="bk-b2" id="bk-tpl">Download template</button><label class="bk-b2" for="bk-file" id="bk-up" tabindex="0">Upload file</label></div><input type="file" id="bk-file" accept=".xlsx" hidden>
-  ${BK.msg?`<div class="bk-er">${esc(BK.msg)}</div>`:''}`;
-  f.innerHTML='<button id="bk-cl">Cancel</button>';
- }else if(BK.step==='busy'){
-  b.innerHTML=`<div class="bk-busy"><div class="bk-sp"></div><b>${esc(BK.msg||'Working…')}</b><small>Please wait, do not close this window.</small></div>`;f.innerHTML='';
- }else if(BK.step==='preview'){
-  const r=BK.res,ne=r.errors.length,nw=r.warnings.length,t=r.totals||{scopes:0,items:0,lines:0,cost:0,sale:0};
-  const tbl=(arr,cls)=>`<div class="bk-sc"><table class="bk-t ${cls}"><thead><tr><th>Sheet</th><th>Row</th><th>Field</th><th>Problem</th></tr></thead><tbody>${arr.slice(0,300).map(e=>`<tr><td>${esc(e.sheet)}</td><td>${esc(e.row)}</td><td>${esc(e.field)}</td><td>${esc(e.msg)}</td></tr>`).join('')}</tbody></table>${arr.length>300?`<div class="bk-more">Showing the first 300 of ${arr.length}.</div>`:''}</div>`;
-  let h=`<div class="bk-file">${esc(BK.file)}</div>`;
-  if(ne){h+=`<div class="bk-bn err"><b>${ne} error${ne>1?'s':''} found.</b> Nothing will be imported until the file is fixed. Correct it and upload it again.</div>${tbl(r.errors,'e')}`;}
-  else h+=`<div class="bk-bn ok"><b>File is valid.</b> Review the summary and confirm to create the data in this quote.</div>`;
-  if(!ne||nw){h+=`<div class="bk-sum"><div><b>${t.scopes}</b><span>Scopes</span></div><div><b>${t.items}</b><span>Items</span></div><div><b>${t.lines}</b><span>Cost lines</span></div><div><b>${m(t.cost)}</b><span>Total cost</span></div><div><b>${m(t.sale)}</b><span>Sale price</span></div></div>`;}
-  if(nw){h+=`<div class="bk-bn warn"><b>${nw} warning${nw>1?'s':''}</b> (they do not block the import)</div>${tbl(r.warnings,'w')}`;}
-  if(!ne){h+=`<div class="bk-sc"><table class="bk-t"><thead><tr><th>Scope</th><th>Division</th><th>Category</th><th class="n">Items</th><th class="n">Cost</th><th class="n">Sale price</th></tr></thead><tbody>${r.scopes.map(s=>`<tr class="bk-s"><td><b>${esc(s.name)}</b></td><td>${esc(s.div)}</td><td>${esc(s.cat)}</td><td class="n">${s.items.length}</td><td class="n">${m(s.cost)}</td><td class="n">${m(s.sale)}</td></tr>`+s.items.map(i=>`<tr class="bk-i"><td>${esc(i.ref)}</td><td>${i.units} ${esc(i.mea)} · ${i.mar}% margin</td><td></td><td class="n">${i.lines.length} lines</td><td class="n">${m(i.cost)}</td><td class="n">${m(i.sale)}</td></tr>`).join('')).join('')}</tbody></table></div>`;}
-  b.innerHTML=h;
-  f.innerHTML=`<button id="bk-again">Upload another file</button><button id="bk-cl">Cancel</button><button class="ok" id="bk-ok"${ne?' disabled':''}>Confirm import</button>`;
- }else if(BK.step==='done'){
-  const d=BK.done;
-  b.innerHTML=`<div class="bk-done"><svg width="52" height="52" viewBox="0 0 24 24" fill="#2e7d32"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15-5-5 1.400-1.400L10 14.200l7.600-7.600L19 8z"/></svg><h4>Import completed</h4>
-  <div class="bk-sum"><div><b>${d.scopes}</b><span>Scopes created</span></div><div><b>${d.items}</b><span>Items created</span></div><div><b>${d.lines}</b><span>Cost lines created</span></div><div><b>${m(d.cost)}</b><span>Total cost added</span></div><div><b>${m(d.sale)}</b><span>Sale price added</span></div></div>
-  <p class="bk-p">0 records skipped. Existing scopes and items were not modified.</p></div>`;
-  f.innerHTML='<button class="ok" id="bk-cl">Close</button>';
+ const b=$('#bk-b'),f=$('#bk-f');
+ if(BK.step==='busy'){
+  b.innerHTML=`<div class="bk-busy"><div class="bk-sp"></div><b>${esc(BK.msg||'Working…')}</b><small>Please wait, do not close this window.</small></div>`;f.innerHTML='';return;
  }
+ const r=BK.res,ne=r?r.errors.length:0;
+ let h=`<div class="bk-act"><button class="bk-b2" id="bk-tpl">Download template</button><label class="bk-b2" for="bk-file" id="bk-up" tabindex="0">Upload file</label></div><input type="file" id="bk-file" accept=".xlsx" hidden>`;
+ if(BK.file)h+=`<div class="bk-file" style="text-align:center">${esc(BK.file)}</div>`;
+ if(BK.msg)h+=`<div class="bk-er">${esc(BK.msg)}</div>`;
+ if(r&&ne)h+=`<div class="bk-bn err" style="margin-top:12px"><b>${ne} error${ne>1?'s':''} found.</b> Correct the file and upload it again.</div><div class="bk-sc"><table class="bk-t e"><thead><tr><th>Sheet</th><th>Row</th><th>Field</th><th>Problem</th></tr></thead><tbody>${r.errors.slice(0,300).map(e=>`<tr><td>${esc(e.sheet)}</td><td>${esc(e.row)}</td><td>${esc(e.field)}</td><td>${esc(e.msg)}</td></tr>`).join('')}</tbody></table>${ne>300?`<div class="bk-more">Showing the first 300 of ${ne}.</div>`:''}</div>`;
+ b.innerHTML=h;
+ f.innerHTML=`<button id="bk-cl">Cancel</button><button class="ok" id="bk-ok"${r&&!ne?'':' disabled'}>Save</button>`;
 }
 async function bkHandle(file){
  if(!file)return;
- BK.file=file.name;BK.msg='';
+ BK.file=file.name;BK.msg='';BK.res=null;
  if(!/\.xlsx$/i.test(file.name)){BK.step='start';BK.msg='The file must be an Excel workbook (.xlsx).';bkRender();return;}
  if(file.size>BK_MAX){BK.step='start';BK.msg='The file is larger than 5 MB.';bkRender();return;}
  if(!file.size){BK.step='start';BK.msg='The file is empty.';bkRender();return;}
  BK.step='busy';BK.msg='Reading and validating the file…';bkRender();
- try{const buf=await file.arrayBuffer();BK.res=await parseWorkbook(buf);BK.step='preview';BK.msg='';}
+ try{const buf=await file.arrayBuffer();BK.res=await parseWorkbook(buf);BK.step='start';BK.msg='';}
  catch(e){BK.step='start';BK.msg='The file could not be read: '+(e&&e.message||e);}
  bkRender();
 }
 async function bkConfirm(){
- if(BK.step!=='preview'||BK.res.errors.length)return;
+ if(!BK.res||BK.res.errors.length)return;
  BK.step='busy';BK.msg='Creating scopes, items and cost lines…';bkRender();
  await new Promise(r=>setTimeout(r,350));
- try{BK.done=applyImport(BK.res);BK.step='done';buildCosts(current.x);toast(BK.done.scopes+' scopes · '+BK.done.items+' items imported');}
+ try{const d=applyImport(BK.res);BK.step='start';buildCosts(current.x);$('#bkd').classList.remove('on');toast(d.scopes+' scope'+(d.scopes>1?'s':'')+' · '+d.items+' item'+(d.items>1?'s':'')+' created');return;}
  catch(e){BK.step='start';BK.msg='The import failed and nothing was created: '+(e&&e.message||e);}
  bkRender();
 }
@@ -1856,7 +1842,6 @@ document.addEventListener('click',e=>{
  if(!$('#bkd').classList.contains('on'))return;
  if(e.target.closest('#bk-x')||e.target.closest('#bk-cl')||e.target.id==='bkd')bkClose();
  else if(e.target.closest('#bk-tpl')){downloadTemplate().then(()=>toast('Template downloaded')).catch(er=>{BK.msg=er.message;bkRender();});}
- else if(e.target.closest('#bk-again')){BK.step='start';BK.msg='';bkRender();}
  else if(e.target.closest('#bk-ok'))bkConfirm();
 });
 document.addEventListener('change',e=>{if(e.target.id==='bk-file'){const f=e.target.files[0];e.target.value='';bkHandle(f);}});
