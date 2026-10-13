@@ -1291,6 +1291,7 @@ function buildGeneral(x,c){
 }
 /* ---------- Edit Item (modal) ---------- */
 const FX=3000, M2=0.09290304, LB=2.20462;
+const cmar=m=>Math.min(m,0.9999);   // margen 100% permitido; el cálculo usa como máximo 99.99%
 const LOUVER_DESC=['5" depth high performance louver made of aluminum profiles.','Horizontal blades.','Florida approval: FL#31288.','Quantity: 1 units.','Area: 6 sqft.','This proposal includes aluminum the finish, AAMA 2604 Bermuda Bronze (1 Coat) .','Louvers with a length exceeding 60" but less than 120" will require reinforcements, which are included in the quote.','Installation brackets and screws for metal structure are included.'];
 // fila: [nombre, peso, cant, unidad, costo, parcial]
 const ITEMS={
@@ -1368,7 +1369,7 @@ function renderSum(){
  if(!ED)return;
  const cost=totalCost(), uni=parseFloat(($('#f-uni').value||'0').replace(',','.'))||0, mar=(parseFloat(($('#f-mar').value||'0').replace(',','.'))||0)/100;
  const ft2=$('#f-mea').value==='m2'?uni/M2:uni, m2=ft2*M2;
- const sale=cost/(1-mar)*1.01, com=sale*.01, mg=sale-cost-com;
+ const sale=cost/(1-cmar(mar))*1.01, com=sale*.01, mg=sale-cost-com;
  const kg=ED.secs.reduce((a,s)=>a+s.rows.reduce((b,r0)=>{const r=rv(r0);return b+(r[3]==="kg"&&r[1]?r[1]*r[2]:0);},0),0), lb=kg*LB;
  const d=(a,b)=>b?a/b:0, f=fmt;
  $('#msum').innerHTML=`<table class="sum"><tr><th></th><th>TOTAL COST</th><th>MARGIN</th><th>SALE PRICE</th><th>COMMISSIONS</th><th>UNITS</th><th>PRICE PER UNIT</th></tr>
@@ -1483,7 +1484,7 @@ function addQuoteItem(x,si,it){ // it: {name,cat,qty,unit,cost,sale,m}
  if(!x._calc)x._calc=JSON.parse(JSON.stringify(calcQuote(x)));
  ensureScopes(x);
  const cl=qCur(x),com=it.sale*.01,gm=it.sale-it.cost-com,qty=it.qty||1;
- x._calc.rows.push([it.name,x._scopes[si].div,it.cat,String(qty),n2(it.cost)+' '+cl,(it.m*100).toFixed(2)+'%',n2(gm)+' '+cl,n2(it.sale/qty)+' '+cl+' / '+it.unit,n2(it.sale)+' '+cl]);
+ x._calc.rows.push([it.name,x._scopes[si].div,it.cat,String(qty),n2(it.cost)+' '+cl,((it.mShow!=null?it.mShow:it.m)*100).toFixed(2)+'%',n2(gm)+' '+cl,n2(it.sale/qty)+' '+cl+' / '+it.unit,n2(it.sale)+' '+cl]);
  x._sc.push(si);x._sp=x._sp||{};syncDiv(x);recalcTot(x);
 }
 function buildCosts(x){
@@ -1498,7 +1499,7 @@ function buildCosts(x){
   const idx=x._sc.map((s,i)=>s===si?i:-1).filter(i=>i>=0),open=x._exp.has(si);
   const C=idx.reduce((a,i)=>a+parse(rows[i][4]),0),G=idx.reduce((a,i)=>a+parse(rows[i][6]),0),S=idx.reduce((a,i)=>a+parse(rows[i][8]),0);
   const Q=idx.reduce((a,i)=>a+(parseFloat(rows[i][3])||0),0);const mine=hl&&idx.some(i=>String(x._sp&&x._sp[i])===hl);
-  rh+=`<tr class="scr${open?' open':''}${mine?' hl':''}" data-si="${si}"><td class="c gp"><span class="grip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span><span class="no">${num}</span></td><td class="nm"><span class="sc-chv">${chvI}</span>${sc.name}${idx.length?` <small>${idx.length} item${idx.length>1?'s':''}</small>`:''}</td><td class="div"><select class="divsel scsel" data-si="${si}" aria-label="Division of ${sc.name}"></select></td><td class="catc">${sc.cat||'—'}</td><td class="n">${idx.length?(+Q.toFixed(2)).toLocaleString('de-DE',{maximumFractionDigits:2}):''}</td><td class="n">${idx.length?n2(C)+' '+cur:''}</td><td class="n">${idx.length?(S?(G/S*100).toFixed(2)+'%':'0.00%'):''}</td><td class="n">${idx.length?n2(G)+' '+cur:''}</td><td class="n">${idx.length?n2(S)+' '+cur:''}</td><td class="c"><button class="ib" data-scm="${si}" title="Actions">${kebab}</button></td></tr>`;
+  rh+=`<tr class="scr${open?' open':''}${mine?' hl':''}" data-si="${si}"><td class="c gp"><span class="grip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span><span class="no">${num}</span></td><td class="nm"><span class="sc-chv">${chvI}</span>${sc.name}${idx.length?` <small>${idx.length} item${idx.length>1?'s':''}</small>`:''}</td><td class="div"><select class="divsel scsel" data-si="${si}" aria-label="Division of ${sc.name}"></select></td><td class="catc">${sc.cat||'—'}</td><td class="n">${idx.length?(()=>{const f=rows[idx[0]],u=((f[7]||'').split('/')[1]||'').trim();return (+(parseFloat(f[3])||0).toFixed(2)).toLocaleString('de-DE',{maximumFractionDigits:2})+(u?' '+u:'');})():''}</td><td class="n">${idx.length?n2(C)+' '+cur:''}</td><td class="n">${idx.length?(S?(G/S*100).toFixed(2)+'%':'0.00%'):''}</td><td class="n">${idx.length?n2(G)+' '+cur:''}</td><td class="n">${idx.length?n2(S)+' '+cur:''}</td><td class="c"><button class="ib" data-scm="${si}" title="Actions">${kebab}</button></td></tr>`;
   if(open){
    rh+=`<tr class="scx"><td></td><td colspan="9"><table class="nx"><thead><tr><th class="c">#</th><th>DESCRIPTION</th><th>CATEGORY</th><th>QTY</th><th>COST</th><th>MARGIN</th><th>GROSS MARGIN</th><th>PRICE PER QUANTITY</th><th>SALE PRICE</th><th class="c">ACTION</th></tr></thead><tbody>`;
    if(!idx.length)rh+=`<tr class="sce"><td colspan="10">No items in this scope yet. Use Add Item in the scope actions.</td></tr>`;
@@ -1709,7 +1710,7 @@ function buildTemplate(){
  list(It,'B',`Scopes!$A$${BK_FIRST}:$A$${last}`,'Choose a scope written in the Scopes sheet.');
  list(It,'C',`Lists!$D$2:$D$${1+MEASURES.length}`,'Choose ft2, m2 or un.');
  num(It,'D','greaterThan',0,'Units must be a number greater than 0.');
- num(It,'E','between',[0,99.99],'Margin must be a number from 0 to 99.99.');
+ num(It,'E','between',[0,100],'Margin must be a number from 0 to 100.');
  list(C,'A',`Scopes!$A$${BK_FIRST}:$A$${last}`,'Choose a scope written in the Scopes sheet.');
  list(C,'B',`Items!$A$${BK_FIRST}:$A$${last}`,'Choose an item written in the Items sheet.');
  list(C,'C',`Lists!$B$2:$B$${1+SEC_NAMES.length}`,'Choose a cost type from the list.');
@@ -1767,7 +1768,7 @@ async function parseWorkbook(buf){
   const mm=MEASURES.find(m=>m.toLowerCase()===mea.toLowerCase());
   if(!mea){err('Items',r,'Measure','Measure is required.');ok=false;}else if(!mm){err('Items',r,'Measure',`"${mea}" is not valid. Use ${MEASURES.join(', ')}.`);ok=false;}
   if(units===null){err('Items',r,'Units','Units is required.');ok=false;}else if(isNaN(units)||units<=0){err('Items',r,'Units','Units must be a number greater than 0.');ok=false;}
-  if(mar===null){err('Items',r,'Margin %','Margin % is required.');ok=false;}else if(isNaN(mar)||mar<0||mar>=100){err('Items',r,'Margin %','Margin % must be a number from 0 to 99.99.');ok=false;}
+  if(mar===null){err('Items',r,'Margin %','Margin % is required.');ok=false;}else if(isNaN(mar)||mar<0||mar>100){err('Items',r,'Margin %','Margin % must be a number from 0 to 100.');ok=false;}
   if(ref&&sc&&!byKey[key]){const it={ref,sid:sc.name,scope:sc,mea:mm||mea,units,mar,desc,row:r,ok,lines:[]};byKey[key]=it;res.items.push(it);sc.items.push(it);}
  });
  // Costs: una fila por material
@@ -1791,7 +1792,7 @@ async function parseWorkbook(buf){
  res.scopes.forEach(s=>{if(!s.items.length)warn('Scopes',s.row,'Scope Name',`Scope "${s.name}" has no items; it will be created empty.`);
   const ex=current&&current.x&&current.x._scopes&&current.x._scopes.find(z=>z.name.toLowerCase()===s.name.toLowerCase());if(ex)warn('Scopes',s.row,'Scope Name',`The quote already has a scope called "${s.name}". A new scope with the same name will be added.`);});
  res.items.forEach(it=>{if(!it.lines.length)warn('Items',it.row,'Item Reference',`Item "${it.ref}" has no cost lines; its cost will be 0.`);});
- res.items.forEach(it=>{it.cost=it.lines.reduce((a,l)=>a+l.par,0);it.sale=(typeof it.mar==='number'&&!isNaN(it.mar))?it.cost/(1-it.mar/100)*1.01:0;});
+ res.items.forEach(it=>{it.cost=it.lines.reduce((a,l)=>a+l.par,0);it.sale=(typeof it.mar==='number'&&!isNaN(it.mar))?it.cost/(1-cmar(it.mar/100))*1.01:0;});
  res.scopes.forEach(s=>{s.cost=s.items.reduce((a,i)=>a+i.cost,0);s.sale=s.items.reduce((a,i)=>a+i.sale,0);});
  res.totals={scopes:res.scopes.length,items:res.items.length,lines:res.items.reduce((a,i)=>a+i.lines.length,0),cost:res.scopes.reduce((a,s)=>a+s.cost,0),sale:res.scopes.reduce((a,s)=>a+s.sale,0)};
  return res;
@@ -1810,7 +1811,7 @@ function applyImport(res){
   res.items.forEach(it=>{
    const si=map[it.sid.toLowerCase()],sc=it.scope,m=it.mar/100;
    const k=qCur(x)==='USD'?1/FX:1;
-   addQuoteItem(x,si,{name:it.ref,cat:sc.cat,qty:it.units,unit:it.mea,cost:it.cost*k,sale:it.sale*k,m});
+   addQuoteItem(x,si,{name:it.ref,cat:sc.cat,qty:it.units,unit:it.mea,cost:it.cost*k,sale:it.sale*k,m:cmar(m),mShow:m});
    const ri=x._calc.rows.length-1,secs=SEC_NAMES.map(n=>({t:n,rows:it.lines.filter(l=>l.sec===n).map(l=>[l.name,l.w,l.q,l.unit,l.cost,l.par])}));
    x._mat=x._mat||{};x._mat[ri]=secs;
    x._imeta=x._imeta||{};x._imeta[ri]={mea:it.mea,uni:String(it.units),mar:String(it.mar),desc:it.desc?textToHtml(it.desc):(sc.desc?textToHtml(sc.desc):'')};
@@ -1878,9 +1879,9 @@ function saveItemModal(){
  if(ED.addTo!=null){ // ítem nuevo dentro de un scope
   const name=$('#f-ref').value.trim(),units=pn($('#f-uni').value),mar=pn($('#f-mar').value)/100;
   if(!name||!units){toast('Complete Reference y Units');return;}
-  const cost=totalCost(),sale=cost/(1-mar)*1.01;
+  const cost=totalCost(),sale=cost/(1-cmar(mar))*1.01;
   x._exp=x._exp||new Set();x._exp.add(ED.addTo);
-  addQuoteItem(x,ED.addTo,{name,cat:$('#f-cat').value,qty:units,unit:$('#f-mea').value,cost,sale,m:mar});
+  addQuoteItem(x,ED.addTo,{name,cat:$('#f-cat').value,qty:units,unit:$('#f-mea').value,cost,sale,m:cmar(mar),mShow:mar});
   x._mat=x._mat||{};x._mat[x._calc.rows.length-1]=clone();
   x._imeta=x._imeta||{};x._imeta[x._calc.rows.length-1]=itemMeta();
   closeItem();buildCosts(x);toast('Item agregado al scope');return;
