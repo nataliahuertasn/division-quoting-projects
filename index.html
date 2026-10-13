@@ -1673,12 +1673,10 @@ function normSecs(secs){ // asegura las 7 secciones de costo en orden; conserva 
 }
 const textToHtml=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\r?\n/g,'<br>');
 const esc=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const BK_HEAD={
- Scopes:['Scope Name','Division','Category','Description'],
- Items:['Item Reference','Scope','Measure','Units','Margin %','Description'],
- Costs:['Scope','Item','Type','Family','TypeItem','Weight','Quantity','Unit','Cost','Currency']};
-const BK_REQ={Scopes:[0,1,2],Items:[0,1,2,3,4],Costs:[0,1,2,4,6,7,8,9]};
-const BK_SHEETS=Object.keys(BK_HEAD);
+// Una sola hoja ("costs"): las 10 primeras columnas son las del Excel de referencia; a la derecha van los datos del scope y del ítem.
+const BK_COLS=['Scope','Item','Type','Family','TypeItem','Weight','Quantity','Unit','Cost','Currency','Division','Category','Scope Description','Measure','Units','Margin %','Item Description'];
+const BK_REQ=[0,1,2,4,6,7,8,9,10,11,13,14,15];
+const BK_SHEET='costs';
 // Monedas aceptadas en la carga. Maqueta: tasas estandarizadas en COP por unidad (el software trabaja siempre en pesos y convierte a la moneda de la cotización).
 const CUR_LIST=['COP','USD','EUR','GBP','CAD','MXN','BRL'],CUR_COP={COP:1,EUR:3500,GBP:4100,CAD:2200,MXN:170,BRL:600};
 const curRate=c=>c==='USD'?FX:CUR_COP[c];
@@ -1688,7 +1686,7 @@ const dvName=d=>'cat_'+String(d).replace(/[^A-Za-z0-9]/g,'_');
 function buildTemplate(){
  if(typeof ExcelJS==='undefined')throw new Error('La librería de Excel no se pudo cargar. Revise su conexión e intente de nuevo.');
  const wb=new ExcelJS.Workbook();wb.creator='Project Agenda';wb.created=new Date();
- const YEL='FFFFFF00',GRAY='FFEEEEEE';
+ const YEL='FFFFFF00';
  const L=wb.addWorksheet('Lists',{state:'hidden'});
  L.getCell('A1').value='Divisions';DIVS.forEach((d,i)=>L.getCell(2+i,1).value=d);
  L.getCell('B1').value='Sections';SEC_NAMES.forEach((d,i)=>L.getCell(2+i,2).value=d);
@@ -1697,28 +1695,23 @@ function buildTemplate(){
  L.getCell('E1').value='Currencies';CUR_LIST.forEach((d,i)=>L.getCell(2+i,5).value=d);
  DIVS.forEach((d,j)=>{const col=6+j;L.getCell(1,col).value=d;const cats=DIV_CATS[d]||[];cats.forEach((c,i)=>L.getCell(2+i,col).value=c);
   if(cats.length){const cl=L.getColumn(col).letter;wb.definedNames.add(`Lists!$${cl}$2:$${cl}$${1+cats.length}`,dvName(d));}});
- const mk=(name,widths)=>{const ws=wb.addWorksheet(name);ws.columns=widths.map(w=>({width:w}));
-  BK_HEAD[name].forEach((h,i)=>{const c=ws.getCell(1,i+1);c.value=h;c.font={bold:true,color:{argb:'FF000000'}};
-   if(BK_REQ[name].includes(i))c.fill={type:'pattern',pattern:'solid',fgColor:{argb:YEL}};});
-  ws.views=[{state:'frozen',ySplit:1}];return ws;};
- const S=mk('Scopes',[34,18,30,60]),It=mk('Items',[34,34,10,10,10,60]),C=mk('Costs',[34,34,26,18,60,10,10,8,14,10]);
+ const C=wb.addWorksheet(BK_SHEET);C.columns=[34,34,26,18,60,10,10,8,14,10,14,28,40,10,10,10,40].map(w=>({width:w}));
+ BK_COLS.forEach((h,i)=>{const c=C.getCell(1,i+1);c.value=h;c.font={bold:true,color:{argb:'FF000000'}};if(BK_REQ.includes(i))c.fill={type:'pattern',pattern:'solid',fgColor:{argb:YEL}};});
+ C.views=[{state:'frozen',ySplit:1}];
  const last=BK_FIRST+BK_ROWS-1;
- const list=(ws,col,f,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'list',allowBlank:true,formulae:[f],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid value',error:msg};};
- const num=(ws,col,op,v,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'decimal',operator:op,formulae:Array.isArray(v)?v:[v],allowBlank:true,showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid number',error:msg};};
- list(S,'B',`Lists!$A$2:$A$${1+DIVS.length}`,'Choose a division from the list.');
- for(let rr=BK_FIRST;rr<=last;rr++)S.getCell('C'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`INDIRECT("cat_"&SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B${rr}," ","_"),"&","_"),"-","_"))`],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid category',error:'Choose a category of the selected division (select the division first).'};
- list(It,'B',`Scopes!$A$${BK_FIRST}:$A$${last}`,'Choose a scope written in the Scopes sheet.');
- list(It,'C',`Lists!$D$2:$D$${1+MEASURES.length}`,'Choose ft2, m2 or un.');
- num(It,'D','greaterThan',0,'Units must be a number greater than 0.');
- num(It,'E','between',[0,100],'Margin must be a number from 0 to 100.');
- list(C,'A',`Scopes!$A$${BK_FIRST}:$A$${last}`,'Choose a scope written in the Scopes sheet.');
- list(C,'B',`Items!$A$${BK_FIRST}:$A$${last}`,'Choose an item written in the Items sheet.');
- list(C,'C',`Lists!$B$2:$B$${1+SEC_NAMES.length}`,'Choose a cost type from the list.');
- num(C,'F','greaterThanOrEqual',0,'Weight must be a number >= 0.');
- num(C,'G','greaterThan',0,'Quantity must be a number greater than 0.');
- list(C,'H',`Lists!$C$2:$C$${1+CL_UNITS.length}`,'Choose a unit from the list.');
- num(C,'I','greaterThanOrEqual',0,'Cost must be a number >= 0.');
- list(C,'J',`Lists!$E$2:$E$${1+CUR_LIST.length}`,'Choose a currency from the list.');
+ const list=(col,f,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)C.getCell(col+rr).dataValidation={type:'list',allowBlank:true,formulae:[f],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid value',error:msg};};
+ const num=(col,op,v,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)C.getCell(col+rr).dataValidation={type:'decimal',operator:op,formulae:Array.isArray(v)?v:[v],allowBlank:true,showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid number',error:msg};};
+ list('C',`Lists!$B$2:$B$${1+SEC_NAMES.length}`,'Choose a cost type from the list.');
+ num('F','greaterThanOrEqual',0,'Weight must be a number >= 0.');
+ num('G','greaterThan',0,'Quantity must be a number greater than 0.');
+ list('H',`Lists!$C$2:$C$${1+CL_UNITS.length}`,'Choose a unit from the list.');
+ num('I','greaterThanOrEqual',0,'Cost must be a number >= 0.');
+ list('J',`Lists!$E$2:$E$${1+CUR_LIST.length}`,'Choose a currency from the list.');
+ list('K',`Lists!$A$2:$A$${1+DIVS.length}`,'Choose a division from the list.');
+ for(let rr=BK_FIRST;rr<=last;rr++)C.getCell('L'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`INDIRECT("cat_"&SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($K${rr}," ","_"),"&","_"),"-","_"))`],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid category',error:'Choose a category of the selected division (select the division first).'};
+ list('N',`Lists!$D$2:$D$${1+MEASURES.length}`,'Choose ft2, m2 or un.');
+ num('O','greaterThan',0,'Units must be a number greater than 0.');
+ num('P','between',[0,100],'Margin must be a number from 0 to 100.');
  for(let rr=BK_FIRST;rr<=last;rr++){C.getCell('I'+rr).numFmt='#,##0.00';C.getCell('F'+rr).numFmt='0.0000';}
  L.orderNo=100;wb.views=[{activeTab:0}];
  return wb;
@@ -1736,62 +1729,68 @@ function cellText(c){let v=c&&c.value;if(v&&typeof v==='object'){if('result' in 
  return v==null?'':String(v).trim();}
 function cellNum(c){let v=c&&c.value;if(v&&typeof v==='object'&&'result' in v)v=v.result;if(typeof v==='number')return v;const t=cellText(c);if(t==='')return null;const n=Number(t.replace(/\s/g,'').replace(',','.'));return isNaN(n)?NaN:n;}
 async function parseWorkbook(buf){
- const res={errors:[],warnings:[],scopes:[],items:[]},err=(sheet,row,field,msg)=>res.errors.push({sheet,row,field,msg}),warn=(sheet,row,field,msg)=>res.warnings.push({sheet,row,field,msg});
- let wb;try{wb=new ExcelJS.Workbook();await wb.xlsx.load(buf);}catch(e){err('File','-','-','The file is not a valid .xlsx workbook. Download the template and use it.');return res;}
- const sheets={};for(const n of BK_SHEETS){const ws=wb.getWorksheet(n);if(!ws)err('File','-',n,`Sheet "${n}" is missing. The file does not match the template; download it again.`);else{
-  const hs=BK_HEAD[n].map((h,i)=>cellText(ws.getCell(1,i+1)).replace(/\*/g,'').trim().toLowerCase()),want=BK_HEAD[n].map(h=>h.toLowerCase());
-  const bad=want.findIndex((h,i)=>hs[i]!==h);
-  if(bad>=0)err(n,1,BK_HEAD[n][bad],`Column ${bad+1} header must be "${BK_HEAD[n][bad]}". Do not rename or move the template columns.`);else sheets[n]=ws;}}
- if(res.errors.length)return res;
- const rowsOf=(ws,cols)=>{const out=[];for(let r=BK_FIRST;r<=ws.rowCount;r++){const vals=[];for(let c=1;c<=cols;c++)vals.push(ws.getCell(r,c));if(vals.every(c=>cellText(c)===''))continue;out.push({r,c:vals});}return out;};
- // Scopes (la clave es el nombre)
- const seenScope={};
- rowsOf(sheets.Scopes,4).forEach(({r,c})=>{
-  const name=cellText(c[0]),div=cellText(c[1]),cat=cellText(c[2]),desc=cellText(c[3]);let ok=true,dup=false;
-  if(!name){err('Scopes',r,'Scope Name','Scope Name is required.');ok=false;}else if(seenScope[name.toLowerCase()]){err('Scopes',r,'Scope Name',`Scope "${name}" is repeated (first used in row ${seenScope[name.toLowerCase()].row}).`);ok=false;dup=true;}
-  else if(DIVS.some(d=>d.toLowerCase()===name.toLowerCase())){err('Scopes',r,'Scope Name','The scope name cannot be the same as a division name.');ok=false;}
-  const dvm=DIVS.find(d=>d.toLowerCase()===div.toLowerCase());
-  if(!div){err('Scopes',r,'Division','Division is required.');ok=false;}else if(!dvm){err('Scopes',r,'Division',`"${div}" is not a division. Valid: ${DIVS.join(', ')}.`);ok=false;}
-  let catm=null;
-  if(!cat){err('Scopes',r,'Category','Category is required.');ok=false;}else if(dvm){catm=(DIV_CATS[dvm]||[]).find(x=>x.toLowerCase()===cat.toLowerCase());if(!catm){err('Scopes',r,'Category',`"${cat}" is not a product of division ${dvm}. Valid: ${(DIV_CATS[dvm]||[]).join(', ')||'none defined'}.`);ok=false;}}
-  if(name&&!dup){const s={id:name,name,div:dvm||div,cat:catm||cat,desc,row:r,ok,items:[]};res.scopes.push(s);seenScope[name.toLowerCase()]=s;}
- });
- if(!res.scopes.length&&!res.errors.length)err('Scopes',BK_FIRST,'-','The Scopes sheet has no rows. Add at least one scope.');
- // Items (clave: Scope + Item)
- const byKey={};
- rowsOf(sheets.Items,6).forEach(({r,c})=>{
-  const ref=cellText(c[0]),scn=cellText(c[1]),mea=cellText(c[2]),units=cellNum(c[3]),mar=cellNum(c[4]),desc=cellText(c[5]);let ok=true,sc=null;
-  if(!ref){err('Items',r,'Item Reference','Item Reference is required.');ok=false;}
-  if(!scn){err('Items',r,'Scope','Scope is required.');ok=false;}else{sc=seenScope[scn.toLowerCase()];if(!sc){err('Items',r,'Scope',`Scope "${scn}" does not exist in the Scopes sheet.`);ok=false;}}
-  const key=sc&&ref?sc.name.toLowerCase()+'|'+ref.toLowerCase():null;
-  if(key&&byKey[key]){err('Items',r,'Item Reference',`Item "${ref}" is repeated in scope "${sc.name}" (first used in row ${byKey[key].row}).`);ok=false;}
-  const mm=MEASURES.find(m=>m.toLowerCase()===mea.toLowerCase());
-  if(!mea){err('Items',r,'Measure','Measure is required.');ok=false;}else if(!mm){err('Items',r,'Measure',`"${mea}" is not valid. Use ${MEASURES.join(', ')}.`);ok=false;}
-  if(units===null){err('Items',r,'Units','Units is required.');ok=false;}else if(isNaN(units)||units<=0){err('Items',r,'Units','Units must be a number greater than 0.');ok=false;}
-  if(mar===null){err('Items',r,'Margin %','Margin % is required.');ok=false;}else if(isNaN(mar)||mar<0||mar>100){err('Items',r,'Margin %','Margin % must be a number from 0 to 100.');ok=false;}
-  if(ref&&sc&&!byKey[key]){const it={ref,sid:sc.name,scope:sc,mea:mm||mea,units,mar,desc,row:r,ok,lines:[]};byKey[key]=it;res.items.push(it);sc.items.push(it);}
- });
- // Costs: una fila por material
- rowsOf(sheets.Costs,10).forEach(({r,c})=>{
-  const scn=cellText(c[0]),ref=cellText(c[1]),sec=cellText(c[2]),fam=cellText(c[3]),name=cellText(c[4]),w=cellNum(c[5]),q=cellNum(c[6]),unit=cellText(c[7]),cost=cellNum(c[8]),cur=cellText(c[9]).toUpperCase();let ok=true,it=null;
-  if(!scn){err('Costs',r,'Scope','Scope is required.');ok=false;}else if(!seenScope[scn.toLowerCase()]){err('Costs',r,'Scope',`Scope "${scn}" does not exist in the Scopes sheet.`);ok=false;}
-  if(!ref){err('Costs',r,'Item','Item is required.');ok=false;}
-  if(ok){it=byKey[seenScope[scn.toLowerCase()].name.toLowerCase()+'|'+ref.toLowerCase()];if(!it){err('Costs',r,'Item',`Item "${ref}" does not exist in scope "${scn}" in the Items sheet.`);ok=false;}}
+ const SH=BK_SHEET,res={errors:[],warnings:[],scopes:[],items:[]},err=(row,field,msg)=>res.errors.push({sheet:SH,row,field,msg}),warn=(row,field,msg)=>res.warnings.push({sheet:SH,row,field,msg});
+ let wb;try{wb=new ExcelJS.Workbook();await wb.xlsx.load(buf);}catch(e){res.errors.push({sheet:'File',row:'-',field:'-',msg:'The file is not a valid .xlsx workbook. Download the template and use it.'});return res;}
+ const ws=wb.getWorksheet(SH)||wb.worksheets.find(w=>w.name.toLowerCase()===SH);
+ if(!ws){res.errors.push({sheet:'File',row:'-',field:SH,msg:`Sheet "${SH}" is missing. The file does not match the template; download it again.`});return res;}
+ const hs=BK_COLS.map((h,i)=>cellText(ws.getCell(1,i+1)).replace(/\*/g,'').trim().toLowerCase());
+ const badH=BK_COLS.findIndex((h,i)=>hs[i]!==h.toLowerCase());
+ if(badH>=0){err(1,BK_COLS[badH],`Column ${badH+1} header must be "${BK_COLS[badH]}". Do not rename or move the template columns.`);return res;}
+ const scopes={},items={};
+ for(let r=BK_FIRST;r<=ws.rowCount;r++){
+  const c=[];for(let i=1;i<=BK_COLS.length;i++)c.push(ws.getCell(r,i));
+  if(c.every(x=>cellText(x)===''))continue;
+  const scn=cellText(c[0]),ref=cellText(c[1]),sec=cellText(c[2]),fam=cellText(c[3]),name=cellText(c[4]),w=cellNum(c[5]),q=cellNum(c[6]),unit=cellText(c[7]),cost=cellNum(c[8]),cur=cellText(c[9]).toUpperCase();
+  const div=cellText(c[10]),cat=cellText(c[11]),sdesc=cellText(c[12]),mea=cellText(c[13]),units=cellNum(c[14]),mar=cellNum(c[15]),idesc=cellText(c[16]);
+  if(!scn)err(r,'Scope','Scope is required.');if(!ref)err(r,'Item','Item is required.');
+  if(!scn||!ref)continue;
+  // --- scope: la primera fila define división y categoría; las siguientes pueden ir vacías o iguales
+  let sc=scopes[scn.toLowerCase()];const dvm=DIVS.find(d=>d.toLowerCase()===div.toLowerCase());
+  if(!sc){
+   let ok=true;
+   if(DIVS.some(d=>d.toLowerCase()===scn.toLowerCase())){err(r,'Scope','The scope name cannot be the same as a division name.');ok=false;}
+   if(!div){err(r,'Division','Division is required in the first row of the scope.');ok=false;}else if(!dvm){err(r,'Division',`"${div}" is not a division. Valid: ${DIVS.join(', ')}.`);ok=false;}
+   let catm=null;
+   if(!cat){err(r,'Category','Category is required in the first row of the scope.');ok=false;}else if(dvm){catm=(DIV_CATS[dvm]||[]).find(x=>x.toLowerCase()===cat.toLowerCase());if(!catm){err(r,'Category',`"${cat}" is not a product of division ${dvm}. Valid: ${(DIV_CATS[dvm]||[]).join(', ')||'none defined'}.`);ok=false;}}
+   sc={id:scn,name:scn,div:dvm||div,cat:catm||cat,desc:sdesc,row:r,ok,items:[]};scopes[scn.toLowerCase()]=sc;res.scopes.push(sc);
+  }else{
+   if(div&&dvm!==sc.div)err(r,'Division',`Division differs from the first row of scope "${scn}" (row ${sc.row}). Leave it empty or use the same value.`);
+   if(cat&&cat.toLowerCase()!==String(sc.cat).toLowerCase())err(r,'Category',`Category differs from the first row of scope "${scn}" (row ${sc.row}). Leave it empty or use the same value.`);
+   if(sdesc&&sc.desc&&sdesc!==sc.desc)err(r,'Scope Description',`Description differs from the first row of scope "${scn}" (row ${sc.row}).`);else if(sdesc&&!sc.desc)sc.desc=sdesc;
+  }
+  // --- ítem: la primera fila define medida, unidades y margen
+  const key=scn.toLowerCase()+'|'+ref.toLowerCase();let it=items[key];const mm=MEASURES.find(m=>m.toLowerCase()===mea.toLowerCase());
+  if(!it){
+   let ok=true;
+   if(!mea){err(r,'Measure','Measure is required in the first row of the item.');ok=false;}else if(!mm){err(r,'Measure',`"${mea}" is not valid. Use ${MEASURES.join(', ')}.`);ok=false;}
+   if(units===null){err(r,'Units','Units is required in the first row of the item.');ok=false;}else if(isNaN(units)||units<=0){err(r,'Units','Units must be a number greater than 0.');ok=false;}
+   if(mar===null){err(r,'Margin %','Margin % is required in the first row of the item.');ok=false;}else if(isNaN(mar)||mar<0||mar>100){err(r,'Margin %','Margin % must be a number from 0 to 100.');ok=false;}
+   it={ref,sid:sc.name,scope:sc,mea:mm||mea,units,mar,desc:idesc,row:r,ok,lines:[]};items[key]=it;res.items.push(it);sc.items.push(it);
+  }else{
+   if(mea&&mm!==it.mea)err(r,'Measure',`Measure differs from the first row of item "${ref}" (row ${it.row}). Leave it empty or use the same value.`);
+   if(units!==null&&units!==it.units)err(r,'Units',`Units differ from the first row of item "${ref}" (row ${it.row}). Leave it empty or use the same value.`);
+   if(mar!==null&&mar!==it.mar)err(r,'Margin %',`Margin % differs from the first row of item "${ref}" (row ${it.row}). Leave it empty or use the same value.`);
+   if(idesc&&it.desc&&idesc!==it.desc)err(r,'Item Description',`Description differs from the first row of item "${ref}" (row ${it.row}).`);else if(idesc&&!it.desc)it.desc=idesc;
+  }
+  // --- línea de material (opcional: una fila sin material crea el ítem sin costos)
+  const hasLine=[sec,fam,name,unit,cur].some(v=>v!=='')||[w,q,cost].some(v=>v!==null);
+  if(!hasLine)continue;
+  let ok=true;
   const sm=SEC_NAMES.find(s=>s.toLowerCase()===sec.toLowerCase());
-  if(!sec){err('Costs',r,'Type','Type is required.');ok=false;}else if(!sm){err('Costs',r,'Type',`"${sec}" is not a cost type. Valid: ${SEC_NAMES.join(', ')}.`);ok=false;}
-  if(!name){err('Costs',r,'TypeItem','TypeItem is required.');ok=false;}
+  if(!sec){err(r,'Type','Type is required.');ok=false;}else if(!sm){err(r,'Type',`"${sec}" is not a cost type. Valid: ${SEC_NAMES.join(', ')}.`);ok=false;}
+  if(!name){err(r,'TypeItem','TypeItem is required.');ok=false;}
   const um=CL_UNITS.find(u=>u.toLowerCase()===unit.toLowerCase());
-  if(!unit){err('Costs',r,'Unit','Unit is required.');ok=false;}else if(!um){err('Costs',r,'Unit',`"${unit}" is not valid. Use ${CL_UNITS.join(', ')}.`);ok=false;}
-  if(q===null){err('Costs',r,'Quantity','Quantity is required.');ok=false;}else if(isNaN(q)||q<=0){err('Costs',r,'Quantity','Quantity must be a number greater than 0.');ok=false;}
-  if(cost===null){err('Costs',r,'Cost','Cost is required (use 0 if it has no cost).');ok=false;}else if(isNaN(cost)||cost<0){err('Costs',r,'Cost','Cost must be a number >= 0.');ok=false;}
+  if(!unit){err(r,'Unit','Unit is required.');ok=false;}else if(!um){err(r,'Unit',`"${unit}" is not valid. Use ${CL_UNITS.join(', ')}.`);ok=false;}
+  if(q===null){err(r,'Quantity','Quantity is required.');ok=false;}else if(isNaN(q)||q<=0){err(r,'Quantity','Quantity must be a number greater than 0.');ok=false;}
+  if(cost===null){err(r,'Cost','Cost is required (use 0 if it has no cost).');ok=false;}else if(isNaN(cost)||cost<0){err(r,'Cost','Cost must be a number >= 0.');ok=false;}
   const cm=CUR_LIST.find(x=>x===cur);
-  if(!cur){err('Costs',r,'Currency','Currency is required.');ok=false;}else if(!cm){err('Costs',r,'Currency',`"${cur}" is not a supported currency. Valid: ${CUR_LIST.join(', ')}.`);ok=false;}
-  if(w!==null&&(isNaN(w)||w<0)){err('Costs',r,'Weight','Weight must be a number >= 0.');ok=false;}
-  if(ok&&it){const cop=cost*curRate(cm),par=(w?w:1)*q*cop;it.lines.push({sec:sm,name,fam,w:w||null,q,unit:um,cost:cop,par,row:r,orig:cost,cur:cm});}
- });
- res.scopes.forEach(s=>{if(!s.items.length)warn('Scopes',s.row,'Scope Name',`Scope "${s.name}" has no items; it will be created empty.`);
-  const ex=current&&current.x&&current.x._scopes&&current.x._scopes.find(z=>z.name.toLowerCase()===s.name.toLowerCase());if(ex)warn('Scopes',s.row,'Scope Name',`The quote already has a scope called "${s.name}". A new scope with the same name will be added.`);});
- res.items.forEach(it=>{if(!it.lines.length)warn('Items',it.row,'Item Reference',`Item "${it.ref}" has no cost lines; its cost will be 0.`);});
+  if(!cur){err(r,'Currency','Currency is required.');ok=false;}else if(!cm){err(r,'Currency',`"${cur}" is not a supported currency. Valid: ${CUR_LIST.join(', ')}.`);ok=false;}
+  if(w!==null&&(isNaN(w)||w<0)){err(r,'Weight','Weight must be a number >= 0.');ok=false;}
+  if(ok){const cop=cost*curRate(cm),par=(w?w:1)*q*cop;it.lines.push({sec:sm,name,fam,w:w||null,q,unit:um,cost:cop,par,row:r,orig:cost,cur:cm});}
+ }
+ if(!res.scopes.length&&!res.errors.length)err(BK_FIRST,'-','The file has no rows. Fill at least one row under the headers.');
+ res.scopes.forEach(s=>{const ex=current&&current.x&&current.x._scopes&&current.x._scopes.find(z=>z.name.toLowerCase()===s.name.toLowerCase());if(ex)warn(s.row,'Scope',`The quote already has a scope called "${s.name}". A new scope with the same name will be added.`);});
+ res.items.forEach(it=>{if(!it.lines.length)warn(it.row,'Item',`Item "${it.ref}" has no cost lines; its cost will be 0.`);});
  res.items.forEach(it=>{it.cost=it.lines.reduce((a,l)=>a+l.par,0);it.sale=(typeof it.mar==='number'&&!isNaN(it.mar))?it.cost/(1-cmar(it.mar/100))*1.01:0;});
  res.scopes.forEach(s=>{s.cost=s.items.reduce((a,i)=>a+i.cost,0);s.sale=s.items.reduce((a,i)=>a+i.sale,0);});
  res.totals={scopes:res.scopes.length,items:res.items.length,lines:res.items.reduce((a,i)=>a+i.lines.length,0),cost:res.scopes.reduce((a,s)=>a+s.cost,0),sale:res.scopes.reduce((a,s)=>a+s.sale,0)};
