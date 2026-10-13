@@ -1336,7 +1336,8 @@ if(!isNew&&current&&current.x._mat&&current.x._mat[current.rowIdx])ED.secs=JSON.
  $('#mtitle').textContent=isNew?'New Item':'Edit Item';
  {const xx=current&&current.x;const dv0=isNew?((xx&&scopeIdx!=null&&xx._scopes[scopeIdx])?xx._scopes[scopeIdx].div:""):((xx&&xx._div&&current.rowIdx!=null)?xx._div[current.rowIdx]:"");$("#f-div").dataset.v=dv0;fillDivSelects();$("#f-div").disabled=true;const sci=isNew?scopeIdx:(xx&&xx._sc?xx._sc[current.rowIdx]:null),scat=(xx&&sci!=null&&xx._scopes[sci])?(xx._scopes[sci].cat||""):"";$("#f-cat").innerHTML="<option>"+scat+"</option>";$("#f-cat").value=scat;$("#f-pt").innerHTML="<option>"+scat+"</option>";$("#f-pt").value=scat;}
  $('#f-ref').value=isNew?'':name; $('#f-mea').value=src.mea; $('#f-uni').value=src.uni; $('#f-mar').value=src.mar;
- ['#f-ref','#f-cat','#f-mea','#f-uni','#f-mar','#f-pt'].forEach(s=>$(s).disabled=!isNew);$('#f-cat').disabled=true;$('#f-pt').disabled=true;  // categoría y product type los define el scope
+ ['#f-ref','#f-cat','#f-mea','#f-uni','#f-mar','#f-pt'].forEach(s=>$(s).disabled=!isNew);$('#f-cat').disabled=true;$('#f-pt').disabled=true;
+ ED.metaEdit=!!(meta&&meta.ed!==false);if(ED.metaEdit)['#f-mea','#f-uni','#f-mar'].forEach(s=>$(s).disabled=false);   // medida, unidades y margen editables en ítems cargados masivamente  // categoría y product type los define el scope
  {let dh=src.desc.map(d=>'• '+d).join('<br>');if(isNew){const xx=current&&current.x,sc=xx&&scopeIdx!=null&&xx._scopes[scopeIdx];dh=sc?(sc.desc||''):'';}else if(meta)dh=meta.desc||'';$('#f-desc').innerHTML=dh;} // la descripción del scope se copia una sola vez; después el ítem es independiente
  $('#msw').classList.remove('on');$('#mswl').textContent='Original (COP)';
  renderSecs(); $('#ov').classList.add('on'); $('#modal').scrollTop=0;
@@ -1673,14 +1674,14 @@ function normSecs(secs){ // asegura las 7 secciones de costo en orden; conserva 
 }
 const textToHtml=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\r?\n/g,'<br>');
 const esc=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-// Una sola hoja ("costs"): las 10 primeras columnas son las del Excel de referencia; a la derecha van los datos del scope y del ítem.
-const BK_COLS=['Scope','Item','Type','Family','TypeItem','Weight','Quantity','Unit','Cost','Currency','Division','Category','Scope Description','Measure','Units','Margin %','Item Description'];
-const BK_REQ=[0,1,2,4,6,7,8,9,10,11,13,14,15];
+// Una sola hoja ("costs") con las columnas del Excel de referencia. Los scopes se crean por el nombre de la columna Scope y los ítems por Scope + Item.
+// División, categoría, medida, unidades y margen no vienen en el archivo: se completan después en Costs (división/categoría en el scope; medida, unidades y margen al abrir el ítem).
+const BK_COLS=['Scope','Item','Type','Family','TypeItem','Weight','Quantity','Unit','Cost','Currency'];
+const BK_REQ=[0,1,2,4,6,7,8,9];
 const BK_SHEET='costs';
 // Monedas aceptadas en la carga. Maqueta: tasas estandarizadas en COP por unidad (el software trabaja siempre en pesos y convierte a la moneda de la cotización).
 const CUR_LIST=['COP','USD','EUR','GBP','CAD','MXN','BRL'],CUR_COP={COP:1,EUR:3500,GBP:4100,CAD:2200,MXN:170,BRL:600};
 const curRate=c=>c==='USD'?FX:CUR_COP[c];
-const dvName=d=>'cat_'+String(d).replace(/[^A-Za-z0-9]/g,'_');
 
 /* ---------- plantilla ---------- */
 function buildTemplate(){
@@ -1688,30 +1689,21 @@ function buildTemplate(){
  const wb=new ExcelJS.Workbook();wb.creator='Project Agenda';wb.created=new Date();
  const YEL='FFFFFF00';
  const L=wb.addWorksheet('Lists',{state:'hidden'});
- L.getCell('A1').value='Divisions';DIVS.forEach((d,i)=>L.getCell(2+i,1).value=d);
- L.getCell('B1').value='Sections';SEC_NAMES.forEach((d,i)=>L.getCell(2+i,2).value=d);
- L.getCell('C1').value='Units';CL_UNITS.forEach((d,i)=>L.getCell(2+i,3).value=d);
- L.getCell('D1').value='Measures';MEASURES.forEach((d,i)=>L.getCell(2+i,4).value=d);
- L.getCell('E1').value='Currencies';CUR_LIST.forEach((d,i)=>L.getCell(2+i,5).value=d);
- DIVS.forEach((d,j)=>{const col=6+j;L.getCell(1,col).value=d;const cats=DIV_CATS[d]||[];cats.forEach((c,i)=>L.getCell(2+i,col).value=c);
-  if(cats.length){const cl=L.getColumn(col).letter;wb.definedNames.add(`Lists!$${cl}$2:$${cl}$${1+cats.length}`,dvName(d));}});
- const C=wb.addWorksheet(BK_SHEET);C.columns=[34,34,26,18,60,10,10,8,14,10,14,28,40,10,10,10,40].map(w=>({width:w}));
+ L.getCell('A1').value='Sections';SEC_NAMES.forEach((d,i)=>L.getCell(2+i,1).value=d);
+ L.getCell('B1').value='Units';CL_UNITS.forEach((d,i)=>L.getCell(2+i,2).value=d);
+ L.getCell('C1').value='Currencies';CUR_LIST.forEach((d,i)=>L.getCell(2+i,3).value=d);
+ const C=wb.addWorksheet(BK_SHEET);C.columns=[34,34,26,18,60,10,10,8,14,10].map(w=>({width:w}));
  BK_COLS.forEach((h,i)=>{const c=C.getCell(1,i+1);c.value=h;c.font={bold:true,color:{argb:'FF000000'}};if(BK_REQ.includes(i))c.fill={type:'pattern',pattern:'solid',fgColor:{argb:YEL}};});
  C.views=[{state:'frozen',ySplit:1}];
  const last=BK_FIRST+BK_ROWS-1;
  const list=(col,f,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)C.getCell(col+rr).dataValidation={type:'list',allowBlank:true,formulae:[f],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid value',error:msg};};
  const num=(col,op,v,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)C.getCell(col+rr).dataValidation={type:'decimal',operator:op,formulae:Array.isArray(v)?v:[v],allowBlank:true,showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid number',error:msg};};
- list('C',`Lists!$B$2:$B$${1+SEC_NAMES.length}`,'Choose a cost type from the list.');
+ list('C',`Lists!$A$2:$A$${1+SEC_NAMES.length}`,'Choose a cost type from the list.');
  num('F','greaterThanOrEqual',0,'Weight must be a number >= 0.');
  num('G','greaterThan',0,'Quantity must be a number greater than 0.');
- list('H',`Lists!$C$2:$C$${1+CL_UNITS.length}`,'Choose a unit from the list.');
+ list('H',`Lists!$B$2:$B$${1+CL_UNITS.length}`,'Choose a unit from the list.');
  num('I','greaterThanOrEqual',0,'Cost must be a number >= 0.');
- list('J',`Lists!$E$2:$E$${1+CUR_LIST.length}`,'Choose a currency from the list.');
- list('K',`Lists!$A$2:$A$${1+DIVS.length}`,'Choose a division from the list.');
- for(let rr=BK_FIRST;rr<=last;rr++)C.getCell('L'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`INDIRECT("cat_"&SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($K${rr}," ","_"),"&","_"),"-","_"))`],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid category',error:'Choose a category of the selected division (select the division first).'};
- list('N',`Lists!$D$2:$D$${1+MEASURES.length}`,'Choose ft2, m2 or un.');
- num('O','greaterThan',0,'Units must be a number greater than 0.');
- num('P','between',[0,100],'Margin must be a number from 0 to 100.');
+ list('J',`Lists!$C$2:$C$${1+CUR_LIST.length}`,'Choose a currency from the list.');
  for(let rr=BK_FIRST;rr<=last;rr++){C.getCell('I'+rr).numFmt='#,##0.00';C.getCell('F'+rr).numFmt='0.0000';}
  L.orderNo=100;wb.views=[{activeTab:0}];
  return wb;
@@ -1741,38 +1733,16 @@ async function parseWorkbook(buf){
   const c=[];for(let i=1;i<=BK_COLS.length;i++)c.push(ws.getCell(r,i));
   if(c.every(x=>cellText(x)===''))continue;
   const scn=cellText(c[0]),ref=cellText(c[1]),sec=cellText(c[2]),fam=cellText(c[3]),name=cellText(c[4]),w=cellNum(c[5]),q=cellNum(c[6]),unit=cellText(c[7]),cost=cellNum(c[8]),cur=cellText(c[9]).toUpperCase();
-  const div=cellText(c[10]),cat=cellText(c[11]),sdesc=cellText(c[12]),mea=cellText(c[13]),units=cellNum(c[14]),mar=cellNum(c[15]),idesc=cellText(c[16]);
   if(!scn)err(r,'Scope','Scope is required.');if(!ref)err(r,'Item','Item is required.');
   if(!scn||!ref)continue;
-  // --- scope: la primera fila define división y categoría; las siguientes pueden ir vacías o iguales
-  let sc=scopes[scn.toLowerCase()];const dvm=DIVS.find(d=>d.toLowerCase()===div.toLowerCase());
+  let sc=scopes[scn.toLowerCase()];
   if(!sc){
-   let ok=true;
-   if(DIVS.some(d=>d.toLowerCase()===scn.toLowerCase())){err(r,'Scope','The scope name cannot be the same as a division name.');ok=false;}
-   if(!div){err(r,'Division','Division is required in the first row of the scope.');ok=false;}else if(!dvm){err(r,'Division',`"${div}" is not a division. Valid: ${DIVS.join(', ')}.`);ok=false;}
-   let catm=null;
-   if(!cat){err(r,'Category','Category is required in the first row of the scope.');ok=false;}else if(dvm){catm=(DIV_CATS[dvm]||[]).find(x=>x.toLowerCase()===cat.toLowerCase());if(!catm){err(r,'Category',`"${cat}" is not a product of division ${dvm}. Valid: ${(DIV_CATS[dvm]||[]).join(', ')||'none defined'}.`);ok=false;}}
-   sc={id:scn,name:scn,div:dvm||div,cat:catm||cat,desc:sdesc,row:r,ok,items:[]};scopes[scn.toLowerCase()]=sc;res.scopes.push(sc);
-  }else{
-   if(div&&dvm!==sc.div)err(r,'Division',`Division differs from the first row of scope "${scn}" (row ${sc.row}). Leave it empty or use the same value.`);
-   if(cat&&cat.toLowerCase()!==String(sc.cat).toLowerCase())err(r,'Category',`Category differs from the first row of scope "${scn}" (row ${sc.row}). Leave it empty or use the same value.`);
-   if(sdesc&&sc.desc&&sdesc!==sc.desc)err(r,'Scope Description',`Description differs from the first row of scope "${scn}" (row ${sc.row}).`);else if(sdesc&&!sc.desc)sc.desc=sdesc;
+   if(DIVS.some(d=>d.toLowerCase()===scn.toLowerCase()))err(r,'Scope','The scope name cannot be the same as a division name.');
+   sc={id:scn,name:scn,div:'',cat:'',desc:'',row:r,ok:true,items:[]};scopes[scn.toLowerCase()]=sc;res.scopes.push(sc);
   }
-  // --- ítem: la primera fila define medida, unidades y margen
-  const key=scn.toLowerCase()+'|'+ref.toLowerCase();let it=items[key];const mm=MEASURES.find(m=>m.toLowerCase()===mea.toLowerCase());
-  if(!it){
-   let ok=true;
-   if(!mea){err(r,'Measure','Measure is required in the first row of the item.');ok=false;}else if(!mm){err(r,'Measure',`"${mea}" is not valid. Use ${MEASURES.join(', ')}.`);ok=false;}
-   if(units===null){err(r,'Units','Units is required in the first row of the item.');ok=false;}else if(isNaN(units)||units<=0){err(r,'Units','Units must be a number greater than 0.');ok=false;}
-   if(mar===null){err(r,'Margin %','Margin % is required in the first row of the item.');ok=false;}else if(isNaN(mar)||mar<0||mar>100){err(r,'Margin %','Margin % must be a number from 0 to 100.');ok=false;}
-   it={ref,sid:sc.name,scope:sc,mea:mm||mea,units,mar,desc:idesc,row:r,ok,lines:[]};items[key]=it;res.items.push(it);sc.items.push(it);
-  }else{
-   if(mea&&mm!==it.mea)err(r,'Measure',`Measure differs from the first row of item "${ref}" (row ${it.row}). Leave it empty or use the same value.`);
-   if(units!==null&&units!==it.units)err(r,'Units',`Units differ from the first row of item "${ref}" (row ${it.row}). Leave it empty or use the same value.`);
-   if(mar!==null&&mar!==it.mar)err(r,'Margin %',`Margin % differs from the first row of item "${ref}" (row ${it.row}). Leave it empty or use the same value.`);
-   if(idesc&&it.desc&&idesc!==it.desc)err(r,'Item Description',`Description differs from the first row of item "${ref}" (row ${it.row}).`);else if(idesc&&!it.desc)it.desc=idesc;
-  }
-  // --- línea de material (opcional: una fila sin material crea el ítem sin costos)
+  const key=scn.toLowerCase()+'|'+ref.toLowerCase();let it=items[key];
+  if(!it){it={ref,sid:sc.name,scope:sc,mea:'un',units:1,mar:0,desc:'',row:r,ok:true,lines:[]};items[key]=it;res.items.push(it);sc.items.push(it);}
+  // línea de material (una fila sin material crea el ítem sin costos)
   const hasLine=[sec,fam,name,unit,cur].some(v=>v!=='')||[w,q,cost].some(v=>v!==null);
   if(!hasLine)continue;
   let ok=true;
@@ -1791,7 +1761,7 @@ async function parseWorkbook(buf){
  if(!res.scopes.length&&!res.errors.length)err(BK_FIRST,'-','The file has no rows. Fill at least one row under the headers.');
  res.scopes.forEach(s=>{const ex=current&&current.x&&current.x._scopes&&current.x._scopes.find(z=>z.name.toLowerCase()===s.name.toLowerCase());if(ex)warn(s.row,'Scope',`The quote already has a scope called "${s.name}". A new scope with the same name will be added.`);});
  res.items.forEach(it=>{if(!it.lines.length)warn(it.row,'Item',`Item "${it.ref}" has no cost lines; its cost will be 0.`);});
- res.items.forEach(it=>{it.cost=it.lines.reduce((a,l)=>a+l.par,0);it.sale=(typeof it.mar==='number'&&!isNaN(it.mar))?it.cost/(1-cmar(it.mar/100))*1.01:0;});
+ res.items.forEach(it=>{it.cost=it.lines.reduce((a,l)=>a+l.par,0);it.sale=it.cost/(1-cmar(it.mar/100))*1.01;});
  res.scopes.forEach(s=>{s.cost=s.items.reduce((a,i)=>a+i.cost,0);s.sale=s.items.reduce((a,i)=>a+i.sale,0);});
  res.totals={scopes:res.scopes.length,items:res.items.length,lines:res.items.reduce((a,i)=>a+i.lines.length,0),cost:res.scopes.reduce((a,s)=>a+s.cost,0),sale:res.scopes.reduce((a,s)=>a+s.sale,0)};
  return res;
@@ -1870,7 +1840,7 @@ document.addEventListener('change',e=>{if(e.target.id==='bk-file'){const f=e.tar
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#bkd').classList.contains('on'))bkClose();});
 
 function remapAux(x,order){['_mat','_imeta'].forEach(k=>{if(!x[k])return;const m={};order.forEach((o,nw)=>{if(x[k][o]!==undefined)m[nw]=x[k][o];});x[k]=m;});}
-function itemMeta(){const d=$('#f-desc').innerHTML.trim();return {mea:$('#f-mea').value,uni:$('#f-uni').value,mar:$('#f-mar').value,desc:plain(d)?d:'',adj:ED.adj||0};}
+function itemMeta(){const d=$('#f-desc').innerHTML.trim();return {mea:$('#f-mea').value,uni:$('#f-uni').value,mar:$('#f-mar').value,desc:plain(d)?d:'',adj:ED.adj||0,ed:!!(ED.metaEdit||ED.addTo!=null)};}
 function saveItemModal(){
  if(!ED)return;
  if(ED.secs.some(s=>s.rows.some(r=>r.ed))){toast('Guarde o cancele la línea que está editando');return;}
@@ -1888,6 +1858,12 @@ function saveItemModal(){
  // ítem existente: los materiales editados cambian su costo; el margen se conserva, así que precio y margen bruto escalan igual
  const ri=current.rowIdx,newCost=totalCost(),oldCost=ED.base;
  x._mat=x._mat||{};x._mat[ri]=clone();x._imeta=x._imeta||{};x._imeta[ri]=itemMeta();
+ if(ED.metaEdit){
+  const units=pn($('#f-uni').value),mar=pn($('#f-mar').value)/100;if(!units){toast('Complete Units');return;}
+  const r=x._calc.rows[ri],cl=qCur(x),k=cl==='USD'?1/FX:1,cost=newCost*k,sale=cost/(1-cmar(mar))*1.01,com=sale*.01,gm=sale-cost-com,mea=$('#f-mea').value;
+  r[3]=String(units);r[4]=n2(cost)+' '+cl;r[5]=(mar*100).toFixed(2)+'%';r[6]=n2(gm)+' '+cl;r[7]=n2(sale/units)+' '+cl+' / '+mea;r[8]=n2(sale)+' '+cl;
+  recalcTot(x);closeItem();buildCosts(x);toast('Item actualizado');return;
+ }
  if(oldCost>0&&Math.abs(newCost-oldCost)>0.005){
   if(!x._calc)x._calc=JSON.parse(JSON.stringify(calcQuote(x)));
   const r=x._calc.rows[ri],k=newCost/oldCost,cl=qCur(x),sc=s=>n2(parse(s)*k)+' '+cl;
