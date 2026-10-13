@@ -2553,6 +2553,25 @@ function placeFab(){const f=$('#fab'),th=[...$$('th')].find(h=>h.textContent==='
 window.addEventListener('resize',placeFab);
 new MutationObserver(placeFab).observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
 
+/* ---- persistencia: lo que se carga o cambia se conserva al salir de la cotización o recargar la página ---- */
+const PKEY='pa-mockup-state-v1';
+const pRep=(k,v)=>{if(v instanceof Set)return{__set:[...v]};if(Array.isArray(v)){const ex={};Object.keys(v).forEach(i=>{if(!/^\d+$/.test(i))ex[i]=v[i];});if(Object.keys(ex).length)return{__arr:v.slice(),__x:ex};}return v;};
+const pRev=(k,v)=>{if(v&&typeof v==='object'){if(v.__set)return new Set(v.__set);if(v.__arr){const a=v.__arr;Object.assign(a,v.__x);return a;}}return v;};
+function pSnapshot(){return JSON.stringify({COLS,DIVS,DIV_CATS,PROJ,LEADS},pRep);}
+function pRestore(){
+ try{const s=localStorage.getItem(PKEY);if(!s)return;const d=JSON.parse(s,pRev);
+  if(!d||!Array.isArray(d.COLS)||!Array.isArray(d.PROJ)||!Array.isArray(d.LEADS))return;
+  COLS.length=0;d.COLS.forEach(c=>COLS.push(c));
+  DIVS=d.DIVS;Object.keys(DIV_CATS).forEach(k=>delete DIV_CATS[k]);Object.assign(DIV_CATS,d.DIV_CATS);
+  PROJ=d.PROJ;LEADS=d.LEADS;
+ }catch(e){}
+}
+let pLast='';
+function pSave(){try{const s=pSnapshot();if(s!==pLast){localStorage.setItem(PKEY,s);pLast=s;}}catch(e){}}
+if(location.hash==='#/reset'){try{localStorage.removeItem(PKEY);}catch(e){}location.hash='#/';}
+pRestore();
+setInterval(pSave,800);window.addEventListener('pagehide',pSave);window.addEventListener('beforeunload',pSave);
+
 renderBoard(); route();
 </script>
 </body>
