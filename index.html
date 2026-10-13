@@ -876,9 +876,10 @@ table.scopet thead th.c{text-align:center}
 .menu div:hover{background:var(--gray)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#323232;color:#fff;padding:12px 20px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
-.bulkbtn{margin-left:auto;margin-right:0;background:#fff!important;color:var(--blue)!important;border:1px solid var(--blue)!important;border-radius:20px!important;height:34px;padding:0 16px!important;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:6px;cursor:pointer}
-.bulkbtn:hover{background:#e3f2fd!important}
-.bulkbtn+.newitem{margin-left:12px!important}
+.items h4 .bulkbtn{position:relative;cursor:pointer;color:#424242}
+.items h4 .bulkbtn:hover{color:var(--blue)}
+.items h4 .bulkbtn::after{content:attr(data-tip);position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);background:#616161;color:#fff;font:500 11px Roboto,Arial,sans-serif;padding:4px 8px;border-radius:3px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:30}
+.items h4 .bulkbtn:hover::after,.items h4 .bulkbtn:focus-visible::after{opacity:1}
 #bkd .bkb{width:820px;max-width:94vw;max-height:90vh;display:flex;flex-direction:column;padding:0;border-radius:4px}
 #bkd .bk-h{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #e6e6e6}
 #bkd .bk-h h3{margin:0;font-size:16px;font-weight:500;color:#424242}
@@ -1060,7 +1061,7 @@ table.scopet thead th.c{text-align:center}
           <div class="row"><span class="lbl">View Mode</span><button class="sw" id="sw"><i></i></button><span id="swl" style="font-size:12px">Original (COP)</span></div>
         </div>
         <div class="items">
-          <h4>Scope <button title="Descargar" data-toast="Descargando items…"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7zM5 18v2h14v-2z"/></svg></button><button class="bulkbtn" id="bulk-open" title="Create several scopes, items and cost lines from an Excel file"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>Bulk Upload</button><button class="newitem" id="newitem">+ New Scope</button></h4>
+          <h4>Scope <button title="Descargar" data-toast="Descargando items…"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7zM5 18v2h14v-2z"/></svg></button><button class="bulkbtn" id="bulk-open" data-tip="Bulk Upload" aria-label="Bulk Upload"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg></button><button class="newitem" id="newitem">+ New Scope</button></h4>
           <table>
             <thead><tr><th class="c" style="width:60px">#</th><th>SCOPE</th><th>DIVISION</th><th>CATEGORY</th><th class="n">QTY</th><th class="n">COST</th><th class="n">MARGIN</th><th class="n">GROSS MARGIN</th><th class="n">SALES PRICE</th><th class="c">ACTIONS</th></tr></thead>
             <tbody id="rows"></tbody>
