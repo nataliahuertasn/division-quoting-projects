@@ -2553,7 +2553,7 @@ function placeFab(){const f=$('#fab'),th=[...$$('th')].find(h=>h.textContent==='
 window.addEventListener('resize',placeFab);
 new MutationObserver(placeFab).observe(document.body,{attributes:true,subtree:true,attributeFilter:['class']});
 
-/* ---- persistencia: lo que se carga o cambia se conserva al salir de la cotización o recargar la página ---- */
+/* ---- persistence: loaded data is kept when leaving the quote or reloading; open #/reset to restore the demo data ---- */
 const PKEY='pa-mockup-state-v1';
 const pRep=(k,v)=>{if(v instanceof Set)return{__set:[...v]};if(Array.isArray(v)){const ex={};Object.keys(v).forEach(i=>{if(!/^\d+$/.test(i))ex[i]=v[i];});if(Object.keys(ex).length)return{__arr:v.slice(),__x:ex};}return v;};
 const pRev=(k,v)=>{if(v&&typeof v==='object'){if(v.__set)return new Set(v.__set);if(v.__arr){const a=v.__arr;Object.assign(a,v.__x);return a;}}return v;};
