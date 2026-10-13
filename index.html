@@ -1645,7 +1645,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#scd').classList.contains('on'))$('#scd').classList.remove('on');if(e.key==='Enter'&&$('#scd').classList.contains('on')&&e.target.id==='scd-n')createScope(false);});
 /* ================= Bulk Upload (Excel) ================= */
 const SEC_NAMES=['Materials','Engineering & Design','Fabrication Processes','Packing Materials','Transportation','Installation Equipment & Labor','Permits'];
-const CL_UNITS=['kg','qt','m2','ft2','h','un'],MEASURES=['ft2','m2','un'],BK_ROWS=200,BK_FIRST=5;
+const CL_UNITS=['kg','qt','m2','ft2','h','un'],MEASURES=['ft2','m2','un'],BK_ROWS=200,BK_FIRST=3;
 function normSecs(secs){ // asegura las 7 secciones de costo en orden; conserva lo que ya traiga cada una
  const by={};secs.forEach(s=>{by[s.t.toLowerCase()]=s;});
  const out=SEC_NAMES.map(n=>by[n.toLowerCase()]||{t:n,rows:[]});
@@ -1678,9 +1678,9 @@ function buildTemplate(){
  // hojas de datos
  const mk=(name,widths)=>{const ws=wb.addWorksheet(name);ws.columns=widths.map(w=>({width:w}));
   ws.getCell('A1').value=name==='Scopes'?'Scopes':name==='Items'?'Items':'Cost Breakdown';ws.getCell('A1').font={bold:true,size:14,color:{argb:BLUE}};
-  BK_HEAD[name].forEach((h,i)=>{const c=ws.getCell(4,i+1);c.value=h+(BK_REQ[name].includes(i)?' *':'');c.font={bold:true,color:{argb:'FFFFFFFF'}};
+  BK_HEAD[name].forEach((h,i)=>{const c=ws.getCell(2,i+1);c.value=h+(BK_REQ[name].includes(i)?' *':'');c.font={bold:true,color:{argb:'FFFFFFFF'}};
    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:BK_REQ[name].includes(i)?DARK:BLUE}};c.alignment={vertical:'middle',wrapText:true};c.border={bottom:{style:'medium',color:{argb:'FF0D47A1'}}};});
-  ws.getRow(4).height=28;ws.views=[{state:'frozen',ySplit:4}];return ws;};
+  ws.getRow(2).height=28;ws.views=[{state:'frozen',ySplit:2}];return ws;};
  const S=mk('Scopes',[34,18,30,60]),It=mk('Items',[30,14,12,12,12,60]),C=mk('Cost Breakdown',[30,28,52,13,13,10,18,18]);
  const last=BK_FIRST+BK_ROWS-1,list=(ws,col,f,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'list',allowBlank:true,formulae:[f],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid value',error:msg};};
  const num=(ws,col,op,v,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'decimal',operator:op,formulae:Array.isArray(v)?v:[v],allowBlank:true,showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid number',error:msg};};
@@ -1717,9 +1717,9 @@ async function parseWorkbook(buf){
  const res={errors:[],warnings:[],scopes:[],items:[],lines:[]},err=(sheet,row,field,msg)=>res.errors.push({sheet,row,field,msg}),warn=(sheet,row,field,msg)=>res.warnings.push({sheet,row,field,msg});
  let wb;try{wb=new ExcelJS.Workbook();await wb.xlsx.load(buf);}catch(e){err('File','-','-','The file is not a valid .xlsx workbook. Download the template and use it.');return res;}
  const sheets={};for(const n of Object.keys(BK_HEAD)){const ws=wb.getWorksheet(n);if(!ws)err('File','-',n,`Sheet "${n}" is missing. The file does not match the template; download it again.`);else{
-  const hs=BK_HEAD[n].map((h,i)=>cellText(ws.getCell(4,i+1)).replace(/\*/g,'').trim().toLowerCase()),want=BK_HEAD[n].map(h=>h.toLowerCase());
+  const hs=BK_HEAD[n].map((h,i)=>cellText(ws.getCell(2,i+1)).replace(/\*/g,'').trim().toLowerCase()),want=BK_HEAD[n].map(h=>h.toLowerCase());
   const bad=want.findIndex((h,i)=>hs[i]!==h);
-  if(bad>=0)err(n,4,BK_HEAD[n][bad],`Column ${bad+1} header must be "${BK_HEAD[n][bad]}". Do not rename or move the template columns.`);else sheets[n]=ws;}}
+  if(bad>=0)err(n,2,BK_HEAD[n][bad],`Column ${bad+1} header must be "${BK_HEAD[n][bad]}". Do not rename or move the template columns.`);else sheets[n]=ws;}}
  if(res.errors.length)return res;
  const rowsOf=(ws,cols)=>{const out=[];for(let r=BK_FIRST;r<=ws.rowCount;r++){const vals=[];for(let c=1;c<=cols;c++)vals.push(ws.getCell(r,c));if(vals.slice(0,cols-(ws.name==='Cost Breakdown'?1:0)).every(c=>cellText(c)===''))continue;out.push({r,c:vals});}return out;};
  // Scopes
