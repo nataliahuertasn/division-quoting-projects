@@ -2581,15 +2581,19 @@ new MutationObserver(placeFab).observe(document.body,{attributes:true,subtree:tr
 
 /* ---- persistence: loaded data is kept when leaving the quote or reloading; open #/reset to restore the demo data ---- */
 const PKEY='pa-mockup-state-v1';
-const pRep=(k,v)=>{if(v instanceof Set)return{__set:[...v]};if(Array.isArray(v)){const ex={};Object.keys(v).forEach(i=>{if(!/^\d+$/.test(i))ex[i]=v[i];});if(Object.keys(ex).length)return{__arr:v.slice(),__x:ex};}return v;};
+const pFind=c=>{for(const col of COLS){const i=col.cards.indexOf(c);if(i>=0)return[col.k,i];}return null;};
+const pRep=(k,v)=>{if(v instanceof Set)return{__set:[...v]};if(Array.isArray(v)){const ex={};Object.keys(v).forEach(i=>{if(!/^\d+$/.test(i))ex[i]=v[i];});
+ if(ex._q){ex._qref=ex._q.map(pFind).filter(Boolean);delete ex._q;}   // las cotizaciones de un proyecto se guardan como referencia al tablero
+ if(Object.keys(ex).length)return{__arr:v.slice(),__x:ex};}return v;};
 const pRev=(k,v)=>{if(v&&typeof v==='object'){if(v.__set)return new Set(v.__set);if(v.__arr){const a=v.__arr;Object.assign(a,v.__x);return a;}}return v;};
-function pSnapshot(){return JSON.stringify({COLS,DIVS,DIV_CATS,PROJ,LEADS},pRep);}
+function pSnapshot(){return JSON.stringify({COLS,DIVS,DIV_CATS,PROJ,LEADS,KPI,PJ_BASE},pRep);}
 function pRestore(){
  try{const s=localStorage.getItem(PKEY);if(!s)return;const d=JSON.parse(s,pRev);
   if(!d||!Array.isArray(d.COLS)||!Array.isArray(d.PROJ)||!Array.isArray(d.LEADS))return;
   COLS.length=0;d.COLS.forEach(c=>COLS.push(c));
   DIVS=d.DIVS;Object.keys(DIV_CATS).forEach(k=>delete DIV_CATS[k]);Object.assign(DIV_CATS,d.DIV_CATS);
-  PROJ=d.PROJ;LEADS=d.LEADS;
+  PROJ=d.PROJ;LEADS=d.LEADS;if(d.KPI)KPI=d.KPI;if(d.PJ_BASE)PJ_BASE=d.PJ_BASE;
+  PROJ.forEach(p=>{if(p._qref){p._q=p._qref.map(([k,i])=>{const c=COLS.find(z=>z.k===k);return c&&c.cards[i];}).filter(Boolean);delete p._qref;}});
  }catch(e){}
 }
 let pLast='';
