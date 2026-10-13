@@ -1308,9 +1308,9 @@ const ITEMS={
 let ED=null;
 const money=n=>ED.usd?fmt(n/FX)+' USD':fmt(n)+' COP';
 const pn=s=>parseFloat(String(s==null?'':s).replace(',','.'))||0;
-const par=(w,q,u,c)=>((u==='kg'&&w)?w:1)*q*c;                    // parcial = (peso si es kg) × cant × costo
+const par=(w,q,u,c)=>(w?w:1)*q*c;                    // parcial = (peso si se ingresó, en la unidad de la línea) × cant × costo
 const epar=r=>r.ed?par(pn(r.d.w),pn(r.d.q),r.d.u,pn(r.d.c)):r[5]; // la línea en edición cuenta con lo que se va escribiendo
-const rv=r=>r.ed?[r.d.name,r.d.u==='kg'&&r.d.w!==''?pn(r.d.w):null,pn(r.d.q),r.d.u,pn(r.d.c)]:r;
+const rv=r=>r.ed?[r.d.name,r.d.w!==''?pn(r.d.w):null,pn(r.d.q),r.d.u,pn(r.d.c)]:r;
 const secSum=s=>s.rows.reduce((a,r)=>a+epar(r),0);
 const totalCost=()=>ED.secs.reduce((a,s)=>a+secSum(s),0)+ED.adj;
 function fillCats(div,sel,isNew){
@@ -1335,7 +1335,7 @@ if(!isNew&&current&&current.x._mat&&current.x._mat[current.rowIdx])ED.secs=JSON.
 const IC={pen:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.250V21h3.750L17.810 9.940l-3.750-3.750zM20.710 7.040a1 1 0 0 0 0-1.410l-2.340-2.340a1 1 0 0 0-1.410 0l-1.830 1.830 3.750 3.750z"/></svg>',del:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.500l-1-1h-5l-1 1H5v2h14z"/></svg>',ck:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.500"/></svg>',drag:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>'};
 IC.ok='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.800 12l-1.400 1.400L9 19 21 7l-1.400-1.400z"/></svg>';IC.x='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.400 17.600 5 12 10.600 6.400 5 5 6.400 10.600 12 5 17.600 6.400 19 12 13.400 17.600 19 19 17.600 13.400 12z"/></svg>';
 function renderSecs(){
- const tc=totalCost()||1,U=['kg','qt','m2','h','un'];
+ const tc=totalCost()||1,U=['kg','qt','m2','ft2','h','un'];
  const f1=(n)=>n==null?'--':(+n).toFixed(2);
  $('#msecs').innerHTML=ED.secs.map((s,si)=>{
   const tot=secSum(s),n=s.rows.length;
@@ -1343,13 +1343,13 @@ function renderSecs(){
    if(r.ed){const d=r.d,p=par(pn(d.w),pn(d.q),d.u,pn(d.c));
     return `<div class="gr rw ed" data-er="${si}:${ri}"><span class="dg"></span><div class="n">${ri+1}</div>
     <div><input class="ei" id="ei-${si}-${ri}-name" data-ef="name" value="${d.name.replace(/"/g,'&quot;')}" placeholder="Name *" autocomplete="off"></div>
-    <div><input class="ei" id="ei-${si}-${ri}-w" data-ef="w" value="${d.w}" placeholder="--" inputmode="decimal" ${d.u==='kg'?'':'disabled'}></div>
+    <div><input class="ei" id="ei-${si}-${ri}-w" data-ef="w" value="${d.w}" placeholder="--" inputmode="decimal"></div>
     <div><input class="ei" id="ei-${si}-${ri}-q" data-ef="q" value="${d.q}" placeholder="Qty" inputmode="decimal"></div>
     <div><select class="ei" id="ei-${si}-${ri}-u" data-ef="u">${U.map(u=>`<option${u===d.u?' selected':''}>${u}</option>`).join('')}</select></div>
     <div><input class="ei" id="ei-${si}-${ri}-c" data-ef="c" value="${d.c}" placeholder="Cost" inputmode="decimal"></div>
     <div>${money(p)}</div>
     <div style="display:flex;justify-content:space-between;padding-right:60px"><span>${(p/tc*100).toFixed(2)}%</span><span class="ac"><span data-esave="${si}:${ri}" title="Save line">${IC.ok}</span><span data-ecancel="${si}:${ri}" title="Cancel">${IC.x}</span></span></div></div>`;}
-   return `<div class="gr rw"><span class="dg">${IC.drag}</span><div class="n">${ri+1}</div><div>${r[0]}</div><div>${r[3]==='kg'?f1(r[1]):'--'}</div><div>${f1(r[2])}</div><div>${r[3]}</div><div>${money(r[4])}</div><div>${money(r[5])}</div><div style="display:flex;justify-content:space-between;padding-right:60px"><span>${(r[5]/tc*100).toFixed(2)}%</span><span class="ac"><span data-edl="${si}:${ri}" title="Edit line">${IC.pen}</span><span data-del="${si}:${ri}" title="Delete line">${IC.del}</span><span class="ck${r.ck?' on':''}" data-ck="${si}:${ri}">${IC.ck}</span></span></div></div>`;}).join('');
+   return `<div class="gr rw"><span class="dg">${IC.drag}</span><div class="n">${ri+1}</div><div>${r[0]}</div><div>${f1(r[1])}</div><div>${f1(r[2])}</div><div>${r[3]}</div><div>${money(r[4])}</div><div>${money(r[5])}</div><div style="display:flex;justify-content:space-between;padding-right:60px"><span>${(r[5]/tc*100).toFixed(2)}%</span><span class="ac"><span data-edl="${si}:${ri}" title="Edit line">${IC.pen}</span><span data-del="${si}:${ri}" title="Delete line">${IC.del}</span><span class="ck${r.ck?' on':''}" data-ck="${si}:${ri}">${IC.ck}</span></span></div></div>`;}).join('');
   return `<div class="sec"><div class="sec-h"><b>${s.t}</b>${n?`<button class="clr" data-clr="${si}">CLEAR ALL</button>`:''}<button class="plus" data-add="${si}" title="Agregar línea"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg></button></div>
   <div class="tw"><div class="gr hd"><div class="n">#</div><div>Name</div><div>Weight</div><div>Qty</div><div>Unit</div><div>Cost</div><div>Parcial = ${money(tot)}</div><div style="display:flex;justify-content:space-between;padding-right:60px"><span>${(tot/tc*100).toFixed(2)} %</span><span>Actions</span></div></div>
   ${rowsHtml}</div>
@@ -1384,10 +1384,10 @@ document.addEventListener('click',e=>{
   const at=v=>v.split(':').map(Number);
   if(clr){ED.secs[+clr.dataset.clr].rows=[];keep();}
   else if(add){if(ED.usd){toast('Cambie a Original (COP) para editar líneas');return;}const si=+add.dataset.add,rw=['',null,1,'qt',0,0];rw.ed=true;rw.isNew=true;rw.d={name:'',w:'',q:'1',u:'qt',c:''};ED.secs[si].rows.push(rw);keep();const el=$(`#ei-${si}-${ED.secs[si].rows.length-1}-name`);if(el)el.focus();}
-  else if(edl){if(ED.usd){toast('Cambie a Original (COP) para editar líneas');return;}const[a,b]=at(edl.dataset.edl),r=ED.secs[a].rows[b];r.ed=true;r.d={name:r[0],w:r[3]==='kg'&&r[1]!=null?String(r[1]):'',q:String(r[2]),u:r[3],c:String(r[4])};keep();const el=$(`#ei-${a}-${b}-name`);if(el)el.focus();}
+  else if(edl){if(ED.usd){toast('Cambie a Original (COP) para editar líneas');return;}const[a,b]=at(edl.dataset.edl),r=ED.secs[a].rows[b];r.ed=true;r.d={name:r[0],w:r[1]!=null?String(r[1]):'',q:String(r[2]),u:r[3],c:String(r[4])};keep();const el=$(`#ei-${a}-${b}-name`);if(el)el.focus();}
   else if(es){const[a,b]=at(es.dataset.esave),r=ED.secs[a].rows[b],d=r.d;
    if(!d.name.trim()||pn(d.q)<=0){toast('Complete Name y Qty (mayor a 0)');return;}
-   r[0]=d.name.trim();r[1]=d.u==='kg'&&d.w!==''?pn(d.w):null;r[2]=pn(d.q);r[3]=d.u;r[4]=pn(d.c);r[5]=par(pn(d.w),pn(d.q),d.u,pn(d.c));r.ed=false;r.isNew=false;delete r.d;keep();}
+   r[0]=d.name.trim();r[1]=d.w!==''?pn(d.w):null;r[2]=pn(d.q);r[3]=d.u;r[4]=pn(d.c);r[5]=par(pn(d.w),pn(d.q),d.u,pn(d.c));r.ed=false;r.isNew=false;delete r.d;keep();}
   else if(ec){const[a,b]=at(ec.dataset.ecancel),r=ED.secs[a].rows[b];if(r.isNew)ED.secs[a].rows.splice(b,1);else{r.ed=false;delete r.d;}keep();}
   else if(del){const[a,b]=at(del.dataset.del);ED.secs[a].rows.splice(b,1);keep();}
   else if(ck){const[a,b]=at(ck.dataset.ck),r=ED.secs[a].rows[b];r.ck=!r.ck;ck.classList.toggle('on',r.ck);}
@@ -1396,11 +1396,11 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{
  const t=e.target;if(!ED||!t.dataset||!t.dataset.ef)return;
  const row=t.closest('[data-er]'),[a,b]=row.dataset.er.split(':').map(Number),r=ED.secs[a].rows[b];
- r.d[t.dataset.ef]=t.value;if(t.dataset.ef==='u'&&t.value!=='kg')r.d.w='';
+ r.d[t.dataset.ef]=t.value;
  const id=t.id,pos=t.selectionStart,st=$('#modal').scrollTop;renderSecs();$('#modal').scrollTop=st;   // % y totales se recalculan al escribir
  const el=$('#'+id);if(el){el.focus();try{if(pos!=null)el.setSelectionRange(pos,pos);}catch(_){}}
 });
-document.addEventListener('change',e=>{if(ED&&e.target.dataset&&e.target.dataset.ef==='u'){const row=e.target.closest('[data-er]'),[a,b]=row.dataset.er.split(':').map(Number);const r=ED.secs[a].rows[b];r.d.u=e.target.value;if(r.d.u!=='kg')r.d.w='';const st=$('#modal').scrollTop;renderSecs();$('#modal').scrollTop=st;}});
+document.addEventListener('change',e=>{if(ED&&e.target.dataset&&e.target.dataset.ef==='u'){const row=e.target.closest('[data-er]'),[a,b]=row.dataset.er.split(':').map(Number);const r=ED.secs[a].rows[b];r.d.u=e.target.value;const st=$('#modal').scrollTop;renderSecs();$('#modal').scrollTop=st;}});
 /* panel lateral: expandir / recoger secciones y contraer el panel */
 document.addEventListener('click',e=>{
  const nv=e.target.closest('#side .nv');
@@ -1657,7 +1657,7 @@ const esc=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 const BK_HEAD={
  Scopes:['Scope Name','Division','Category','Description'],
  Items:['Item Reference','Scope','Measure','Units','Margin %','Description'],
- 'Cost Breakdown':['Item Reference','Section','Name','Weight (kg)','Quantity','Unit','Unit Cost (COP)','Parcial (auto)']};
+ 'Cost Breakdown':['Item Reference','Section','Name','Weight','Quantity','Unit','Unit Cost (COP)']};
 const BK_REQ={Scopes:[0,1,2],Items:[0,1,2,3,4],'Cost Breakdown':[0,1,2,4,5,6]};
 const dvName=d=>'cat_'+String(d).replace(/[^A-Za-z0-9]/g,'_');
 
@@ -1681,7 +1681,7 @@ function buildTemplate(){
   BK_HEAD[name].forEach((h,i)=>{const c=ws.getCell(2,i+1);c.value=h+(BK_REQ[name].includes(i)?' *':'');c.font={bold:true,color:{argb:'FFFFFFFF'}};
    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:BK_REQ[name].includes(i)?DARK:BLUE}};c.alignment={vertical:'middle',wrapText:true};c.border={bottom:{style:'medium',color:{argb:'FF0D47A1'}}};});
   ws.getRow(2).height=28;ws.views=[{state:'frozen',ySplit:2}];return ws;};
- const S=mk('Scopes',[34,18,30,60]),It=mk('Items',[30,14,12,12,12,60]),C=mk('Cost Breakdown',[30,28,52,13,13,10,18,18]);
+ const S=mk('Scopes',[34,18,30,60]),It=mk('Items',[30,14,12,12,12,60]),C=mk('Cost Breakdown',[30,28,52,13,13,10,18]);
  const last=BK_FIRST+BK_ROWS-1,list=(ws,col,f,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'list',allowBlank:true,formulae:[f],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid value',error:msg};};
  const num=(ws,col,op,v,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)ws.getCell(col+rr).dataValidation={type:'decimal',operator:op,formulae:Array.isArray(v)?v:[v],allowBlank:true,showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid number',error:msg};};
  list(S,'B',`Lists!$A$2:$A$${1+DIVS.length}`,'Choose a division from the list.');
@@ -1696,8 +1696,7 @@ function buildTemplate(){
  num(C,'E','greaterThan',0,'Quantity must be a number greater than 0.');
  list(C,'F',`Lists!$C$2:$C$${1+CL_UNITS.length}`,'Choose a unit from the list.');
  num(C,'G','greaterThanOrEqual',0,'Unit cost must be a number >= 0.');
- for(let rr=BK_FIRST;rr<=last;rr++){const c=C.getCell('H'+rr);c.value={formula:`IF(OR(E${rr}="",G${rr}=""),"",IF(AND(F${rr}="kg",D${rr}<>""),D${rr},1)*E${rr}*G${rr})`};c.numFmt='#,##0.00';c.font={color:{argb:'FF757575'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:GRAY}};
-  C.getCell('G'+rr).numFmt='#,##0.00';C.getCell('D'+rr).numFmt='0.0000';}
+ for(let rr=BK_FIRST;rr<=last;rr++){C.getCell('G'+rr).numFmt='#,##0.00';C.getCell('D'+rr).numFmt='0.0000';}
  L.orderNo=100;wb.views=[{activeTab:0}];
  return wb;
 }
@@ -1721,7 +1720,7 @@ async function parseWorkbook(buf){
   const bad=want.findIndex((h,i)=>hs[i]!==h);
   if(bad>=0)err(n,2,BK_HEAD[n][bad],`Column ${bad+1} header must be "${BK_HEAD[n][bad]}". Do not rename or move the template columns.`);else sheets[n]=ws;}}
  if(res.errors.length)return res;
- const rowsOf=(ws,cols)=>{const out=[];for(let r=BK_FIRST;r<=ws.rowCount;r++){const vals=[];for(let c=1;c<=cols;c++)vals.push(ws.getCell(r,c));if(vals.slice(0,cols-(ws.name==='Cost Breakdown'?1:0)).every(c=>cellText(c)===''))continue;out.push({r,c:vals});}return out;};
+ const rowsOf=(ws,cols)=>{const out=[];for(let r=BK_FIRST;r<=ws.rowCount;r++){const vals=[];for(let c=1;c<=cols;c++)vals.push(ws.getCell(r,c));if(vals.every(c=>cellText(c)===''))continue;out.push({r,c:vals});}return out;};
  // Scopes
  const seenScope={};
  rowsOf(sheets.Scopes,4).forEach(({r,c})=>{
@@ -1749,7 +1748,7 @@ async function parseWorkbook(buf){
   if(ref){const it={ref,sid,scope:sc,mea:mm||mea,units,mar,desc,row:r,ok,lines:[]};if(!seenItem[ref.toLowerCase()])seenItem[ref.toLowerCase()]=it;res.items.push(it);if(sc)sc.items.push(it);}
  });
  // Cost Breakdown
- rowsOf(sheets['Cost Breakdown'],8).forEach(({r,c})=>{
+ rowsOf(sheets['Cost Breakdown'],7).forEach(({r,c})=>{
   const ref=cellText(c[0]),sec=cellText(c[1]),name=cellText(c[2]),w=cellNum(c[3]),q=cellNum(c[4]),unit=cellText(c[5]),cost=cellNum(c[6]);let ok=true;
   const it=ref?seenItem[ref.toLowerCase()]:null;
   if(!ref){err('Cost Breakdown',r,'Item Reference','Item Reference is required.');ok=false;}else if(!it){err('Cost Breakdown',r,'Item Reference',`Item "${ref}" does not exist in the Items sheet.`);ok=false;}
@@ -1760,8 +1759,8 @@ async function parseWorkbook(buf){
   if(!unit){err('Cost Breakdown',r,'Unit','Unit is required.');ok=false;}else if(!um){err('Cost Breakdown',r,'Unit',`"${unit}" is not valid. Use ${CL_UNITS.join(', ')}.`);ok=false;}
   if(q===null){err('Cost Breakdown',r,'Quantity','Quantity is required.');ok=false;}else if(isNaN(q)||q<=0){err('Cost Breakdown',r,'Quantity','Quantity must be a number greater than 0.');ok=false;}
   if(cost===null){err('Cost Breakdown',r,'Unit Cost (COP)','Unit Cost is required (use 0 if it has no cost).');ok=false;}else if(isNaN(cost)||cost<0){err('Cost Breakdown',r,'Unit Cost (COP)','Unit Cost must be a number >= 0.');ok=false;}
-  if(w!==null){if(isNaN(w)||w<0){err('Cost Breakdown',r,'Weight (kg)','Weight must be a number >= 0.');ok=false;}else if(um&&um!=='kg'){err('Cost Breakdown',r,'Weight (kg)','Weight only applies when the Unit is kg. Clear the weight or change the unit to kg.');ok=false;}}
-  if(ok&&it){const par=((um==='kg'&&w)?w:1)*q*cost;it.lines.push({sec:sm,name,w:um==='kg'&&w?w:null,q,unit:um,cost,par,row:r});}
+  if(w!==null){if(isNaN(w)||w<0){err('Cost Breakdown',r,'Weight','Weight must be a number >= 0.');ok=false;}}
+  if(ok&&it){const par=(w?w:1)*q*cost;it.lines.push({sec:sm,name,w:w||null,q,unit:um,cost,par,row:r});}
  });
  // avisos
  res.scopes.forEach(s=>{if(!s.items.length)warn('Scopes',s.row,'Scope Name',`Scope "${s.name}" has no items; it will be created empty.`);
