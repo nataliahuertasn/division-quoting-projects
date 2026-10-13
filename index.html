@@ -1678,7 +1678,6 @@ function buildTemplate(){
  // hojas de datos
  const mk=(name,widths)=>{const ws=wb.addWorksheet(name);ws.columns=widths.map(w=>({width:w}));
   ws.getCell('A1').value=name==='Scopes'?'Scopes':name==='Items'?'Items':'Cost Breakdown';ws.getCell('A1').font={bold:true,size:14,color:{argb:BLUE}};
-  ws.getCell('A2').value='Fields with * are required. Start in the first empty row below the headers. Leave unused rows empty.';ws.getCell('A2').font={italic:true,color:{argb:'FF757575'}};
   BK_HEAD[name].forEach((h,i)=>{const c=ws.getCell(4,i+1);c.value=h+(BK_REQ[name].includes(i)?' *':'');c.font={bold:true,color:{argb:'FFFFFFFF'}};
    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:BK_REQ[name].includes(i)?DARK:BLUE}};c.alignment={vertical:'middle',wrapText:true};c.border={bottom:{style:'medium',color:{argb:'FF0D47A1'}}};});
   ws.getRow(4).height=28;ws.views=[{state:'frozen',ySplit:4}];return ws;};
