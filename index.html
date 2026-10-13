@@ -154,7 +154,7 @@ tfoot td{background:var(--gray);font-weight:700;border-top:1px solid var(--line)
 .items h4{justify-content:flex-start}
 .newitem{margin-left:auto;margin-right:16px;background:var(--blue)!important;color:#fff!important;border-radius:20px!important;height:40px;padding:0 18px!important;font-size:14px;font-weight:700;letter-spacing:.9px;display:flex;align-items:center}
 .newitem:hover{background:#1565c0!important}
-#rows tr{cursor:pointer}
+:is(#rows,#arows) tr{cursor:pointer}
 /* modal Edit Item */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:50}
 .ov.on{display:block}
@@ -270,8 +270,8 @@ td.div select.divsel:hover,td.div select.divsel:focus{border-bottom-color:#9e9e9
 .qbn span:nth-child(2){flex:1}
 .qbn button,.lk{background:none;border:0;color:var(--blue);font:inherit;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;padding:6px 8px;border-radius:4px;white-space:nowrap}
 .qbn button:hover,.lk:hover{background:#e3f2fd}
-#rows tr.hl td{background:#e6e6e6}
-#rows tr.hl td:first-child{box-shadow:inset 3px 0 0 #757575}
+:is(#rows,#arows) tr.hl td{background:#e6e6e6}
+:is(#rows,#arows) tr.hl td:first-child{box-shadow:inset 3px 0 0 #757575}
 .pq{background:#eee;padding:18px 18px 8px;margin-top:14px}
 .pq-top{display:flex;align-items:center;gap:16px;margin-bottom:14px}
 .pq-top h3{margin:0;font-size:24px;font-weight:400;color:#212121}
@@ -364,7 +364,7 @@ html #v-quote .gi .notes textarea{font-size:12px;min-height:60px}
 html #v-quote .gi .notes{min-height:70px;margin-top:14px}
 html #v-quote .gi svg[width="38"]{width:30px;height:30px}
 html #v-quote .gi select#g-div{font-size:13px}
-#rows tr.scr td.nm small.cat{color:#1976d2;background:#e3f2fd;border-radius:9px;padding:1px 7px;font-size:10px;margin-left:8px}
+:is(#rows,#arows) tr.scr td.nm small.cat{color:#1976d2;background:#e3f2fd;border-radius:9px;padding:1px 7px;font-size:10px;margin-left:8px}
 .sf-w{width:260px}
 #f-cat:disabled{color:var(--text);opacity:1;-webkit-text-fill-color:var(--text)}
 html .mf .f select#f-pt:disabled{-webkit-text-fill-color:var(--text);color:var(--text);opacity:1}
@@ -384,8 +384,8 @@ html #scd .sf input,html #scd .sf select{font-size:12px;padding:3px 0;text-trans
 html #scd .sc-ft{padding:16px 16px 0;gap:8px}
 html #scd .sc-ft .pillb{height:28px;font-size:11px;padding:0 14px}
 /* Scope: descripción en una línea bajo el nombre (opción 2) */
-#rows tr.scr td.nm .sdesc{display:block;margin:2px 0 0 24px;max-width:240px;font-size:10.5px;font-weight:400;color:#9e9e9e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#rows tr.scr td{padding-top:6px;padding-bottom:6px}
+:is(#rows,#arows) tr.scr td.nm .sdesc{display:block;margin:2px 0 0 24px;max-width:240px;font-size:10.5px;font-weight:400;color:#9e9e9e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:is(#rows,#arows) tr.scr td{padding-top:6px;padding-bottom:6px}
 /* New Scope: descripción */
 html #scd .rte{border:1px solid #e0e0e0;margin-top:4px;display:block}
 html #scd .rte .tb{height:30px;gap:2px;padding:0 6px;font-size:13px}
@@ -434,9 +434,9 @@ html #scd .rte .ed ul,html #scd .rte .ed ol{margin:4px 0;padding-left:20px}
 .items > table > thead th{text-align:left}
 .items > table > thead th.n{text-align:right}
 .items > table > thead th.c{text-align:center}
-html #rows tr.scr td.div,html #rows tr.scr td.catc{text-align:left;padding-left:8px;font-size:12px}
-html #rows tr.scr td.div select.divsel{text-align:left;text-align-last:left;width:100%;max-width:130px;padding:4px 0}
-html #rows tr.scr td.catc{color:#424242;font-weight:400}
+html :is(#rows,#arows) tr.scr td.div,html :is(#rows,#arows) tr.scr td.catc{text-align:left;padding-left:8px;font-size:12px}
+html :is(#rows,#arows) tr.scr td.div select.divsel{text-align:left;text-align-last:left;width:100%;max-width:130px;padding:4px 0}
+html :is(#rows,#arows) tr.scr td.catc{color:#424242;font-weight:400}
 #tot td{font-size:12px}
 /* New Scope: nombre arriba; división y categoría lado a lado */
 #scd .bx{width:560px;padding-bottom:18px}
@@ -463,19 +463,19 @@ table.scopet th,table.scopet td{overflow:hidden;text-overflow:ellipsis}
 table.scopet thead th{text-align:left}
 table.scopet thead th.n{text-align:right;padding-right:18px}
 table.scopet thead th.c{text-align:center}
-#rows tr.itr td{background:#fafafa;height:50px;font-size:12px;border-top:1px solid #eee;color:#424242}
-#rows tr.itr:hover td{background:#f3f3f3}
-#rows tr.itr td.itn{padding-left:34px;text-align:left;color:#212121}
-#rows tr.itr td.itn .sub{display:block;font-size:10.5px;color:#9e9e9e;margin-top:2px}
-#rows tr.itr td.itc{text-align:left;font-size:11px;color:#757575;font-weight:400}
-#rows tr.itr td.n{text-align:right;padding-right:18px}
-#rows tr.itr td.ic{text-align:center;white-space:nowrap}
-#rows tr.itr td.ic span{display:inline-block;margin:0 2px}
-#rows tr.itr.hl td{background:#e6e6e6}
-#rows tr.itr.dragging td{opacity:.45}
-#rows tr.itr.d-top td{box-shadow:inset 0 3px 0 var(--blue)}
-#rows tr.itr.d-bot td{box-shadow:inset 0 -3px 0 var(--blue)}
-#rows tr.sce td{text-align:center;color:#9e9e9e;font-size:12px;height:36px;background:#fafafa}
+:is(#rows,#arows) tr.itr td{background:#fafafa;height:50px;font-size:12px;border-top:1px solid #eee;color:#424242}
+:is(#rows,#arows) tr.itr:hover td{background:#f3f3f3}
+:is(#rows,#arows) tr.itr td.itn{padding-left:34px;text-align:left;color:#212121}
+:is(#rows,#arows) tr.itr td.itn .sub{display:block;font-size:10.5px;color:#9e9e9e;margin-top:2px}
+:is(#rows,#arows) tr.itr td.itc{text-align:left;font-size:11px;color:#757575;font-weight:400}
+:is(#rows,#arows) tr.itr td.n{text-align:right;padding-right:18px}
+:is(#rows,#arows) tr.itr td.ic{text-align:center;white-space:nowrap}
+:is(#rows,#arows) tr.itr td.ic span{display:inline-block;margin:0 2px}
+:is(#rows,#arows) tr.itr.hl td{background:#e6e6e6}
+:is(#rows,#arows) tr.itr.dragging td{opacity:.45}
+:is(#rows,#arows) tr.itr.d-top td{box-shadow:inset 0 3px 0 var(--blue)}
+:is(#rows,#arows) tr.itr.d-bot td{box-shadow:inset 0 -3px 0 var(--blue)}
+:is(#rows,#arows) tr.sce td{text-align:center;color:#9e9e9e;font-size:12px;height:36px;background:#fafafa}
 /* Settings > Division: tabla limpia */
 .dth,.drw{display:grid;grid-template-columns:minmax(220px,1.1fr) minmax(260px,2fr) 170px;column-gap:24px;align-items:center;padding:0 20px 0 28px}
 .dth{background:#eee;height:62px;font-size:11px;font-weight:500;color:#424242;text-transform:uppercase;align-items:center;padding-top:0}
@@ -513,14 +513,14 @@ table.scopet thead th.c{text-align:center}
 #dlg-ci{text-transform:none;font-size:14px}
 #dlg .bx{width:480px}
 /* Costs: reordenar scopes */
-#rows tr.scr td.gp{white-space:nowrap}
-#rows tr.scr td.gp .grip{display:inline-flex;vertical-align:middle;color:#bdbdbd;cursor:grab;padding:2px;border-radius:3px;margin-right:2px}
-#rows tr.scr:hover td.gp .grip{color:#616161}
-#rows tr.scr td.gp .grip:hover{background:#eee;color:var(--blue)}
-#rows tr.scr td.gp .grip:active{cursor:grabbing}
-#rows tr.scr.dragging td{opacity:.45}
-#rows tr.scr.d-top td{box-shadow:inset 0 3px 0 var(--blue)}
-#rows tr.scr.d-bot td{box-shadow:inset 0 -3px 0 var(--blue)}
+:is(#rows,#arows) tr.scr td.gp{white-space:nowrap}
+:is(#rows,#arows) tr.scr td.gp .grip{display:inline-flex;vertical-align:middle;color:#bdbdbd;cursor:grab;padding:2px;border-radius:3px;margin-right:2px}
+:is(#rows,#arows) tr.scr:hover td.gp .grip{color:#616161}
+:is(#rows,#arows) tr.scr td.gp .grip:hover{background:#eee;color:var(--blue)}
+:is(#rows,#arows) tr.scr td.gp .grip:active{cursor:grabbing}
+:is(#rows,#arows) tr.scr.dragging td{opacity:.45}
+:is(#rows,#arows) tr.scr.d-top td{box-shadow:inset 0 3px 0 var(--blue)}
+:is(#rows,#arows) tr.scr.d-bot td{box-shadow:inset 0 -3px 0 var(--blue)}
 .nx td.gp{white-space:nowrap;width:64px}
 .nx td.gp .grip{display:inline-flex;vertical-align:middle;color:#cfcfcf;cursor:grab;padding:2px;border-radius:3px;margin-right:2px}
 .nx tr:hover td.gp .grip{color:#616161}
@@ -529,28 +529,28 @@ table.scopet thead th.c{text-align:center}
 .nx tr.d-top td{box-shadow:inset 0 3px 0 var(--blue)}
 .nx tr.d-bot td{box-shadow:inset 0 -3px 0 var(--blue)}
 /* Costs: scope consolidado + ítems anidados */
-#rows tr.scr td{background:#fff;border-top:1px solid #e0e0e0;height:52px;font-size:12px;cursor:pointer}
-#rows tr.scr:hover td{background:#fafafa}
-#rows tr.scr td.nm{font-weight:500;color:#212121;text-align:left}
-#rows tr.scr td.nm small{font-weight:400;color:#9e9e9e;margin-left:6px}
-#rows tr.scr td.n,.items th.n,#tot td.n{text-align:right;padding-right:18px}
-#rows tr.scr td.div{text-align:left}
+:is(#rows,#arows) tr.scr td{background:#fff;border-top:1px solid #e0e0e0;height:52px;font-size:12px;cursor:pointer}
+:is(#rows,#arows) tr.scr:hover td{background:#fafafa}
+:is(#rows,#arows) tr.scr td.nm{font-weight:500;color:#212121;text-align:left}
+:is(#rows,#arows) tr.scr td.nm small{font-weight:400;color:#9e9e9e;margin-left:6px}
+:is(#rows,#arows) tr.scr td.n,.items th.n,:is(#tot,#atot) td.n{text-align:right;padding-right:18px}
+:is(#rows,#arows) tr.scr td.div{text-align:left}
 .sc-chv{display:inline-flex;vertical-align:middle;margin-right:4px;color:#757575;transition:transform .15s;transform:rotate(-90deg)}
-#rows tr.scr.open .sc-chv{transform:rotate(0)}
-#rows tr.scr.hl td{background:#e6e6e6}
-#rows tr.scx>td{padding:4px 12px 14px 0;background:#fafafa}
+:is(#rows,#arows) tr.scr.open .sc-chv{transform:rotate(0)}
+:is(#rows,#arows) tr.scr.hl td{background:#e6e6e6}
+:is(#rows,#arows) tr.scx>td{padding:4px 12px 14px 0;background:#fafafa}
 .nx{width:100%;border-collapse:collapse;background:#fff;border-radius:4px;overflow:hidden}
 .nx th{background:#eee;font-size:10.5px;padding:10px 6px;text-align:left;white-space:nowrap}
 .nx td{height:40px;font-size:12px;padding:0 6px;border-top:1px solid #eee;background:#fff}
 .nx tr.hl td{background:#e6e6e6}
 .nx tr.sce td{color:#9e9e9e;text-align:center;height:34px}
-#rows tr.scx tr[data-ri]{cursor:pointer}
+:is(#rows,#arows) tr.scx tr[data-ri]{cursor:pointer}
 /* Costs: scopes */
-#rows tr.sch td{background:#f5f5f5;border-top:1px solid #e0e0e0;font-weight:500;color:#212121;height:44px}
-#rows tr.sch td b{font-size:13px}
-#rows tr.sch td.div{text-align:left}
-#rows tr.sch select.divsel{font-size:11px;width:120px;text-align:left;text-align-last:left;border-bottom:1px solid #bdbdbd}
-#rows tr.sce td{height:34px;color:#9e9e9e;font-size:12px;background:#fff}
+:is(#rows,#arows) tr.sch td{background:#f5f5f5;border-top:1px solid #e0e0e0;font-weight:500;color:#212121;height:44px}
+:is(#rows,#arows) tr.sch td b{font-size:13px}
+:is(#rows,#arows) tr.sch td.div{text-align:left}
+:is(#rows,#arows) tr.sch select.divsel{font-size:11px;width:120px;text-align:left;text-align-last:left;border-bottom:1px solid #bdbdbd}
+:is(#rows,#arows) tr.sce td{height:34px;color:#9e9e9e;font-size:12px;background:#fff}
 .addi{background:none;border:0;color:var(--blue);font:inherit;font-size:12px;font-weight:700;letter-spacing:.4px;display:inline-flex;align-items:center;gap:2px;cursor:pointer;padding:4px 6px;border-radius:4px;text-transform:uppercase}
 .addi:hover{background:#e3f2fd}
 .pencil{background:none;border:0;color:#616161;font-size:15px;cursor:pointer;margin-left:8px;padding:2px 4px}
@@ -1068,6 +1068,14 @@ table.scopet thead th.c{text-align:center}
             <tfoot id="tot"></tfoot>
           </table>
         </div>
+        <div class="items alts">
+          <h4>Alternates <button class="newitem" id="newalt">+ Add Alternate</button></h4>
+          <table>
+            <thead><tr><th class="c" style="width:60px">#</th><th>ALTERNATE</th><th>DIVISION</th><th>CATEGORY</th><th class="n">QTY</th><th class="n">COST</th><th class="n">MARGIN</th><th class="n">GROSS MARGIN</th><th class="n">SALES PRICE</th><th class="c">ACTIONS</th></tr></thead>
+            <tbody id="arows"></tbody>
+            <tfoot id="atot"></tfoot>
+          </table>
+        </div>
       </div>
       <div class="pane" data-p="versions"><div class="placeholder">Versions — pendiente de referencia visual.</div></div>
       <div class="pane" data-p="tasks"><div class="placeholder">Tasks — pendiente de referencia visual.</div></div>
@@ -1371,8 +1379,9 @@ function renderSum(){
 }
 function closeItem(){$('#ov').classList.remove('on');ED=null;}
 document.addEventListener('click',e=>{
- const row=e.target.closest('#rows tr'); if(row){if(row.dataset.ri===undefined||e.target.closest('select')||e.target.closest('button'))return;current.rowIdx=+row.dataset.ri;openItem(row.children[1].textContent);return;}
+ const row=e.target.closest('#rows tr,#arows tr'); if(row){if(row.dataset.ri===undefined||e.target.closest('select')||e.target.closest('button'))return;current.rowIdx=+row.dataset.ri;openItem(row.children[1].textContent);return;}
  if(e.target.closest('#newitem')){openScopeDlg();return;}
+ if(e.target.closest('#newalt')){openScopeDlg(null,true);return;}
  if(!ED)return;
  if(e.target.closest('#mclose')) closeItem();
  else if(e.target.closest('#msave')){saveItemModal();}
@@ -1463,7 +1472,7 @@ function fillScopeCats(sel){
 }
 function syncDiv(x){x._div=x._sc.map(si=>(x._scopes[si]||{}).div||'');}
 function recalcTot(x){
- const cl=qCur(x),rows=x._calc.rows;
+ const cl=qCur(x),rows=x._calc.rows.filter((r,i)=>!(x._scopes&&x._sc&&x._scopes[x._sc[i]]&&x._scopes[x._sc[i]].alt));   // los alternates no suman al valor de la cotización
  const C=rows.reduce((a,r)=>a+parse(r[4]),0),G=rows.reduce((a,r)=>a+parse(r[6]),0),S=rows.reduce((a,r)=>a+parse(r[8]),0);
  x._calc.tot=[n2(C)+' '+cl,(S?G/S*100:0).toFixed(2)+'%',n2(G)+' '+cl,n2(S)+' '+cl];
  x[4]=n0(S)+' '+(cl==='USD'?'$':'COP');
@@ -1482,21 +1491,25 @@ function buildCosts(x){
  const del='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.500l-1-1h-5l-1 1H5v2h14z"/></svg>';
  const cp='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11z"/></svg>';
  const hl=current&&current.hl;
- let html='';
- x._scopes.forEach((sc,si)=>{
+ let html='',ahtml='',nb=0,na=0;
+ x._scopes.forEach((sc,si)=>{let rh='';const num=sc.alt?++na:++nb;
   const idx=x._sc.map((s,i)=>s===si?i:-1).filter(i=>i>=0),open=x._exp.has(si);
   const C=idx.reduce((a,i)=>a+parse(rows[i][4]),0),G=idx.reduce((a,i)=>a+parse(rows[i][6]),0),S=idx.reduce((a,i)=>a+parse(rows[i][8]),0);
   const Q=idx.reduce((a,i)=>a+(parseFloat(rows[i][3])||0),0);const mine=hl&&idx.some(i=>String(x._sp&&x._sp[i])===hl);
-  html+=`<tr class="scr${open?' open':''}${mine?' hl':''}" data-si="${si}"><td class="c gp"><span class="grip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span><span class="no">${si+1}</span></td><td class="nm"><span class="sc-chv">${chvI}</span>${sc.name}${idx.length?` <small>${idx.length} item${idx.length>1?'s':''}</small>`:''}</td><td class="div"><select class="divsel scsel" data-si="${si}" aria-label="Division of ${sc.name}"></select></td><td class="catc">${sc.cat||'—'}</td><td class="n">${idx.length?(+Q.toFixed(2)).toLocaleString('de-DE',{maximumFractionDigits:2}):''}</td><td class="n">${idx.length?n2(C)+' '+cur:''}</td><td class="n">${idx.length?(S?(G/S*100).toFixed(2)+'%':'0.00%'):''}</td><td class="n">${idx.length?n2(G)+' '+cur:''}</td><td class="n">${idx.length?n2(S)+' '+cur:''}</td><td class="c"><button class="ib" data-scm="${si}" title="Actions">${kebab}</button></td></tr>`;
+  rh+=`<tr class="scr${open?' open':''}${mine?' hl':''}" data-si="${si}"><td class="c gp"><span class="grip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span><span class="no">${num}</span></td><td class="nm"><span class="sc-chv">${chvI}</span>${sc.name}${idx.length?` <small>${idx.length} item${idx.length>1?'s':''}</small>`:''}</td><td class="div"><select class="divsel scsel" data-si="${si}" aria-label="Division of ${sc.name}"></select></td><td class="catc">${sc.cat||'—'}</td><td class="n">${idx.length?(+Q.toFixed(2)).toLocaleString('de-DE',{maximumFractionDigits:2}):''}</td><td class="n">${idx.length?n2(C)+' '+cur:''}</td><td class="n">${idx.length?(S?(G/S*100).toFixed(2)+'%':'0.00%'):''}</td><td class="n">${idx.length?n2(G)+' '+cur:''}</td><td class="n">${idx.length?n2(S)+' '+cur:''}</td><td class="c"><button class="ib" data-scm="${si}" title="Actions">${kebab}</button></td></tr>`;
   if(open){
-   html+=`<tr class="scx"><td></td><td colspan="9"><table class="nx"><thead><tr><th class="c">#</th><th>DESCRIPTION</th><th>CATEGORY</th><th>QTY</th><th>COST</th><th>MARGIN</th><th>GROSS MARGIN</th><th>PRICE PER QUANTITY</th><th>SALE PRICE</th><th class="c">ACTION</th></tr></thead><tbody>`;
-   if(!idx.length)html+=`<tr class="sce"><td colspan="10">No items in this scope yet. Use Add Item in the scope actions.</td></tr>`;
-   idx.forEach((i,k)=>{const r=rows[i];html+=`<tr data-ri="${i}"${String(x._sp&&x._sp[i])===hl&&hl?' class="hl"':''}><td class="c gp"><span class="grip igrip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span>${k+1}</td><td>${r[0]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td class="ic"><span data-toast="Ver item">${eye}</span><span data-toast="Eliminar item">${del}</span><span data-toast="Duplicar item">${cp}</span></td></tr>`;});
-   html+='</tbody></table></td></tr>';
+   rh+=`<tr class="scx"><td></td><td colspan="9"><table class="nx"><thead><tr><th class="c">#</th><th>DESCRIPTION</th><th>CATEGORY</th><th>QTY</th><th>COST</th><th>MARGIN</th><th>GROSS MARGIN</th><th>PRICE PER QUANTITY</th><th>SALE PRICE</th><th class="c">ACTION</th></tr></thead><tbody>`;
+   if(!idx.length)rh+=`<tr class="sce"><td colspan="10">No items in this scope yet. Use Add Item in the scope actions.</td></tr>`;
+   idx.forEach((i,k)=>{const r=rows[i];rh+=`<tr data-ri="${i}"${String(x._sp&&x._sp[i])===hl&&hl?' class="hl"':''}><td class="c gp"><span class="grip igrip" draggable="true" title="Drag to reorder" aria-label="Drag to reorder"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h2v2H9zm4 0h2v2h-2zM9 9h2v2H9zm4 0h2v2h-2zM9 14h2v2H9zm4 0h2v2h-2zM9 19h2v2H9zm4 0h2v2h-2z"/></svg></span>${k+1}</td><td>${r[0]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td class="ic"><span data-toast="Ver item">${eye}</span><span data-toast="Eliminar item">${del}</span><span data-toast="Duplicar item">${cp}</span></td></tr>`;});
+   rh+='</tbody></table></td></tr>';
   }
+  if(sc.alt)ahtml+=rh;else html+=rh;
  });
- if(!x._scopes.length)html='<tr class="sce"><td colspan="10" style="height:64px">This quote has no scopes yet. Use + New Scope to start building it.</td></tr>';
- $('#rows').innerHTML=html;
+ if(!nb)html='<tr class="sce"><td colspan="10" style="height:64px">This quote has no scopes yet. Use + New Scope to start building it.</td></tr>';
+ if(!na)ahtml='<tr class="sce"><td colspan="10" style="height:64px">This quote has no alternates yet. Use + Add Alternate to add one.</td></tr>';
+ $('#rows').innerHTML=html;$('#arows').innerHTML=ahtml;
+ {const ai=x._sc.map((s,i)=>(x._scopes[s]&&x._scopes[s].alt)?i:-1).filter(i=>i>=0),aC=ai.reduce((a,i)=>a+parse(rows[i][4]),0),aG=ai.reduce((a,i)=>a+parse(rows[i][6]),0),aS=ai.reduce((a,i)=>a+parse(rows[i][8]),0);
+ $('#atot').innerHTML=`<tr><td></td><td>TOTALS</td><td></td><td></td><td></td><td class="n">${n2(aC)+' '+cur}</td><td class="n">${(aS?aG/aS*100:0).toFixed(2)+'%'}</td><td class="n">${n2(aG)+' '+cur}</td><td class="n">${n2(aS)+' '+cur}</td><td></td></tr>`;}
  fillDivSelects();
  $('#qbanner').hidden=true;
  $('#tot').innerHTML=`<tr><td></td><td>TOTALS</td><td></td><td></td><td></td><td class="n">${tot[0]}</td><td class="n">${tot[1]}</td><td class="n">${tot[2]}</td><td class="n">${tot[3]}</td><td></td></tr>`;
@@ -1521,7 +1534,7 @@ function moveItem(x,from,target,before){ // reordena dentro del mismo scope
  x._calc.rows=order.map(o=>rows[o]);remapAux(x,order);x._sc=order.map(o=>x._sc[o]);x._sp=sp;syncDiv(x);
 }
 let DRAG=null,DRAGI=null;
-const clearDnd=()=>$$('#rows tr').forEach(r=>r.classList.remove('dragging','d-top','d-bot'));
+const clearDnd=()=>$$('#rows tr,#arows tr').forEach(r=>r.classList.remove('dragging','d-top','d-bot'));
 document.addEventListener('dragstart',e=>{
  const g=e.target.closest&&e.target.closest('.grip');if(!g)return;
  if(g.classList.contains('igrip')){const tr=g.closest('tr[data-ri]');DRAGI=+tr.dataset.ri;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','i'+DRAGI);try{e.dataTransfer.setDragImage(tr,20,20);}catch(_){}setTimeout(()=>tr.classList.add('dragging'),0);return;}
@@ -1531,24 +1544,25 @@ document.addEventListener('dragstart',e=>{
 });
 document.addEventListener('dragover',e=>{
  if(DRAGI!==null){
-  const tr=e.target.closest&&e.target.closest('#rows tr[data-ri]');if(!tr)return;
+  const tr=e.target.closest&&e.target.closest('#rows tr[data-ri],#arows tr[data-ri]');if(!tr)return;
   const x=current.x;if(x._sc[+tr.dataset.ri]!==x._sc[DRAGI])return;   // solo dentro del mismo scope
   e.preventDefault();e.dataTransfer.dropEffect='move';
-  $$('#rows tr[data-ri]').forEach(r=>r.classList.remove('d-top','d-bot'));
+  $$('#rows tr[data-ri],#arows tr[data-ri]').forEach(r=>r.classList.remove('d-top','d-bot'));
   const b=tr.getBoundingClientRect();tr.classList.add(e.clientY<b.top+b.height/2?'d-top':'d-bot');return;
  }
- if(DRAG===null)return;const tr=e.target.closest&&e.target.closest('#rows tr.scr');if(!tr)return;
+ if(DRAG===null)return;const tr=e.target.closest&&e.target.closest('#rows tr.scr,#arows tr.scr');if(!tr)return;
+ if(!!current.x._scopes[+tr.dataset.si].alt!==!!current.x._scopes[DRAG].alt)return;
  e.preventDefault();e.dataTransfer.dropEffect='move';
- $$('#rows tr.scr').forEach(r=>r.classList.remove('d-top','d-bot'));
+ $$('#rows tr.scr,#arows tr.scr').forEach(r=>r.classList.remove('d-top','d-bot'));
  const b=tr.getBoundingClientRect();tr.classList.add(e.clientY<b.top+b.height/2?'d-top':'d-bot');
 });
 document.addEventListener('drop',e=>{
  if(DRAGI!==null){
-  const tr=e.target.closest&&e.target.closest('#rows tr[data-ri]');if(!tr)return;
+  const tr=e.target.closest&&e.target.closest('#rows tr[data-ri],#arows tr[data-ri]');if(!tr)return;
   const x=current.x,t=+tr.dataset.ri;if(x._sc[t]!==x._sc[DRAGI])return;e.preventDefault();
   const b=tr.getBoundingClientRect(),from=DRAGI;DRAGI=null;moveItem(x,from,t,e.clientY<b.top+b.height/2);buildCosts(x);toast('Ítem movido');return;
  }
- if(DRAG===null)return;const tr=e.target.closest&&e.target.closest('#rows tr.scr');if(!tr)return;e.preventDefault();
+ if(DRAG===null)return;const tr=e.target.closest&&e.target.closest('#rows tr.scr,#arows tr.scr');if(!tr)return;if(!!current.x._scopes[+tr.dataset.si].alt!==!!current.x._scopes[DRAG].alt)return;e.preventDefault();
  const b=tr.getBoundingClientRect(),over=+tr.dataset.si,before=e.clientY<b.top+b.height/2;
  let to=before?over:over+1;if(DRAG<to)to--;
  const from=DRAG;DRAG=null;moveScope(current.x,from,to);buildCosts(current.x);if(from!==to)toast('Scope movido a la posición '+(to+1));
@@ -1558,22 +1572,25 @@ document.addEventListener('change',e=>{if(e.target.id==='scd-d')fillScopeCats(''
 document.addEventListener('mousedown',e=>{const b=e.target.closest('#scd-tb [data-cmd]');if(!b)return;e.preventDefault();const c=b.dataset.cmd;document.execCommand(c,false,c==='foreColor'?'#1976d2':null);});
 /* Preview Quote: vista para el cliente (scopes y precios) */
 const QP_T={
- en:{title:'Preview Quote',quote:'QUOTE',prepared:'Prepared for',id:'ID',date:'Date',scope:'Scope',amount:'Amount',total:'TOTAL',qty:'Qty',empty:'This quote has no scopes yet.'},
- es:{title:'Vista previa de la cotización',quote:'COTIZACIÓN',prepared:'Preparada para',id:'ID',date:'Fecha',scope:'Alcance',amount:'Valor',total:'TOTAL',qty:'Cant.',empty:'Esta cotización aún no tiene alcances.'}};
+ en:{title:'Preview Quote',quote:'QUOTE',prepared:'Prepared for',id:'ID',date:'Date',scope:'Scope',amount:'Amount',total:'TOTAL',qty:'Qty',empty:'This quote has no scopes yet.',alts:'Alternates'},
+ es:{title:'Vista previa de la cotización',quote:'COTIZACIÓN',prepared:'Preparada para',id:'ID',date:'Fecha',scope:'Alcance',amount:'Valor',total:'TOTAL',qty:'Cant.',alts:'Alternativas',empty:'Esta cotización aún no tiene alcances.'}};
 const MES_ES={Jan:'Ene',Apr:'Abr',Aug:'Ago',Dec:'Dic'};
 function openLangDlg(){$('#lg-s').value='';$('#lg-g').disabled=true;$('#lgd').classList.add('on');}
 function openQuotePreview(lang){
  const T=QP_T[lang]||QP_T.en,x=current.x;ensureScopes(x);const cur=qCur(x),rows=calcQuote(x).rows,cl=cur==='USD'?'$':'COP';
  const m=n=>n2(n)+' '+cl;let total=0;
  const dm=x[3].split(' ').slice(0,2),dt=lang==='es'?(MES_ES[dm[0]]||dm[0])+' '+dm[1]:dm.join(' ');
- const body=x._scopes.map((s,si)=>{
+ const mkBody=alt=>x._scopes.map((s,si)=>{
+  if(!!s.alt!==alt)return'';
   const idx=x._sc.map((c,i)=>c===si?i:-1).filter(i=>i>=0);if(!idx.length)return'';
-  const sum=idx.reduce((a,i)=>a+parse(rows[i][8]),0);total+=sum;
+  const sum=idx.reduce((a,i)=>a+parse(rows[i][8]),0);if(!alt)total+=sum;
   return `<tr class="qp-s"><td><b>${s.name}</b><small>${s.div}${s.cat?' · '+s.cat:''}</small>${s.desc?`<div class="qp-d">${s.desc}</div>`:''}</td><td class="r"><b>${m(sum)}</b></td></tr>`+idx.map(i=>`<tr class="qp-i"><td>${rows[i][0]}<small>${T.qty} ${rows[i][3]}</small></td><td class="r">${rows[i][8]}</td></tr>`).join('');
  }).join('');
+ const body=mkBody(false),altBody=mkBody(true);
  $('#qpv .qp-hd h3').textContent=T.title;
  $('#qpv-b').innerHTML=`<div class="qp-top"><div><small>${T.quote}</small><h2>${x[2]}</h2><div class="qp-m">${T.prepared} <b>${x[1]}</b></div></div><div class="qp-r"><small>${T.id}</small><b>${x[0]}</b><small>${T.date}</small><b>${dt}</b></div></div>
- ${body?`<table class="qp-t"><thead><tr><th>${T.scope}</th><th class="r">${T.amount}</th></tr></thead><tbody>${body}</tbody><tfoot><tr><td>${T.total}</td><td class="r">${m(total)}</td></tr></tfoot></table>`:`<div class="qp-e">${T.empty}</div>`}`;
+ ${body?`<table class="qp-t"><thead><tr><th>${T.scope}</th><th class="r">${T.amount}</th></tr></thead><tbody>${body}</tbody><tfoot><tr><td>${T.total}</td><td class="r">${m(total)}</td></tr></tfoot></table>`:`<div class="qp-e">${T.empty}</div>`}
+ ${altBody?`<table class="qp-t"><thead><tr><th>${T.alts}</th><th class="r">${T.amount}</th></tr></thead><tbody>${altBody}</tbody></table>`:''}`;
  $('#qpv').classList.add('on');
 }
 document.addEventListener('click',e=>{
@@ -1585,7 +1602,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#lgd').classList
 document.addEventListener('click',e=>{if(e.target.closest('#qpv-x')||e.target.id==='qpv')$('#qpv').classList.remove('on');});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#qpv').classList.contains('on'))$('#qpv').classList.remove('on');});
 /* acciones del scope */
-let SCEDIT=null,SCDEL=null;
+let SCEDIT=null,SCDEL=null,SCALT=false;
 function removeScope(x,si){
  if(!x._calc)x._calc=JSON.parse(JSON.stringify(calcQuote(x)));
  const keep=x._sc.map((s,i)=>s!==si?i:-1).filter(i=>i>=0);
@@ -1597,7 +1614,7 @@ function removeScope(x,si){
 }
 function duplicateScope(x,si){
  if(!x._calc)x._calc=JSON.parse(JSON.stringify(calcQuote(x)));
- const sc=x._scopes[si];x._scopes.push({name:sc.name+' (copy)',div:sc.div,cat:sc.cat,desc:sc.desc});const ns=x._scopes.length-1;
+ const sc=x._scopes[si];x._scopes.push({name:sc.name+' (copy)',div:sc.div,cat:sc.cat,desc:sc.desc,alt:sc.alt});const ns=x._scopes.length-1;
  x._sc.map((s,i)=>s===si?i:-1).filter(i=>i>=0).forEach(i=>{x._calc.rows.push(x._calc.rows[i].slice());x._sc.push(ns);const ni=x._calc.rows.length-1;['_mat','_imeta'].forEach(k=>{if(x[k]&&x[k][i])x[k][ni]=JSON.parse(JSON.stringify(x[k][i]));});});
  syncDiv(x);recalcTot(x);return ns;
 }
@@ -1610,18 +1627,18 @@ function scopeAction(si,a){
 }
 document.addEventListener('click',e=>{
  const k=e.target.closest('[data-scm]');
- if(k){const si=+k.dataset.scm;setTimeout(()=>openMenu(k,['Edit Scope','Duplicate Scope','Delete Scope','Add Item'],a=>scopeAction(si,a)),0);return;}
- const r=e.target.closest('#rows tr.scr');
+ if(k){const si=+k.dataset.scm;setTimeout(()=>openMenu(k,current.x._scopes[si].alt?['Edit Alternate','Duplicate Alternate','Delete Alternate','Add Item']:['Edit Scope','Duplicate Scope','Delete Scope','Add Item'],a=>scopeAction(si,a.replace(' Alternate',' Scope'))),0);return;}
+ const r=e.target.closest('#rows tr.scr,#arows tr.scr');
  if(r&&!e.target.closest('select')&&!e.target.closest('button')){const si=+r.dataset.si,x=current.x;x._exp.has(si)?x._exp.delete(si):x._exp.add(si);buildCosts(x);return;}
  if(e.target.closest('#dsc-c')||e.target.id==='dsc')$('#dsc').classList.remove('on');
  if(e.target.closest('#dsc-ok')){const x=current.x,nm=x._scopes[SCDEL].name;removeScope(x,SCDEL);SCDEL=null;$('#dsc').classList.remove('on');buildCosts(x);toast('Scope "'+nm+'" eliminado');}
 });
 /* diálogo New Scope / Edit Scope */
-function openScopeDlg(sc){
+function openScopeDlg(sc,alt){SCALT=sc?!!sc.alt:!!alt;
  $('#scd-n').value=sc?sc.name:'';$('#scd-d').innerHTML='<option value=""></option>'+DIVS.map(d=>`<option>${d}</option>`).join('');fillScopeCats('');
  if(sc)$('#scd-d').value=sc.div;fillScopeCats(sc?sc.cat:'');
  $('#scd-ds').innerHTML=sc?(sc.desc||''):'';
- $('#scd .sc-hd h3').textContent=sc?'Edit Scope':'New Scope';$('#scd-i').style.display=sc?'none':'';
+ $('#scd .sc-hd h3').textContent=(sc?'Edit ':'New ')+(SCALT?'Alternate':'Scope');$('#scd-n').previousElementSibling.firstChild.textContent=SCALT?'Alternate name ':'Scope name ';$('#scd-i').style.display=sc?'none':'';
  if(!sc)SCEDIT=null;
  $$('#scd .sf').forEach(f=>f.classList.remove('err'));$('#scd').classList.add('on');setTimeout(()=>$('#scd-n').focus(),0);
 }
@@ -1630,10 +1647,10 @@ function createScope(thenItem){
  $('#scd-n').closest('.sf').classList.toggle('err',!nm);$('#scd-d').closest('.sf').classList.toggle('err',!dv);
  if(!nm||!dv||!cat){toast('Complete nombre, división y categoría del scope');return;}
  ensureScopes(x);
- if(SCEDIT!=null){x._scopes[SCEDIT].name=nm;x._scopes[SCEDIT].div=dv;setScopeCat(x,SCEDIT,cat);x._scopes[SCEDIT].desc=$('#scd-ds').innerHTML.trim();syncDiv(x);SCEDIT=null;$('#scd').classList.remove('on');buildCosts(x);toast('Scope actualizado');return;}
- x._scopes.push({name:nm,div:dv,cat,desc:$('#scd-ds').innerHTML.trim()});const si=x._scopes.length-1;
+ if(SCEDIT!=null){x._scopes[SCEDIT].name=nm;x._scopes[SCEDIT].div=dv;setScopeCat(x,SCEDIT,cat);x._scopes[SCEDIT].desc=$('#scd-ds').innerHTML.trim();syncDiv(x);SCEDIT=null;$('#scd').classList.remove('on');buildCosts(x);toast(SCALT?'Alternate actualizado':'Scope actualizado');return;}
+ x._scopes.push({name:nm,div:dv,cat,desc:$('#scd-ds').innerHTML.trim(),alt:SCALT||undefined});const si=x._scopes.length-1;
  $('#scd').classList.remove('on');buildCosts(x);
- if(thenItem){current.rowIdx=null;x._exp.add(si);buildCosts(x);openItem('',true,si);}else toast('Scope "'+nm+'" creado');
+ if(thenItem){current.rowIdx=null;x._exp.add(si);buildCosts(x);openItem('',true,si);}else toast((SCALT?'Alternate "':'Scope "')+nm+'" creado');
 }
 document.addEventListener('click',e=>{
  if(e.target.closest('#scd-x')||e.target.id==='scd')$('#scd').classList.remove('on');
@@ -2036,11 +2053,11 @@ function applyQuote(){
 }
 function scopesOf(q){ // un renglón por SCOPE (no por ítem): valor = suma de sus ítems
  ensureScopes(q);q._sp=q._sp||{};const its=itemsOf(q);
- return q._scopes.map((s,si)=>{
+ return q._scopes.map((s,si)=>s.alt?null:(()=>{
   const idx=q._sc.map((c,i)=>c===si?i:-1).filter(i=>i>=0),val=idx.reduce((a,i)=>a+its[i].sale,0);
   const ps=[...new Set(idx.map(i=>q._sp[i]).filter(Boolean))];
   return{i:si,desc:s.name,div:s.div,val,idx,n:idx.length,prj:(idx.length&&idx.every(i=>q._sp[i])&&ps.length===1)?ps[0]:null};
- });
+ })()).filter(Boolean);
 }
 function renderScopes(){
  const q=NP.card,box=$('#np-scopes'),sc=scopesOf(q),cur=q[4].includes('$')?'USD':'COP';
