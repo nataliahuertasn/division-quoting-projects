@@ -1883,6 +1883,7 @@ function setTab(t){
 /* ---- navegación ---- */
 function show(v){$$('.view').forEach(e=>e.classList.toggle('active',e.id==='v-'+v));
  $$('#side .nv').forEach(b=>b.classList.toggle('cur',(b.dataset.nv==='sales'&&(v==='board'||v==='quote'||v==='leads'))||(b.dataset.nv==='proj'&&(v==='projects'||v==='pdetail'))||(b.dataset.nv==='set'&&v==='settings')));
+ if(v==='board'&&$('#board').children.length)renderBoard();
  if(v==='projects')loadProj();
  if(v==='leads')showLeads();
  $('#nav-leads').classList.toggle('on',v==='leads');
