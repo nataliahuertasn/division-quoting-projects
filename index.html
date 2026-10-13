@@ -880,22 +880,22 @@ table.scopet thead th.c{text-align:center}
 .items h4 .bulkbtn:hover{color:var(--blue)}
 .items h4 .bulkbtn::after{content:attr(data-tip);position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);background:#616161;color:#fff;font:500 11px Roboto,Arial,sans-serif;padding:4px 8px;border-radius:3px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:30}
 .items h4 .bulkbtn:hover::after,.items h4 .bulkbtn:focus-visible::after{opacity:1}
-#bkd .bkb{width:820px;max-width:94vw;max-height:90vh;display:flex;flex-direction:column;padding:0;border-radius:4px}
-#bkd .bk-h{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #e6e6e6}
+#bkd .bkb{width:480px;max-width:94vw;max-height:90vh;display:flex;flex-direction:column;padding:0;border-radius:4px}
+#bkd .bk-h{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #e6e6e6}
 #bkd .bk-h h3{margin:0;font-size:16px;font-weight:500;color:#424242}
 #bkd .bk-h .x{background:none;border:0;color:#90a4c8;padding:0;display:flex;cursor:pointer}
-#bk-b{padding:16px 20px;overflow:auto;font-size:13px;color:#424242;min-height:200px}
-#bk-f{display:flex;justify-content:flex-end;gap:8px;padding:8px 14px;border-top:1px solid #e6e6e6}
+#bk-b{padding:16px 20px;overflow:auto;font-size:13px;color:#424242;min-height:0}
+#bk-f{display:flex;justify-content:flex-end;gap:8px;padding:4px 12px;border-top:1px solid #e6e6e6}
 #bk-f button{background:none;border:0;height:36px;padding:0 14px;font-size:13px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:#616161;border-radius:4px;cursor:pointer}
 #bk-f button.ok{color:var(--blue)}#bk-f button:hover{background:#f0f0f0}#bk-f button:disabled{color:#bdbdbd;cursor:not-allowed;background:none}
 .bk-p{margin:0 0 14px;line-height:1.5}
 .bk-st{display:flex;align-items:center;gap:12px;padding:10px 0}
 .bk-st>div{flex:1}.bk-st small{display:block;color:#757575;margin-top:2px;font-size:12px}
 .bk-n{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
-.bk-b2{background:#fff;border:1px solid var(--blue);color:var(--blue);border-radius:4px;height:34px;padding:0 14px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer}
+.bk-b2{background:#fff;border:1px solid var(--blue);color:var(--blue);border-radius:4px;height:30px;padding:0 12px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer}
 .bk-b2:hover{background:#e3f2fd}
-.bk-act{display:flex;gap:14px;justify-content:center;align-items:center;padding:34px 0 24px}
-.bk-act .bk-b2{display:inline-flex;align-items:center;height:34px;cursor:pointer}
+.bk-act{display:flex;gap:12px;justify-content:center;align-items:center;padding:12px 0 6px}
+.bk-act .bk-b2{display:inline-flex;align-items:center;height:30px;cursor:pointer}
 .bk-er{margin-top:10px;color:#c62828;background:#ffebee;border-radius:4px;padding:8px 12px}
 .bk-busy{display:flex;flex-direction:column;align-items:center;gap:10px;padding:50px 0}.bk-busy small{color:#757575}
 .bk-sp{width:36px;height:36px;border:4px solid #e3f2fd;border-top-color:var(--blue);border-radius:50%;animation:bksp .8s linear infinite}
@@ -1815,7 +1815,7 @@ function bkRender(){
  if(BK.file)h+=`<div class="bk-file" style="text-align:center">${esc(BK.file)}</div>`;
  if(BK.msg)h+=`<div class="bk-er">${esc(BK.msg)}</div>`;
  if(r&&ne)h+=`<div class="bk-bn err" style="margin-top:12px"><b>${ne} error${ne>1?'s':''} found.</b> Correct the file and upload it again.</div><div class="bk-sc"><table class="bk-t e"><thead><tr><th>Sheet</th><th>Row</th><th>Field</th><th>Problem</th></tr></thead><tbody>${r.errors.slice(0,300).map(e=>`<tr><td>${esc(e.sheet)}</td><td>${esc(e.row)}</td><td>${esc(e.field)}</td><td>${esc(e.msg)}</td></tr>`).join('')}</tbody></table>${ne>300?`<div class="bk-more">Showing the first 300 of ${ne}.</div>`:''}</div>`;
- b.innerHTML=h;
+ b.innerHTML=h;$('#bkd .bkb').style.width=(r&&ne)?'760px':'';
  f.innerHTML=`<button id="bk-cl">Cancel</button><button class="ok" id="bk-ok"${r&&!ne?'':' disabled'}>Save</button>`;
 }
 async function bkHandle(file){
