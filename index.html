@@ -1676,7 +1676,7 @@ const textToHtml=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 const esc=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 // Una sola hoja ("costs") con las columnas del Excel de referencia. Los scopes se crean por el nombre de la columna Scope y los ítems por Scope + Item.
 // División, categoría, medida, unidades y margen no vienen en el archivo: se completan después en Costs (división/categoría en el scope; medida, unidades y margen al abrir el ítem).
-const BK_COLS=['Scope','Item','Type','Family','TypeItem','Weight','Quantity','Unit','Cost','Currency'];
+const BK_COLS=['Scope','Item','Type','Family','Typeitem','Weight','Quantity','Unit','Cost','Currency'];
 const BK_REQ=[0,1,2,4,6,7,8,9];
 const BK_SHEET='costs';
 // Monedas aceptadas en la carga. Maqueta: tasas estandarizadas en COP por unidad (el software trabaja siempre en pesos y convierte a la moneda de la cotización).
@@ -1693,7 +1693,7 @@ function buildTemplate(){
  L.getCell('B1').value='Units';CL_UNITS.forEach((d,i)=>L.getCell(2+i,2).value=d);
  L.getCell('C1').value='Currencies';CUR_LIST.forEach((d,i)=>L.getCell(2+i,3).value=d);
  const C=wb.addWorksheet(BK_SHEET);C.columns=[34,34,26,18,60,10,10,8,14,10].map(w=>({width:w}));
- BK_COLS.forEach((h,i)=>{const c=C.getCell(1,i+1);c.value=h;c.font={bold:true,color:{argb:'FF000000'}};if(BK_REQ.includes(i))c.fill={type:'pattern',pattern:'solid',fgColor:{argb:YEL}};});
+ BK_COLS.forEach((h,i)=>{const c=C.getCell(1,i+1);c.value=h;c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F497D'}};});   // encabezados: texto blanco en negrita sobre azul oscuro, todos iguales
  C.views=[{state:'frozen',ySplit:1}];
  const last=BK_FIRST+BK_ROWS-1;
  const list=(col,f,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)C.getCell(col+rr).dataValidation={type:'list',allowBlank:true,formulae:[f],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid value',error:msg};};
@@ -1748,7 +1748,7 @@ async function parseWorkbook(buf){
   let ok=true;
   const sm=SEC_NAMES.find(s=>s.toLowerCase()===sec.toLowerCase());
   if(!sec){err(r,'Type','Type is required.');ok=false;}else if(!sm){err(r,'Type',`"${sec}" is not a cost type. Valid: ${SEC_NAMES.join(', ')}.`);ok=false;}
-  if(!name){err(r,'TypeItem','TypeItem is required.');ok=false;}
+  if(!name){err(r,'Typeitem','Typeitem is required.');ok=false;}
   const um=CL_UNITS.find(u=>u.toLowerCase()===unit.toLowerCase());
   if(!unit){err(r,'Unit','Unit is required.');ok=false;}else if(!um){err(r,'Unit',`"${unit}" is not valid. Use ${CL_UNITS.join(', ')}.`);ok=false;}
   if(q===null){err(r,'Quantity','Quantity is required.');ok=false;}else if(isNaN(q)||q<=0){err(r,'Quantity','Quantity must be a number greater than 0.');ok=false;}
