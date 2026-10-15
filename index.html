@@ -1068,7 +1068,7 @@ html #pmodal .pm-f button.ok{height:40px;border-radius:4px;box-shadow:none}
     </div>
     <div class="tabs" id="pd-tabs">
       <button class="tab on" data-dt="details">Project Details</button>
-      <button class="tab" data-dt="quotes">Quotes</button>
+      <button class="tab" data-dt="quotes">Scopes</button>
       <button class="tab" data-dt="milestones">Milestones</button>
       <button class="tab" data-dt="tasks">Tasks</button>
       <button class="tab" data-dt="follow">Follow Up</button>
@@ -2324,9 +2324,8 @@ function openProject(ref,tab){
   row('Balance To Bill:',`${n0(p[10])} ${cur} - <b>${bal.toFixed(2)} %</b>`)+
   row('Location:',loc)+
   row('Address:',addr)+
-  `<div class="pd-r"><span class="k">Follow up:</span><div class="fl2"><small>Quotes</small><select>${opts.map(o=>`<option${o===fu?' selected':''}>${o}</option>`).join('')}</select></div></div>`+
-  `<div class="pd-sc" id="pd-sc"></div>`;
- renderPdScopes(p);setPdTab("details");show("pdetail");if(tab==="quotes")setPdTab("quotes");
+  `<div class="pd-r"><span class="k">Follow up:</span><div class="fl2"><small>Quotes</small><select>${opts.map(o=>`<option${o===fu?' selected':''}>${o}</option>`).join('')}</select></div></div>`;
+ setPdTab("details");show("pdetail");if(tab==="quotes")setPdTab("quotes");
 }
 document.addEventListener('click',e=>{
  const sr=e.target.closest('[data-pdsc]');if(sr){const p=PROJ.find(x=>String(x[0])===String($('#pd-body').dataset.ref)),k=p[0]+':'+sr.dataset.pdsc;PDX.has(k)?PDX.delete(k):PDX.add(k);renderPdScopes(p);return;}
@@ -2378,24 +2377,26 @@ function itemsOf(x){
 }
 const chvI='<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7.400 8.600 12 13.200l4.600-4.600L18 10l-6 6-6-6z"/></svg>';
 const sheetI='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM8 18H6v-2h2zm0-4H6v-2h2zm0-4H6V8h2zm5 8h-2v-2h2zm0-4h-2v-2h2zm0-4h-2V8h2zm5 8h-2v-6h2zm0-8h-2V8h2z"/></svg>';
-function renderPQuotes(ref){
+function renderPQuotes(ref){ // pestaña "Scopes" del proyecto: un renglón por scope (si se combinaron varios, uno solo con todos sus ítems)
  const p=PROJ.find(x=>String(x[0])===String(ref)),cur=p[8],qs=quotesOf(p),rr=rnd(+ref+7);let grand=0;
  const c0=n=>n0(n)+' '+(cur==='USD'?'$':'COP'),c2=n=>n2(n)+' '+(cur==='USD'?'$':'COP');
- const body=qs.map((x,qi)=>{
-  x._sp=x._sp||{};
-  const mine=itemsOf(x).filter(it=>String(x._sp[it.i])===String(ref));   // solo los scopes asociados a este proyecto
+ const body=projScopes(p).map(e=>{
+  const mine=[];e.srcs.forEach(({c,si})=>{c._sp=c._sp||{};const its=itemsOf(c);scopesOf(c).filter(s=>s.i===si).forEach(s=>s.idx.filter(i=>String(c._sp[i])===String(ref)).forEach(i=>mine.push(its[i])));});
+  if(!mine.length)return '';
   const sc=mine.reduce((a,b)=>a+b.sale,0),C=mine.reduce((a,b)=>a+b.cost,0),G=mine.reduce((a,b)=>a+b.gm,0);grand+=sc;
-  const oc=x._oc!==undefined?x._oc:(x._oc=(qi===0||rr()<.5)?'45'+String(Math.floor(rr()*1e8)).padStart(8,'0'):'');
+  const cards=[...new Set(e.srcs.map(z=>z.c))];
+  const ids=cards.map(c=>c[0]),ocs=[...new Set(cards.map((c,k)=>c._oc!==undefined?c._oc:(c._oc=(qs.indexOf(c)===0||rr()<.5)?'45'+String(Math.floor(rr()*1e8)).padStart(8,'0'):'')).filter(Boolean))];
+  const qi=Math.max(0,qs.indexOf(cards[0]));
   return `<div class="pk-q" data-qi="${qi}">
-  <div class="pk-h"><span class="pk-c"><button class="pk-b" aria-label="Expand">${chvI}</button></span><span>${x[0]}</span><span class="pk-n"><a title="Open the quote as the estimator sees it">${x[2]}</a></span><span class="pk-r">${c0(sc)}</span><span>${oc}</span><span class="pk-a"><button class="ib" data-toast="Quitar cotización del proyecto">${delI}</button></span></div>
+  <div class="pk-h"><span class="pk-c"><button class="pk-b" aria-label="Expand">${chvI}</button></span><span>${ids[0]}${ids.length>1?` <small>+${ids.length-1}</small>`:''}</span><span class="pk-n"><a title="Open the quote as the estimator sees it">${esc(e.name)}</a></span><span class="pk-r">${c0(sc)}</span><span>${ocs.join(', ')}</span><span class="pk-a"><button class="ib" data-toast="Quitar scope del proyecto">${delI}</button></span></div>
   <div class="pk-d"><div class="pk-t">
-   <div class="pk-g hd"><span>Row</span><span>Cost</span><span>Qty</span><span class="r">Cost</span><span class="r">Margin</span><span class="r">Gross margin</span><span>Price per quantity</span><span class="r">Sale price</span></div>
-   ${mine.map((it,k)=>`<div class="pk-g"><span>${k+1}</span><span>${it.desc}</span><span>${+it.qty.toFixed(2)}</span><span class="r">${c2(it.cost)}</span><span class="r">${it.m.toFixed(2)}%</span><span class="r">${c2(it.gm)}</span><span>${it.ppq<100?c2(it.ppq):c0(it.ppq)} / ${it.unit}</span><span class="r">${c0(it.sale)}</span></div>`).join('')}
+   <div class="pk-g hd"><span>Row</span><span>Description</span><span>Qty</span><span class="r">Cost</span><span class="r">Margin</span><span class="r">Gross margin</span><span>Price per quantity</span><span class="r">Sale price</span></div>
+   ${mine.map((it,k)=>`<div class="pk-g"><span>${k+1}</span><span>${esc(it.desc)}</span><span>${+it.qty.toFixed(2)}</span><span class="r">${c2(it.cost)}</span><span class="r">${it.m.toFixed(2)}%</span><span class="r">${c2(it.gm)}</span><span>${it.ppq<100?c2(it.ppq):c0(it.ppq)} / ${it.unit}</span><span class="r">${c0(it.sale)}</span></div>`).join('')}
    <div class="pk-g ft"><span></span><span>TOTAL</span><span></span><span class="r">${c2(C)}</span><span class="r">${sc?(G/sc*100).toFixed(2):'0.00'}%</span><span class="r">${c2(G)}</span><span></span><span class="r">${c0(sc)}</span></div>
   </div></div></div>`;}).join('');
- $('#pd-body').innerHTML=`<div class="pk"><div class="pk-top"><h3>QUOTES</h3><button class="pillb" data-toast="Agregar cotización al proyecto"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>Add</button></div>
+ $('#pd-body').innerHTML=`<div class="pk"><div class="pk-top"><h3>Scopes</h3><button class="pillb" data-toast="Agregar scope al proyecto"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>Add</button></div>
  <div class="pk-hd pk-row"><span></span><span>ID</span><span>Name</span><span class="pk-r">Price</span><span>OC</span><span>Action</span></div>
- ${body}
+ ${body||'<div class="pk-q"><div class="pk-h"><span></span><span></span><span class="pk-n">No scopes associated yet.</span></div></div>'}
  <div class="pk-tt"><span>TOTAL</span><b>${c0(grand)}</b></div></div>`;
 }
 function setPdTab(t){
