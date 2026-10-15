@@ -1433,7 +1433,7 @@ function renderSecs(){
   const rowsHtml=s.rows.map((r,ri)=>{
    if(r.ed){const d=r.d,p=par(pn(d.w),pn(d.q),d.u,pn(d.c));
     return `<div class="gr rw ed" data-er="${si}:${ri}"><span class="dg"></span><div class="n">${ri+1}</div>
-    <div>${TYPE_ITEMS[s.t]?`<select class="ei" id="ei-${si}-${ri}-name" data-ef="name"><option value="">Select *</option>${[...(d.name&&!TYPE_ITEMS[s.t].includes(d.name)?[d.name]:[]),...TYPE_ITEMS[s.t]].map(o=>`<option${o===d.name?' selected':''}>${o.replace(/&/g,'&amp;')}</option>`).join('')}</select>`:`<input class="ei" id="ei-${si}-${ri}-name" data-ef="name" value="${d.name.replace(/"/g,'&quot;')}" placeholder="Name *" autocomplete="off">`}</div>
+    <div>${TYPE_ITEMS[s.t]?`<input class="ei" id="ei-${si}-${ri}-name" data-ef="name" data-tl="${s.t}" list="dl-${si}" value="${d.name.replace(/"/g,'&quot;')}" placeholder="Search or select *" autocomplete="off">`:`<input class="ei" id="ei-${si}-${ri}-name" data-ef="name" value="${d.name.replace(/"/g,'&quot;')}" placeholder="Name *" autocomplete="off">`}</div>
     <div><input class="ei" id="ei-${si}-${ri}-w" data-ef="w" value="${d.w}" placeholder="--" inputmode="decimal"></div>
     <div><input class="ei" id="ei-${si}-${ri}-q" data-ef="q" value="${d.q}" placeholder="Qty" inputmode="decimal"></div>
     <div><select class="ei" id="ei-${si}-${ri}-u" data-ef="u">${U.map(u=>`<option${u===d.u?' selected':''}>${u}</option>`).join('')}</select></div>
@@ -1441,7 +1441,7 @@ function renderSecs(){
     <div>${money(p)}</div>
     <div style="display:flex;justify-content:space-between;padding-right:60px"><span>${(p/tc*100).toFixed(2)}%</span><span class="ac"><span data-esave="${si}:${ri}" title="Save line">${IC.ok}</span><span data-ecancel="${si}:${ri}" title="Cancel">${IC.x}</span></span></div></div>`;}
    return `<div class="gr rw"><span class="dg">${IC.drag}</span><div class="n">${ri+1}</div><div>${r[0]}</div><div>${f1(r[1])}</div><div>${f1(r[2])}</div><div>${r[3]}</div><div>${money(r[4])}</div><div>${money(r[5])}</div><div style="display:flex;justify-content:space-between;padding-right:60px"><span>${(r[5]/tc*100).toFixed(2)}%</span><span class="ac"><span data-edl="${si}:${ri}" title="Edit line">${IC.pen}</span><span data-del="${si}:${ri}" title="Delete line">${IC.del}</span><span class="ck${r.ck?' on':''}" data-ck="${si}:${ri}">${IC.ck}</span></span></div></div>`;}).join('');
-  return `<div class="sec"><div class="sec-h"><b>${s.t}</b>${n?`<button class="clr" data-clr="${si}">CLEAR ALL</button>`:''}<button class="plus" data-add="${si}" title="Agregar línea"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg></button></div>
+  return `<div class="sec"><div class="sec-h"><b>${s.t}</b>${TYPE_ITEMS[s.t]?`<datalist id="dl-${si}">${TYPE_ITEMS[s.t].map(o=>`<option value="${o.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"></option>`).join('')}</datalist>`:''}${n?`<button class="clr" data-clr="${si}">CLEAR ALL</button>`:''}<button class="plus" data-add="${si}" title="Agregar línea"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg></button></div>
   <div class="tw"><div class="gr hd"><div class="n">#</div><div>Name</div><div>Weight</div><div>Qty</div><div>Unit</div><div>Cost</div><div>Parcial = ${money(tot)}</div><div style="display:flex;justify-content:space-between;padding-right:60px"><span>${(tot/tc*100).toFixed(2)} %</span><span>Actions</span></div></div>
   ${rowsHtml}</div>
   <div class="pg"><span style="display:flex;align-items:center">Rows per page:<span class="rp">All <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 3h8L5 8z" fill="#616161"/></svg></span></span><span>${n?`1-${n} of ${n}`:'–'}</span><i>‹</i><i>›</i></div></div>`;}).join('');
@@ -1480,6 +1480,7 @@ document.addEventListener('click',e=>{
   else if(edl){if(ED.usd){toast('Cambie a Original (COP) para editar líneas');return;}const[a,b]=at(edl.dataset.edl),r=ED.secs[a].rows[b];r.ed=true;r.d={name:r[0],w:r[1]!=null?String(r[1]):'',q:String(r[2]),u:r[3],c:String(r[4])};keep();const el=$(`#ei-${a}-${b}-name`);if(el)el.focus();}
   else if(es){const[a,b]=at(es.dataset.esave),r=ED.secs[a].rows[b],d=r.d;
    if(!d.name.trim()||pn(d.q)<=0){toast('Complete Name y Qty (mayor a 0)');return;}
+   {const tl=ED.secs[a].t;if(TYPE_ITEMS[tl]&&!typeItem(tl,d.name)&&d.name!==r[0]){toast('Choose an item from the list');return;}}
    r[0]=d.name.trim();r[1]=d.w!==''?pn(d.w):null;r[2]=pn(d.q);r[3]=d.u;r[4]=pn(d.c);r[5]=par(pn(d.w),pn(d.q),d.u,pn(d.c));r.ed=false;r.isNew=false;delete r.d;keep();}
   else if(ec){const[a,b]=at(ec.dataset.ecancel),r=ED.secs[a].rows[b];if(r.isNew)ED.secs[a].rows.splice(b,1);else{r.ed=false;delete r.d;}keep();}
   else if(del){const[a,b]=at(del.dataset.del);ED.secs[a].rows.splice(b,1);keep();}
@@ -1488,10 +1489,18 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('input',e=>{
  const t=e.target;if(!ED||!t.dataset||!t.dataset.ef)return;
+ if(t.dataset.tl!==undefined){const w0=t.closest('[data-er]'),[a0,b0]=w0.dataset.er.split(':').map(Number);ED.secs[a0].rows[b0].d.name=t.value;return;}
  const row=t.closest('[data-er]'),[a,b]=row.dataset.er.split(':').map(Number),r=ED.secs[a].rows[b];
  r.d[t.dataset.ef]=t.value;
  const id=t.id,pos=t.selectionStart,st=$('#modal').scrollTop;renderSecs();$('#modal').scrollTop=st;   // % y totales se recalculan al escribir
  const el=$('#'+id);if(el){el.focus();try{if(pos!=null)el.setSelectionRange(pos,pos);}catch(_){}}
+});
+document.addEventListener('change',e=>{
+ const t=e.target;if(!ED||!t.dataset||t.dataset.tl===undefined)return;
+ const w0=t.closest('[data-er]'),[a0,b0]=w0.dataset.er.split(':').map(Number),d=ED.secs[a0].rows[b0].d;
+ if(!t.value.trim()){d.name='';return;}
+ const m=typeItem(t.dataset.tl,t.value);
+ if(!m){toast('Choose an item from the list');t.value='';d.name='';}else{t.value=m;d.name=m;}
 });
 document.addEventListener('change',e=>{if(ED&&e.target.dataset&&e.target.dataset.ef==='u'){const row=e.target.closest('[data-er]'),[a,b]=row.dataset.er.split(':').map(Number);const r=ED.secs[a].rows[b];r.d.u=e.target.value;const st=$('#modal').scrollTop;renderSecs();$('#modal').scrollTop=st;}});
 /* panel lateral: expandir / recoger secciones y contraer el panel */
