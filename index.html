@@ -2620,7 +2620,6 @@ function renderAward(){
  $('#aw-b').innerHTML=`<div class="aw2-quote"><div class="aw2-name">${qLabel(q)}</div><div class="aw2-total">Quote total <strong>${n0(total)} ${cur}</strong></div></div>${rows}`;
  const el=sc.filter(elig),done=el.filter(s=>AWM[s.i].project&&AWM[s.i].scope).length;
  $('#aw-s').disabled=!el.length||done<el.length;
- $('#aw-sum').textContent=el.length?`${done} of ${el.length} scopes assigned`:'';
 }
 function awardApply(createNew){
  const card=AWQ;if(!card)return;
