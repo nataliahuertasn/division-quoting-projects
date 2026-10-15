@@ -2247,7 +2247,7 @@ function saveNewProj(another){
  if(!validNP(['name','am','pm','client','cur']))return;
  if(NP.card&&!NP.sel.size){toast('Seleccione al menos un Scope para el proyecto');$('#np-scopes').scrollIntoView({block:'nearest'});return;}
  const ref=createProject(new Set(NP.sel),npv('name'),true);
- renderKpi();renderProj();$('.ptab').scrollTop=0;
+ renderKpi();renderProj();$('.ptab').scrollTop=0;retireQuote(NP.card);
  if(!another){closeNewProj();toast('Proyecto '+ref+' creado');return;}
  if(!NP.card){['name','ref','sap','offer','price'].forEach(id=>setF(id,''));toast('Proyecto '+ref+' creado · formulario listo para el siguiente');return;}
  const free=scopesOf(NP.card).filter(s=>s.div&&!s.prj&&s.n);
@@ -2262,7 +2262,7 @@ function createAll(){
  const free=scopesOf(NP.card).filter(s=>s.div&&!s.prj&&s.n),divs=[...new Set(free.map(s=>s.div))];
  if(!divs.length){toast('No hay scopes pendientes');return;}
  const refs=divs.map(d=>createProject(new Set(free.filter(s=>s.div===d).map(s=>s.i)),NP.card[2]+' - '+d,false));
- renderKpi();renderProj();$('.ptab').scrollTop=0;closeNewProj();
+ renderKpi();renderProj();$('.ptab').scrollTop=0;retireQuote(NP.card);closeNewProj();
  toast(refs.length+' proyectos creados: '+refs.join(', '));
 }
 document.addEventListener('click',e=>{
@@ -2603,8 +2603,15 @@ document.addEventListener('click',e=>{
 let OCQ=null;
 let AWQ=null,AWM={};   // AWM: índice de scope -> '' | 'new' | ref de proyecto existente
 function ocGo(skip){
- if(!OCQ)return;const card=OCQ,v=skip?'':$('#oc-i').value.trim();card._oc=v;OCQ=null;$('#ocd').classList.remove('on');
+ if(!OCQ)return;const card=OCQ,v=skip?'':$('#oc-i').value.trim();card._oc=v;card._won=true;OCQ=null;$('#ocd').classList.remove('on');
  openAward(card);
+}
+/* Una cotización ganada con todos sus scopes en proyectos sale del tablero y queda solo en sus proyectos */
+function retireQuote(card){
+ if(!card||!card._won)return;
+ if(scopesOf(card).some(s=>s.div&&!s.prj&&s.n))return;
+ COLS.forEach(c=>{const i=c.cards.indexOf(card);if(i>=0){c.cards.splice(i,1);c.n=c.cards.length;}});
+ renderBoard();
 }
 function openAward(card){
  AWQ=card;AWM={};scopesOf(card).forEach(s=>{AWM[s.i]={project:'',scope:'',open:false,sopen:false};});renderAward();$('#awd').classList.add('on');
@@ -2669,7 +2676,7 @@ function awardApply(createNew){
   p[12]=[...new Set([...(p[12]?p[12].split(', '):[]),...list.map(x=>x.s.div)])].join(', ');
   done.push(`${list.length} → ${p[0]}`);
  });
- $('#awd').classList.remove('on');AWQ=null;renderKpi();renderProj();
+ $('#awd').classList.remove('on');AWQ=null;renderKpi();renderProj();retireQuote(card);
  if(news.length){const lb=qLabel(card);location.hash='#/projects';setTimeout(()=>openNewProj(lb,true,news),150);
   if(done.length)toast('Asignados: '+done.join(', ')+' · ahora cree el proyecto nuevo');}
  else toast('Scopes asignados: '+done.join(', '));
@@ -2766,6 +2773,8 @@ function pRestore(){
   PROJ=d.PROJ.filter(p=>{const rm=String(p[0])==='9401'&&p[2]==='Torre Aurora - Fachada Norte';if(rm&&d.KPI){const k=p[8]==='COP'?d.KPI.cop:d.KPI.usd;k[0]--;k[1]-=p[7];}return !rm;});LEADS=d.LEADS;if(d.KPI)KPI=d.KPI;if(d.PJ_BASE)PJ_BASE=d.PJ_BASE;
   PROJ.forEach(p=>{if(p._qref){p._q=p._qref.map(r=>{if(r.v)return r.v;const c=COLS.find(z=>z.k===r.b[0]);return c&&c.cards[r.b[1]];}).filter(Boolean);delete p._qref;}
    if(p._psref){p._ps=p._psref.map(e=>({id:e.id,name:e.name,div:e.div,srcs:e.srcs.map(([qi,si])=>({c:p._q&&p._q[qi],si})).filter(z=>z.c)}));delete p._psref;}});
+  try{COLS.forEach(c=>{for(let i=c.cards.length-1;i>=0;i--){const q=c.cards[i];if(q._oc===undefined)continue;const sc=scopesOf(q);if(sc.some(s=>s.prj)&&!sc.some(s=>s.div&&!s.prj&&s.n)){q._won=true;c.cards.splice(i,1);c.n=c.cards.length;}}});}catch(e){}
+
  }catch(e){}
 }
 let pLast='';
