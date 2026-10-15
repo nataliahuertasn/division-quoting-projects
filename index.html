@@ -2267,8 +2267,8 @@ function createAll(){
 }
 document.addEventListener('click',e=>{
  if(e.target.closest('#nav-pboard'))location.hash='#/projects';
- if(e.target.closest('#mn-won')&&current){const lb=qLabel(current.x);location.hash='#/projects';setTimeout(()=>openNewProj(lb,true),150);}
- if(e.target.closest('#mn-create')&&current){const lb=qLabel(current.x);location.hash='#/projects';setTimeout(()=>openNewProj(lb),150);}
+ if(e.target.closest('#mn-won')&&current){const lb=qLabel(current.x);openNewProj(lb,true);}
+ if(e.target.closest('#mn-create')&&current){const lb=qLabel(current.x);openNewProj(lb);}
  const pt=e.target.closest('#pj-tabs .tab');if(pt)setProjTab(pt.dataset.pt);
  if(e.target.closest('#pj-new'))openNewProj();
  if(e.target.closest('#pj-inform'))toast('Generando informe…');
@@ -2678,7 +2678,7 @@ function awardApply(createNew){
   done.push(`${list.length} → ${p[0]}`);
  });
  $('#awd').classList.remove('on');AWQ=null;renderKpi();renderProj();retireQuote(card);
- if(news.length){const lb=qLabel(card);location.hash='#/projects';setTimeout(()=>openNewProj(lb,true,news),150);
+ if(news.length){const lb=qLabel(card);openNewProj(lb,true,news);
   if(done.length)toast('Asignados: '+done.join(', ')+' · ahora cree el proyecto nuevo');}
  else toast('Scopes asignados: '+done.join(', '));
 }
