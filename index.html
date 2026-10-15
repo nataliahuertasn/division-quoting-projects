@@ -942,6 +942,21 @@ html #awd .aw-f{display:flex;align-items:center;justify-content:space-between;pa
 html #awd .aw-f .lk{color:#1557B0;font-weight:700;letter-spacing:.04em;font-size:14px}
 html #awd .aw-f .ok{height:44px;padding:0 28px;border-radius:999px;background:#1557B0;color:#fff;font-weight:700;letter-spacing:.04em}
 html #awd .aw-f .ok:disabled{background:#E3E7ED;color:#6B7685}
+
+/* Project Details > Scopes */
+.pd-sc{margin:26px 0 30px}.pd-sc h4{margin:0 0 10px;font-size:15px;font-weight:500;color:#212121}
+.pd-st{width:100%;border-collapse:collapse;font-size:12px;background:#fff}
+.pd-st th{background:#eee;text-align:left;padding:9px 10px;font-size:11px;letter-spacing:.4px;color:#616161;font-weight:500}
+.pd-st td{padding:10px;border-top:1px solid #e0e0e0;vertical-align:top;color:#212121}
+.pd-st .n,.pd-it .n{text-align:right}.pd-st td.c{width:30px;padding-right:0}
+.pd-st small{display:block;color:#757575;margin-top:2px;font-size:11px;font-weight:400}
+.pd-sr .aw2-tg{margin-top:0}
+.pd-st tfoot td{background:#eee;font-weight:500;border-top:1px solid #e0e0e0}
+.pd-sx>td{background:#fafafa;padding:6px 10px 12px}
+.pd-it{width:100%;border-collapse:collapse;font-size:12px}
+.pd-it th{text-align:left;padding:6px 8px;font-size:10.5px;color:#757575;font-weight:500;border-bottom:1px solid #e0e0e0}
+.pd-it td{padding:7px 8px;border-top:1px solid #eee}
+.pd-se{font-size:12px;color:#9e9e9e;padding:14px 0}
 </style>
 </head>
 <body>
@@ -2197,6 +2212,18 @@ document.addEventListener('change',e=>{
 /* ---- Project Details ---- */
 const initials=n=>n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const person=(n,lg)=>`<span class="pe"><i${lg?' class="lg"':''}>${lg||initials(n)}</i>${n}</span>`;
+/* Scopes del proyecto (los scopes de cotización asociados; si se combinaron, un solo scope con el valor y el detalle de todos) */
+let PDX=new Set();
+function renderPdScopes(p){
+ const box=$('#pd-sc');if(!box)return;
+ const cur=p[8]==='USD'?'USD':'COP',list=projScopes(p).map(e=>({e,info:psInfo(p,e)})).filter(x=>x.info.items.length),total=list.reduce((a,x)=>a+x.info.amount,0);
+ const chv=awEye;   // solo el ojo para ver el detalle, igual que en Mark Quote As Awarded
+ box.innerHTML=`<h4>Scopes</h4>`+(list.length?`<table class="pd-st"><thead><tr><th></th><th>#</th><th>SCOPE</th><th>DIVISION</th><th>QUOTES</th><th class="n">VALUE</th></tr></thead><tbody>`+
+  list.map((x,k)=>{const open=PDX.has(p[0]+':'+x.e.id),qs=[...new Set(x.info.items.map(i=>i.q))];
+   return `<tr class="pd-sr${open?' open':''}"><td class="c"><button class="aw2-tg" type="button" data-pdsc="${x.e.id}" aria-expanded="${open}" aria-label="${open?'Hide items':'View items'} (${x.info.items.length})" title="${open?'Hide items':'View items'} (${x.info.items.length})">${chv}</button></td><td>${k+1}</td><td><b>${esc(x.e.name)}</b>${x.e.srcs.length>1?`<small>Combined · ${x.e.srcs.length} quote scopes</small>`:''}</td><td>${esc(x.e.div)}</td><td>${qs.map(esc).join('<br>')}</td><td class="n">${n0(x.info.amount)} ${cur}</td></tr>`+
+   (open?`<tr class="pd-sx"><td></td><td colspan="5"><table class="pd-it"><thead><tr><th>DESCRIPTION</th><th>QUOTE</th><th class="n">QTY</th><th>UNIT</th><th class="n">SALE PRICE</th></tr></thead><tbody>${x.info.items.map(i=>`<tr><td>${esc(i.name)}</td><td>${esc(i.q)}</td><td class="n">${n0(i.qty)}</td><td>${esc(i.unit)}</td><td class="n">${n0(i.amount)} ${cur}</td></tr>`).join('')}</tbody></table></td></tr>`:'');}).join('')+
+  `</tbody><tfoot><tr><td></td><td></td><td>TOTAL</td><td></td><td></td><td class="n">${n0(total)} ${cur}</td></tr></tfoot></table>`:`<div class="pd-se">No scopes associated yet.</div>`);
+}
 function openProject(ref,tab){
  const p=PROJ.find(x=>String(x[0])===String(ref));if(!p){location.hash='#/projects';return;}
  const cur=p[8],pct=p[7]?p[9]/p[7]*100:0,bal=p[7]?p[10]/p[7]*100:0;
@@ -2224,10 +2251,12 @@ function openProject(ref,tab){
   row('Balance To Bill:',`${n0(p[10])} ${cur} - <b>${bal.toFixed(2)} %</b>`)+
   row('Location:',loc)+
   row('Address:',addr)+
-  `<div class="pd-r"><span class="k">Follow up:</span><div class="fl2"><small>Quotes</small><select>${opts.map(o=>`<option${o===fu?' selected':''}>${o}</option>`).join('')}</select></div></div>`;
- setPdTab("details");show("pdetail");if(tab==="quotes")setPdTab("quotes");
+  `<div class="pd-r"><span class="k">Follow up:</span><div class="fl2"><small>Quotes</small><select>${opts.map(o=>`<option${o===fu?' selected':''}>${o}</option>`).join('')}</select></div></div>`+
+  `<div class="pd-sc" id="pd-sc"></div>`;
+ renderPdScopes(p);setPdTab("details");show("pdetail");if(tab==="quotes")setPdTab("quotes");
 }
 document.addEventListener('click',e=>{
+ const sr=e.target.closest('[data-pdsc]');if(sr){const p=PROJ.find(x=>String(x[0])===String($('#pd-body').dataset.ref)),k=p[0]+':'+sr.dataset.pdsc;PDX.has(k)?PDX.delete(k):PDX.add(k);renderPdScopes(p);return;}
  const pr=e.target.closest('#pj-rows .pr');
  if(pr&&!e.target.closest('.ac'))location.hash='#/project/'+pr.dataset.ref;
  if(e.target.closest('#pd-close'))location.hash='#/projects';
@@ -2518,7 +2547,7 @@ function projScopes(p){
 }
 function psInfo(p,e){ // valor y detalle de un scope del proyecto = lo asociado de cada scope de cotización que lo compone
  const ref=String(p[0]);let amount=0;const items=[];
- e.srcs.forEach(({c,si})=>{const its=itemsOf(c);scopesOf(c).filter(s=>s.i===si).forEach(s=>s.idx.filter(i=>String(c._sp[i])===ref).forEach(i=>{amount+=its[i].sale;items.push({name:its[i].desc,qty:its[i].qty,unit:its[i].unit,amount:its[i].sale});}));});
+ e.srcs.forEach(({c,si})=>{const its=itemsOf(c);scopesOf(c).filter(s=>s.i===si).forEach(s=>s.idx.filter(i=>String(c._sp[i])===ref).forEach(i=>{amount+=its[i].sale;items.push({name:its[i].desc,qty:its[i].qty,unit:its[i].unit,amount:its[i].sale,q:qLabel(c)});}));});
  return{amount,items};
 }
 const awEye='<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>';
