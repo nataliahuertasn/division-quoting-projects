@@ -1433,7 +1433,7 @@ function renderSecs(){
   const rowsHtml=s.rows.map((r,ri)=>{
    if(r.ed){const d=r.d,p=par(pn(d.w),pn(d.q),d.u,pn(d.c));
     return `<div class="gr rw ed" data-er="${si}:${ri}"><span class="dg"></span><div class="n">${ri+1}</div>
-    <div>${s.t===ENG_SEC?`<select class="ei" id="ei-${si}-${ri}-name" data-ef="name"><option value="">Select *</option>${[...(d.name&&!ENG_ITEMS.includes(d.name)?[d.name]:[]),...ENG_ITEMS].map(o=>`<option${o===d.name?' selected':''}>${o.replace(/&/g,'&amp;')}</option>`).join('')}</select>`:`<input class="ei" id="ei-${si}-${ri}-name" data-ef="name" value="${d.name.replace(/"/g,'&quot;')}" placeholder="Name *" autocomplete="off">`}</div>
+    <div>${TYPE_ITEMS[s.t]?`<select class="ei" id="ei-${si}-${ri}-name" data-ef="name"><option value="">Select *</option>${[...(d.name&&!TYPE_ITEMS[s.t].includes(d.name)?[d.name]:[]),...TYPE_ITEMS[s.t]].map(o=>`<option${o===d.name?' selected':''}>${o.replace(/&/g,'&amp;')}</option>`).join('')}</select>`:`<input class="ei" id="ei-${si}-${ri}-name" data-ef="name" value="${d.name.replace(/"/g,'&quot;')}" placeholder="Name *" autocomplete="off">`}</div>
     <div><input class="ei" id="ei-${si}-${ri}-w" data-ef="w" value="${d.w}" placeholder="--" inputmode="decimal"></div>
     <div><input class="ei" id="ei-${si}-${ri}-q" data-ef="q" value="${d.q}" placeholder="Qty" inputmode="decimal"></div>
     <div><select class="ei" id="ei-${si}-${ri}-u" data-ef="u">${U.map(u=>`<option${u===d.u?' selected':''}>${u}</option>`).join('')}</select></div>
@@ -1764,6 +1764,10 @@ const BK_SHEET='costs';
 // Monedas aceptadas en la carga. Maqueta: tasas estandarizadas en COP por unidad (el software trabaja siempre en pesos y convierte a la moneda de la cotización).
 const ENG_ITEMS=['DESIGN (Shopdrawings & fabrication Drawings)','ENGINEERING (Calculations)','PROJECT MANAGEMENT (Coordination)','STAMP (Sign & Seal)'];   // parametrizado: el estimador no lo escribe
 const ENG_SEC='Engineering & Design';
+const FAB_ITEMS=['BENDING','BENDING (CURVED PANELS)','CONTAINER LOADING','EASYLOCK PUNCHING','EASYLOCK SLOTTING','EXT. ADONIZED FINISH','EXT. PAINTING (AAMA2603 Duracron)','EXT. PAINTING (AAMA2603 Polycron)','EXT. PAINTING (AAMA2604 Durastar)','EXT. PAINTING (AAMA2605 Duranar)','EXTRUSION CUTTING','EXTRUSION CUTTING (PIEZAS)','GALVANIZING PROCESS','LASER CUTTING','PAINTING LABOR (ONE / TWO COAT)','PAINTING LABOR (THREE COAT)','PANEL CUTTING','PANEL CUTTING (PIEZAS)','PUNCHING','WELDING (ALUMINUM)','WELDING (STEEL)'];
+// Typeitem parametrizado por Type: para estos tipos el nombre se elige de la lista (se usa en reportes), no se escribe
+const TYPE_ITEMS={'Engineering & Design':ENG_ITEMS,'Fabrication Processes':FAB_ITEMS};
+const typeItem=(t,name)=>(TYPE_ITEMS[t]||[]).find(z=>z.toLowerCase()===String(name).toLowerCase());
 const CUR_LIST=['COP','USD','EUR','GBP','CAD','MXN','BRL'],CUR_COP={COP:1,EUR:3500,GBP:4100,CAD:2200,MXN:170,BRL:600};
 const curRate=c=>c==='USD'?FX:CUR_COP[c];
 const dvName=d=>'cat_'+String(d).replace(/[^A-Za-z0-9]/g,'_');
@@ -1777,8 +1781,10 @@ function buildTemplate(x){
  L.getCell('B1').value='Units';CL_UNITS.forEach((d,i)=>L.getCell(2+i,2).value=d);
  L.getCell('C1').value='Currencies';CUR_LIST.forEach((d,i)=>L.getCell(2+i,3).value=d);
  L.getCell('D1').value='Divisions';DIVS.forEach((d,i)=>L.getCell(2+i,4).value=d);
- {const ec=5+DIVS.length;L.getCell(1,ec).value='Engineering & Design items';ENG_ITEMS.forEach((d,i)=>L.getCell(2+i,ec).value=d);
-  const el=L.getColumn(ec).letter,bl=L.getColumn(ec+1).letter;wb.definedNames.add(`Lists!$${el}$2:$${el}$${1+ENG_ITEMS.length}`,'eng_items');wb.definedNames.add(`Lists!$${bl}$2`,'no_items');}
+ const tkeys=Object.keys(TYPE_ITEMS);
+ tkeys.forEach((t,k)=>{const ec=5+DIVS.length+k;L.getCell(1,ec).value=t+' items';TYPE_ITEMS[t].forEach((d,i)=>L.getCell(2+i,ec).value=d);
+  const cl=L.getColumn(ec).letter;wb.definedNames.add(`Lists!$${cl}$2:$${cl}$${1+TYPE_ITEMS[t].length}`,'ti_'+k);});
+ {const bl=L.getColumn(5+DIVS.length+tkeys.length).letter;wb.definedNames.add(`Lists!$${bl}$2`,'no_items');}
  DIVS.forEach((d,j)=>{const col=5+j;L.getCell(1,col).value=d;const cats=DIV_CATS[d]||[];cats.forEach((c,i)=>L.getCell(2+i,col).value=c);
   if(cats.length){const cl=L.getColumn(col).letter;wb.definedNames.add(`Lists!$${cl}$2:$${cl}$${1+cats.length}`,dvName(d));}});
  const C=wb.addWorksheet(BK_SHEET);C.columns=[34,16,30,34,26,18,60,10,10,8,14,10,10].map(w=>({width:w}));
@@ -1794,7 +1800,7 @@ function buildTemplate(x){
  for(let rr=BK_FIRST;rr<=last;rr++)C.getCell('C'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`INDIRECT("cat_"&SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B${rr}," ","_"),"&","_"),"-","_"))`],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid category',error:'Choose a category of the selected division (select the division first).'};
  list('E',`Lists!$A$2:$A$${1+SEC_NAMES.length}`,'Choose a cost type from the list.');
  // Typeitem: si el Type es Engineering & Design se ofrece la lista parametrizada (INDIRECT sobre un nombre definido)
- for(let rr=BK_FIRST;rr<=last;rr++)C.getCell('G'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`IF($E${rr}="${ENG_SEC}",INDIRECT("eng_items"),INDIRECT("no_items"))`],showErrorMessage:true,errorStyle:'warning',errorTitle:'Engineering & Design',error:'For Engineering & Design choose the item from the list.'};
+ for(let rr=BK_FIRST;rr<=last;rr++)C.getCell('G'+rr).dataValidation={type:'list',allowBlank:true,formulae:[Object.keys(TYPE_ITEMS).reduceRight((acc,t,k)=>`IF($E${rr}="${t}",INDIRECT("ti_${k}"),${acc})`,'INDIRECT("no_items")')],showErrorMessage:true,errorStyle:'warning',errorTitle:'Typeitem',error:'For this Type choose the item from the list.'};
  num('H','greaterThanOrEqual',0,'Weight must be a number >= 0.');
  num('I','greaterThan',0,'Quantity must be a number greater than 0.');
  list('J',`Lists!$B$2:$B$${1+CL_UNITS.length}`,'Choose a unit from the list.');
@@ -1871,7 +1877,7 @@ async function parseWorkbook(buf){
   const sm=SEC_NAMES.find(s=>s.toLowerCase()===sec.toLowerCase());
   if(!sec){err(r,'Type','Type is required.');ok=false;}else if(!sm){err(r,'Type',`"${sec}" is not a cost type. Valid: ${SEC_NAMES.join(', ')}.`);ok=false;}
   if(!name){err(r,'Typeitem','Typeitem is required.');ok=false;}
-  else if(sm===ENG_SEC){const em=ENG_ITEMS.find(z=>z.toLowerCase()===name.toLowerCase());if(!em){err(r,'Typeitem',`For ${ENG_SEC} the Typeitem must be one of: ${ENG_ITEMS.join(' | ')}.`);ok=false;}}
+  else if(sm&&TYPE_ITEMS[sm]){if(!typeItem(sm,name)){err(r,'Typeitem',`For ${sm} the Typeitem must be one of: ${TYPE_ITEMS[sm].join(' | ')}.`);ok=false;}}
   const um=CL_UNITS.find(u=>u.toLowerCase()===unit.toLowerCase());
   if(!unit){err(r,'Unit','Unit is required.');ok=false;}else if(!um){err(r,'Unit',`"${unit}" is not valid. Use ${CL_UNITS.join(', ')}.`);ok=false;}
   if(q===null){err(r,'Quantity','Quantity is required.');ok=false;}else if(isNaN(q)||q<=0){err(r,'Quantity','Quantity must be a number greater than 0.');ok=false;}
@@ -1879,7 +1885,7 @@ async function parseWorkbook(buf){
   const cm=CUR_LIST.find(x=>x===cur);
   if(!cur){err(r,'Currency','Currency is required.');ok=false;}else if(!cm){err(r,'Currency',`"${cur}" is not a supported currency. Valid: ${CUR_LIST.join(', ')}.`);ok=false;}
   if(w!==null&&(isNaN(w)||w<0)){err(r,'Weight','Weight must be a number >= 0.');ok=false;}
-  if(ok){const cop=cost*curRate(cm),par=(w?w:1)*q*cop;it.lines.push({sec:sm,name:(sm===ENG_SEC?(ENG_ITEMS.find(z=>z.toLowerCase()===name.toLowerCase())||name):name),fam,w:w||null,q,unit:um,cost:cop,par,row:r,orig:cost,cur:cm});}
+  if(ok){const cop=cost*curRate(cm),par=(w?w:1)*q*cop;it.lines.push({sec:sm,name:(TYPE_ITEMS[sm]?(typeItem(sm,name)||name):name),fam,w:w||null,q,unit:um,cost:cop,par,row:r,orig:cost,cur:cm});}
  }
  if(!res.scopes.length&&!res.errors.length)err(BK_FIRST,'-','The file has no rows. Fill at least one row under the headers.');
  res.items.forEach(it=>{if(!it.lines.length)warn(it.row,'Item',`Item "${it.ref}" has no cost lines; its cost will be 0.`);});
