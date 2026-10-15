@@ -1247,8 +1247,7 @@ const pie='<svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="1
 
 /* ---- datos mock (valores visibles en el PDF + cotizaciones adicionales realistas) ---- */
 const COLS=[
- {k:'bid',title:'Bidding',n:5,total:'',cards:[
-  ['9401','Constructora Andina','Torre Aurora - Fachada Norte','Oct 09/2026 9:12 am','0 COP'],
+ {k:'bid',title:'Bidding',n:4,total:'',cards:[
   ['9402','Grupo Hotelero Pacífico','Hotel Costa Brava - Terrazas y Pérgolas','Oct 09/2026 8:47 am','0 COP'],
   ['9403','Clínica Los Cedros','Centro Médico Los Cedros - Celosías','Oct 08/2026 4:20 pm','48.500.000 COP'],
   ['9404','Inmobiliaria Horizonte','Residencias Mirador del Parque','Oct 08/2026 2:05 pm','312.000.000 COP'],
@@ -2737,8 +2736,9 @@ function pRestore(){
  try{const s=localStorage.getItem(PKEY);if(!s)return;const d=JSON.parse(s,pRev);
   if(!d||!Array.isArray(d.COLS)||!Array.isArray(d.PROJ)||!Array.isArray(d.LEADS))return;
   COLS.length=0;d.COLS.forEach(c=>COLS.push(c));
+  COLS.forEach(c=>{const k=c.cards.findIndex(x=>x[0]==='9401'&&x[2]==='Torre Aurora - Fachada Norte');if(k>=0){c.cards.splice(k,1);c.n=Math.max(0,(c.n||c.cards.length+1)-1);}});   // cotización retirada de la maqueta
   DIVS=d.DIVS;Object.keys(DIV_CATS).forEach(k=>delete DIV_CATS[k]);Object.assign(DIV_CATS,d.DIV_CATS);
-  PROJ=d.PROJ;LEADS=d.LEADS;if(d.KPI)KPI=d.KPI;if(d.PJ_BASE)PJ_BASE=d.PJ_BASE;
+  PROJ=d.PROJ.filter(p=>{const rm=String(p[0])==='9401'&&p[2]==='Torre Aurora - Fachada Norte';if(rm&&d.KPI){const k=p[8]==='COP'?d.KPI.cop:d.KPI.usd;k[0]--;k[1]-=p[7];}return !rm;});LEADS=d.LEADS;if(d.KPI)KPI=d.KPI;if(d.PJ_BASE)PJ_BASE=d.PJ_BASE;
   PROJ.forEach(p=>{if(p._qref){p._q=p._qref.map(r=>{if(r.v)return r.v;const c=COLS.find(z=>z.k===r.b[0]);return c&&c.cards[r.b[1]];}).filter(Boolean);delete p._qref;}
    if(p._psref){p._ps=p._psref.map(e=>({id:e.id,name:e.name,div:e.div,srcs:e.srcs.map(([qi,si])=>({c:p._q&&p._q[qi],si})).filter(z=>z.c)}));delete p._psref;}});
  }catch(e){}
