@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Project Agenda - Main Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{
@@ -917,6 +917,31 @@ table.scopet thead th.c{text-align:center}
 .bk-t tr.bk-s td{background:#fafafa}.bk-t tr.bk-i td{color:#616161}.bk-t tr.bk-i td:first-child{padding-left:26px}
 .bk-more{padding:6px 10px;color:#757575;font-size:12px}
 .bk-done{text-align:center;padding:14px 0}.bk-done h4{margin:6px 0 10px;font-size:18px;font-weight:500}
+
+/* Mark Quote As Awarded: formato del prototipo (una fila por scope, proyecto y scope a la derecha) */
+html #awd .bx{width:740px;max-width:94vw;max-height:92vh;padding:0;border-radius:12px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',Roboto,sans-serif;color:#1B2430;box-shadow:0 8px 28px rgba(20,30,50,.18)}
+html #awd .oc-h{display:flex;align-items:center;gap:12px;padding:18px 24px 14px;border-bottom:1px solid #E3E7ED;margin:0}
+html #awd .oc-h h3{margin:0;font-size:22px;font-weight:600;color:#1B2430}
+html #awd .oc-h .x{color:#1557B0}
+html #awd .aw-b{max-height:none;overflow-y:auto;padding:0 24px;flex:1}
+.aw2-quote{padding:16px 0 6px}.aw2-name{font-size:15px;font-weight:500}.aw2-total{font-size:13px;color:#4A5565;margin-top:4px}
+.aw2-row{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid #E3E7ED;flex-wrap:wrap}
+.aw2-info{flex:1 1 220px;padding-top:6px;min-width:0}
+.aw2-line{font-size:15px;line-height:1.45;color:#1B2430}.aw2-meta{font-size:13px;font-weight:500;color:#5B6573;margin-top:2px}
+.aw2-tg{display:flex;align-items:center;gap:6px;margin-top:6px;min-height:32px;padding:0;border:none;background:transparent;color:#1557B0;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.aw2-items{margin-top:4px;border:1px solid #E3E7ED;border-radius:8px;background:#FAFBFC;overflow:hidden}
+.aw2-ir{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,.6fr) minmax(0,.5fr) minmax(0,1.4fr);gap:8px;padding:8px 12px;font-size:13px;border-bottom:1px solid #EEF1F5}
+.aw2-ir:last-child{border-bottom:none}.aw2-ir .r{text-align:right}
+.aw2-ih{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#5B6573;border-bottom:1px solid #E3E7ED}
+.aw2-fields{width:320px;max-width:100%;display:flex;flex-direction:column;gap:12px}
+.aw2-field{display:flex;flex-direction:column;gap:4px}
+.aw2-field label{font-size:12px;font-weight:600;color:#4A5565}
+.aw2-field select{height:44px;border-radius:8px;border:1px solid #B9C2CE;padding:0 12px;font:inherit;font-size:14px;background:#fff;color:#1B2430;width:100%}
+.aw2-note{font-size:13px;color:#9e9e9e;padding-top:10px}
+html #awd .aw-f{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;margin:0;border-top:1px solid #E3E7ED}
+html #awd .aw-f .lk{color:#1557B0;font-weight:700;letter-spacing:.04em;font-size:14px}
+html #awd .aw-f .ok{height:44px;padding:0 28px;border-radius:999px;background:#1557B0;color:#fff;font-weight:700;letter-spacing:.04em}
+html #awd .aw-f .ok:disabled{background:#E3E7ED;color:#6B7685}
 </style>
 </head>
 <body>
@@ -2480,38 +2505,68 @@ function ocGo(skip){
  openAward(card);
 }
 function openAward(card){
- AWQ=card;AWM={};AWX=new Set();scopesOf(card).forEach(s=>{AWM[s.i]="";});renderAward();$('#awd').classList.add('on');
+ AWQ=card;AWM={};scopesOf(card).forEach(s=>{AWM[s.i]={project:'',scope:'',open:false,sopen:false};});renderAward();$('#awd').classList.add('on');
 }
-let AWX=new Set();   // divisiones con el detalle de scopes desplegado
+/* Scopes de un proyecto: cada uno agrupa uno o más scopes de cotizaciones asociadas (se calculan la primera vez y luego se conservan) */
+function projScopes(p){
+ if(!p._ps){
+  const ref=String(p[0]),out=[];p._psn=p._psn||0;
+  quotesOf(p).forEach(c=>{c._sp=c._sp||{};scopesOf(c).forEach(s=>{if(s.idx.some(i=>String(c._sp[i])===ref))out.push({id:'ps'+(++p._psn),name:s.desc,div:s.div,srcs:[{c,si:s.i}]});});});
+  p._ps=out;
+ }
+ return p._ps;
+}
+function psInfo(p,e){ // valor y detalle de un scope del proyecto = lo asociado de cada scope de cotización que lo compone
+ const ref=String(p[0]);let amount=0;const items=[];
+ e.srcs.forEach(({c,si})=>{const its=itemsOf(c);scopesOf(c).filter(s=>s.i===si).forEach(s=>s.idx.filter(i=>String(c._sp[i])===ref).forEach(i=>{amount+=its[i].sale;items.push({name:its[i].desc,qty:its[i].qty,unit:its[i].unit,amount:its[i].sale});}));});
+ return{amount,items};
+}
+const awEye='<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>';
+const awToggle=(open,count,key)=>`<button class="aw2-tg" type="button" data-awtg="${key}" aria-expanded="${open}">${awEye}<span>${open?'Hide items':'View items'} (${count})</span></button>`;
+const awTable=(items,cur)=>`<div class="aw2-items"><div class="aw2-ir aw2-ih"><span>Description</span><span class="r">Qty</span><span>Unit</span><span class="r">Sale price</span></div>${items.map(it=>`<div class="aw2-ir"><span>${esc(it.name)}</span><span class="r">${n0(it.qty)}</span><span>${esc(it.unit)}</span><span class="r">${n0(it.amount)} ${cur}</span></div>`).join('')}</div>`;
 function renderAward(){
- const q=AWQ,sc=scopesOf(q),cur=q[4].includes('$')?'USD':'COP',total=sc.reduce((a,s)=>a+s.val,0);
- const opts=sel=>`${sel==='__mixed'?'<option value="__mixed" selected>Several projects</option>':''}<option value="">Select project</option>`+PROJ.map(p=>`<option value="${p[0]}"${String(p[0])===String(sel)?' selected':''}>${p[0]} - ${p[2]}</option>`).join('');
- const divs=[...new Set(sc.map(s=>s.div||''))];
- let html='';
- divs.forEach(d=>{
-  const g=sc.filter(s=>(s.div||'')===d),free=g.filter(s=>d&&!s.prj&&s.n),open=AWX.has(d),sum=g.reduce((a,s)=>a+s.val,0);
-  const cur1=free.length?(free.every(s=>AWM[s.i]===AWM[free[0].i])?AWM[free[0].i]:'__mixed'):'';
-  html+=`<div class="aw-d${open?' open':''}"><div class="aw-h" data-awt="${d}"><span class="aw-c">${chvI}</span><div class="aw-i"><b>${d||'No division'}</b><small>${g.length} scope${g.length>1?'s':''} · ${n0(sum)} ${cur}</small></div>${free.length?`<div class="aw-s2"><select data-awg="${d}" aria-label="Project for ${d}">${opts(cur1)}</select></div>`:`<span class="aw-n">${g[0].prj?'Already in project '+g[0].prj:'Needs a division'}</span>`}</div>`;
-  if(open)html+='<div class="aw-l">'+g.map(s=>{const dis=s.prj||!s.div||!s.n;return `<div class="aw-r"><span>${s.desc}<small>${n0(s.val)} ${cur}</small></span>${dis?`<span class="aw-n">${s.prj?'Project '+s.prj:'No division'}</span>`:`<div class="aw-s2"><select data-aws="${s.i}" aria-label="Project for ${s.desc}">${opts(AWM[s.i])}</select></div>`}</div>`;}).join('')+'</div>';
-  html+='</div>';
- });
- $('#aw-b').innerHTML=`<div class="aw-q">${qLabel(q)}<br><span>Quote total <b>${n0(total)} ${cur}</b></span></div>${html}`;
- const n=Object.values(AWM).filter(Boolean).length;$('#aw-s').disabled=!n;
- $('#aw-sum').textContent=n?`${n} of ${sc.length} scopes assigned`:'';
+ const q=AWQ,sc=scopesOf(q),cur=q[4].includes('$')?'USD':'COP',its=itemsOf(q),total=sc.reduce((a,s)=>a+s.val,0);
+ const elig=s=>s.div&&!s.prj&&s.n;
+ const rows=sc.map(s=>{
+  const st=AWM[s.i],qitems=s.idx.map(i=>({name:its[i].desc,qty:its[i].qty,unit:its[i].unit,amount:its[i].sale}));
+  const info=`<div class="aw2-info"><div class="aw2-line">Scope: ${esc(s.desc)}</div><div class="aw2-line">Division: ${esc(s.div||'—')}</div><div class="aw2-meta">${n0(s.val)} ${cur}</div>${qitems.length?awToggle(st.open,qitems.length,'o:'+s.i):''}${st.open?awTable(qitems,cur):''}</div>`;
+  if(!elig(s))return `<div class="aw2-row">${info}<div class="aw2-fields"><span class="aw2-note">${s.prj?'Already in project '+s.prj:(!s.div?'Needs a division':'No items')}</span></div></div>`;
+  const p=PROJ.find(x=>String(x[0])===String(st.project)),pcur=p?(p[8]==='USD'?'USD':'COP'):cur;
+  let fields=`<div class="aw2-field"><label for="awp-${s.i}">Assign to existing project</label><select id="awp-${s.i}" data-awp="${s.i}"><option value="">Select project</option>${PROJ.map(x=>`<option value="${x[0]}"${String(x[0])===String(st.project)?' selected':''}>(${x[0]}) ${esc(x[2])}</option>`).join('')}</select></div>`;
+  if(p){ // el selector de scope aparece solo cuando hay proyecto; solo se ofrecen scopes de la misma división
+   const ps=projScopes(p).filter(e=>e.div===s.div),target=p._ps.find(e=>e.id===st.scope);
+   fields+=`<div class="aw2-field"><label for="aws-${s.i}">Scope</label><select id="aws-${s.i}" data-aws="${s.i}"><option value="">Select scope</option>${ps.map(e=>`<option value="${e.id}"${e.id===st.scope?' selected':''}>${esc(e.name)} · ${n0(psInfo(p,e).amount)} ${pcur}</option>`).join('')}<option value="new"${st.scope==='new'?' selected':''}>+ Add as new scope</option></select>`;
+   if(target){const ti=psInfo(p,target).items;fields+=awToggle(st.sopen,ti.length,'s:'+s.i)+(st.sopen?awTable(ti,pcur):'');}
+   fields+='</div>';
+  }
+  return `<div class="aw2-row">${info}<div class="aw2-fields">${fields}</div></div>`;
+ }).join('');
+ $('#aw-b').innerHTML=`<div class="aw2-quote"><div class="aw2-name">${qLabel(q)}</div><div class="aw2-total">Quote total <strong>${n0(total)} ${cur}</strong></div></div>${rows}`;
+ const el=sc.filter(elig),done=el.filter(s=>AWM[s.i].project&&AWM[s.i].scope).length;
+ $('#aw-s').disabled=!el.length||done<el.length;
+ $('#aw-sum').textContent=el.length?`${done} of ${el.length} scopes assigned`:'';
 }
-function awardApply(createNewForUnassigned){
+function awardApply(createNew){
  const card=AWQ;if(!card)return;
- const sc=scopesOf(card);
- if(createNewForUnassigned)sc.forEach(s=>{if(s.div&&!s.prj&&s.n&&!AWM[s.i])AWM[s.i]='new';});
+ const sc=scopesOf(card);card._sp=card._sp||{};
  const byProj={},news=[];
- Object.keys(AWM).forEach(k=>{const v=AWM[k];if(!v)return;if(v==='new')news.push(+k);else(byProj[v]=byProj[v]||[]).push(+k);});
+ sc.forEach(s=>{if(!(s.div&&!s.prj&&s.n))return;const st=AWM[s.i];
+  if(st&&st.project&&st.scope)(byProj[st.project]=byProj[st.project]||[]).push({s,scope:st.scope});else if(createNew)news.push(s.i);});
  const done=[];
  Object.keys(byProj).forEach(ref=>{
-  const p=PROJ.find(x=>String(x[0])===ref),idx=byProj[ref],items=sc.filter(s=>idx.includes(s.i)),sum=items.reduce((a,s)=>a+s.val,0);
-  quotesOf(p);items.forEach(s=>s.idx.forEach(j=>{card._sp[j]=String(p[0]);}));if(!p._q.includes(card))p._q.push(card);
+  const p=PROJ.find(x=>String(x[0])===ref),list=byProj[ref];
+  const ps=projScopes(p);quotesOf(p);                       // la lista del proyecto se fija antes de asociar los scopes de esta cotización
+  list.forEach(({s,scope})=>{
+   const t=scope==='new'?null:ps.find(e=>e.id===scope);
+   if(t)t.srcs.push({c:card,si:s.i});                      // scope existente: se suma su valor y se asocia su detalle
+   else ps.push({id:'ps'+(++p._psn),name:s.desc,div:s.div,srcs:[{c:card,si:s.i}]});   // scope nuevo en el proyecto
+   s.idx.forEach(j=>{card._sp[j]=String(p[0]);});
+  });
+  const sum=list.reduce((a,x)=>a+x.s.val,0);
+  if(!p._q.includes(card))p._q.push(card);
   p[7]=Math.round((p[7]+sum)*100)/100;p[10]=Math.round((p[10]+sum)*100)/100;const k=p[8]==='COP'?KPI.cop:KPI.usd;k[1]+=sum;
-  p[12]=[...new Set([...(p[12]?p[12].split(', '):[]),...items.map(s=>s.div)])].join(', ');
-  done.push(`${items.length} → ${p[0]}`);
+  p[12]=[...new Set([...(p[12]?p[12].split(', '):[]),...list.map(x=>x.s.div)])].join(', ');
+  done.push(`${list.length} → ${p[0]}`);
  });
  $('#awd').classList.remove('on');AWQ=null;renderKpi();renderProj();
  if(news.length){const lb=qLabel(card);location.hash='#/projects';setTimeout(()=>openNewProj(lb,true,news),150);
@@ -2521,14 +2576,14 @@ function awardApply(createNewForUnassigned){
 document.addEventListener('click',e=>{
  if(e.target.closest('#aw-x')||e.target.id==='awd'){$('#awd').classList.remove('on');AWQ=null;}
  if(e.target.closest('#aw-new')&&AWQ)awardApply(true);
- const th=e.target.closest('[data-awt]');if(th&&AWQ&&!e.target.closest('select')){const d=th.dataset.awt;AWX.has(d)?AWX.delete(d):AWX.add(d);renderAward();}
+ const tg=e.target.closest('[data-awtg]');if(tg&&AWQ){const[k,i]=tg.dataset.awtg.split(':'),st=AWM[+i];if(k==='o')st.open=!st.open;else st.sopen=!st.sopen;renderAward();}
  if(e.target.closest('#aw-s')&&!$('#aw-s').disabled)awardApply(false);
 });
 document.addEventListener('change',e=>{
- const g=e.target.dataset&&e.target.dataset.awg,s=e.target.dataset&&e.target.dataset.aws;
- if(!AWQ)return;
- if(g!==undefined){if(e.target.value==='__mixed')return;scopesOf(AWQ).filter(x=>(x.div||'')===g&&x.div&&!x.prj).forEach(x=>{AWM[x.i]=e.target.value;});renderAward();}
- else if(s!==undefined){AWM[s]=e.target.value;renderAward();}
+ if(!AWQ||!e.target.dataset)return;
+ const pi=e.target.dataset.awp,si=e.target.dataset.aws;
+ if(pi!==undefined){const st=AWM[+pi];st.project=e.target.value;st.scope='';st.sopen=false;renderAward();}
+ else if(si!==undefined){const st=AWM[+si];st.scope=e.target.value;st.sopen=false;renderAward();}
 });
 document.addEventListener('click',e=>{
  if(e.target.closest('#oc-x')||e.target.id==='ocd'){$('#ocd').classList.remove('on');OCQ=null;}
@@ -2595,7 +2650,9 @@ new MutationObserver(placeFab).observe(document.body,{attributes:true,subtree:tr
 const PKEY='pa-mockup-state-v1';
 const pFind=c=>{for(const col of COLS){const i=col.cards.indexOf(c);if(i>=0)return[col.k,i];}return null;};
 const pRep=(k,v)=>{if(v instanceof Set)return{__set:[...v]};if(Array.isArray(v)){const ex={};Object.keys(v).forEach(i=>{if(!/^\d+$/.test(i))ex[i]=v[i];});
- if(ex._q){ex._qref=ex._q.map(pFind).filter(Boolean);delete ex._q;}   // las cotizaciones de un proyecto se guardan como referencia al tablero
+ if(ex._ps&&ex._q){ex._psref=ex._ps.map(e=>({id:e.id,name:e.name,div:e.div,srcs:e.srcs.map(z=>[ex._q.indexOf(z.c),z.si]).filter(z=>z[0]>=0)}));}
+ if(ex._q){ex._qref=ex._q.map(c=>{const f=pFind(c);return f?{b:f}:{v:c};});delete ex._q;}   // cotizaciones del proyecto: las del tablero por referencia, las demás por valor
+ delete ex._ps;   // las cotizaciones de un proyecto se guardan como referencia al tablero
  if(Object.keys(ex).length)return{__arr:v.slice(),__x:ex};}return v;};
 const pRev=(k,v)=>{if(v&&typeof v==='object'){if(v.__set)return new Set(v.__set);if(v.__arr){const a=v.__arr;Object.assign(a,v.__x);return a;}}return v;};
 function pSnapshot(){return JSON.stringify({COLS,DIVS,DIV_CATS,PROJ,LEADS,KPI,PJ_BASE},pRep);}
@@ -2605,7 +2662,8 @@ function pRestore(){
   COLS.length=0;d.COLS.forEach(c=>COLS.push(c));
   DIVS=d.DIVS;Object.keys(DIV_CATS).forEach(k=>delete DIV_CATS[k]);Object.assign(DIV_CATS,d.DIV_CATS);
   PROJ=d.PROJ;LEADS=d.LEADS;if(d.KPI)KPI=d.KPI;if(d.PJ_BASE)PJ_BASE=d.PJ_BASE;
-  PROJ.forEach(p=>{if(p._qref){p._q=p._qref.map(([k,i])=>{const c=COLS.find(z=>z.k===k);return c&&c.cards[i];}).filter(Boolean);delete p._qref;}});
+  PROJ.forEach(p=>{if(p._qref){p._q=p._qref.map(r=>{if(r.v)return r.v;const c=COLS.find(z=>z.k===r.b[0]);return c&&c.cards[r.b[1]];}).filter(Boolean);delete p._qref;}
+   if(p._psref){p._ps=p._psref.map(e=>({id:e.id,name:e.name,div:e.div,srcs:e.srcs.map(([qi,si])=>({c:p._q&&p._q[qi],si})).filter(z=>z.c)}));delete p._psref;}});
  }catch(e){}
 }
 let pLast='';
