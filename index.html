@@ -1674,16 +1674,15 @@ function normSecs(secs){ // asegura las 7 secciones de costo en orden; conserva 
 }
 const textToHtml=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\r?\n/g,'<br>');
 const esc=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-// Una sola hoja ("costs") con las columnas del Excel de referencia + Division y Category (el scope tiene UNA sola división y UNA sola categoría/producto).
-// La plantilla se descarga con los scopes que la cotización ya tiene (con su división y categoría); las filas que el usuario agregue a un scope existente se suman a ese scope.
-// Medida, unidades y margen no vienen en el archivo: se completan después al abrir el ítem.
-const BK_COLS=['Scope','Item','Type','Family','Typeitem','Weight','Quantity','Unit','Cost','Currency','Division','Category'];
+// Una sola hoja ("costs") con las 10 columnas del Excel de referencia. La división y la categoría (producto) pertenecen al SCOPE y sus ítems las heredan: no van en el archivo.
+// La plantilla se descarga con los scopes que la cotización ya tiene (su división y categoría se muestran en una nota de la celda); las filas que el usuario agregue a un scope existente se suman a ese scope.
+// Un scope con nombre nuevo se crea sin división ni categoría (se asignan en Costs). Medida, unidades y margen de los ítems se completan al abrir el ítem.
+const BK_COLS=['Scope','Item','Type','Family','Typeitem','Weight','Quantity','Unit','Cost','Currency'];
 const BK_REQ=[0,1,2,4,6,7,8,9];
 const BK_SHEET='costs';
 // Monedas aceptadas en la carga. Maqueta: tasas estandarizadas en COP por unidad (el software trabaja siempre en pesos y convierte a la moneda de la cotización).
 const CUR_LIST=['COP','USD','EUR','GBP','CAD','MXN','BRL'],CUR_COP={COP:1,EUR:3500,GBP:4100,CAD:2200,MXN:170,BRL:600};
 const curRate=c=>c==='USD'?FX:CUR_COP[c];
-const dvName=d=>'cat_'+String(d).replace(/[^A-Za-z0-9]/g,'_');
 
 /* ---------- plantilla ---------- */
 function buildTemplate(x){
@@ -1693,16 +1692,13 @@ function buildTemplate(x){
  L.getCell('A1').value='Sections';SEC_NAMES.forEach((d,i)=>L.getCell(2+i,1).value=d);
  L.getCell('B1').value='Units';CL_UNITS.forEach((d,i)=>L.getCell(2+i,2).value=d);
  L.getCell('C1').value='Currencies';CUR_LIST.forEach((d,i)=>L.getCell(2+i,3).value=d);
- L.getCell('D1').value='Divisions';DIVS.forEach((d,i)=>L.getCell(2+i,4).value=d);
- DIVS.forEach((d,j)=>{const col=5+j;L.getCell(1,col).value=d;const cats=DIV_CATS[d]||[];cats.forEach((c,i)=>L.getCell(2+i,col).value=c);
-  if(cats.length){const cl=L.getColumn(col).letter;wb.definedNames.add(`Lists!$${cl}$2:$${cl}$${1+cats.length}`,dvName(d));}});
- const C=wb.addWorksheet(BK_SHEET);C.columns=[34,34,26,18,60,10,10,8,14,10,16,30].map(w=>({width:w}));
+ const C=wb.addWorksheet(BK_SHEET);C.columns=[34,34,26,18,60,10,10,8,14,10].map(w=>({width:w}));
  BK_COLS.forEach((h,i)=>{const c=C.getCell(1,i+1);c.value=h;c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F497D'}};});   // encabezados: texto blanco en negrita sobre azul oscuro
  C.views=[{state:'frozen',ySplit:1}];
- // scopes que la cotización ya tiene: una fila cada uno con su división y categoría; el resto de columnas queda vacío para completar
+ // scopes que la cotización ya tiene: una fila cada uno; la división y la categoría del scope se ven en la nota de la celda
  const pre=((x&&x._scopes)||[]).filter(s=>!s.alt);
- pre.forEach((s,i)=>{const r=BK_FIRST+i;C.getCell('A'+r).value=s.name;C.getCell('K'+r).value=s.div||null;C.getCell('L'+r).value=s.cat||null;});
- const last=Math.max(BK_FIRST+BK_ROWS-1,BK_FIRST+pre.length+BK_ROWS-1);
+ pre.forEach((s,i)=>{const c=C.getCell('A'+(BK_FIRST+i));c.value=s.name;c.note=`Division: ${s.div||'-'}\nCategory: ${s.cat||'-'}`;});
+ const last=BK_FIRST+pre.length+BK_ROWS-1;
  const list=(col,f,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)C.getCell(col+rr).dataValidation={type:'list',allowBlank:true,formulae:[f],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid value',error:msg};};
  const num=(col,op,v,msg)=>{for(let rr=BK_FIRST;rr<=last;rr++)C.getCell(col+rr).dataValidation={type:'decimal',operator:op,formulae:Array.isArray(v)?v:[v],allowBlank:true,showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid number',error:msg};};
  list('C',`Lists!$A$2:$A$${1+SEC_NAMES.length}`,'Choose a cost type from the list.');
@@ -1711,8 +1707,6 @@ function buildTemplate(x){
  list('H',`Lists!$B$2:$B$${1+CL_UNITS.length}`,'Choose a unit from the list.');
  num('I','greaterThanOrEqual',0,'Cost must be a number >= 0.');
  list('J',`Lists!$C$2:$C$${1+CUR_LIST.length}`,'Choose a currency from the list.');
- list('K',`Lists!$D$2:$D$${1+DIVS.length}`,'Choose a division from the list.');
- for(let rr=BK_FIRST;rr<=last;rr++)C.getCell('L'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`INDIRECT("cat_"&SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($K${rr}," ","_"),"&","_"),"-","_"))`],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid category',error:'Choose a category of the selected division (select the division first).'};
  for(let rr=BK_FIRST;rr<=last;rr++){C.getCell('I'+rr).numFmt='#,##0.00';C.getCell('F'+rr).numFmt='0.0000';}
  L.orderNo=100;wb.views=[{activeTab:0}];
  return wb;
@@ -1742,31 +1736,14 @@ async function parseWorkbook(buf){
  for(let r=BK_FIRST;r<=ws.rowCount;r++){
   const c=[];for(let i=1;i<=BK_COLS.length;i++)c.push(ws.getCell(r,i));
   if(c.every(x=>cellText(x)===''))continue;
-  const scn=cellText(c[0]),ref=cellText(c[1]),sec=cellText(c[2]),fam=cellText(c[3]),name=cellText(c[4]),w=cellNum(c[5]),q=cellNum(c[6]),unit=cellText(c[7]),cost=cellNum(c[8]),cur=cellText(c[9]).toUpperCase(),div=cellText(c[10]),cat=cellText(c[11]);
+  const scn=cellText(c[0]),ref=cellText(c[1]),sec=cellText(c[2]),fam=cellText(c[3]),name=cellText(c[4]),w=cellNum(c[5]),q=cellNum(c[6]),unit=cellText(c[7]),cost=cellNum(c[8]),cur=cellText(c[9]).toUpperCase();
   if(!scn){err(r,'Scope','Scope is required.');continue;}
-  // --- scope: un scope tiene una sola división y una sola categoría (producto)
-  const dvm=DIVS.find(d=>d.toLowerCase()===div.toLowerCase());
+  // --- scope: si ya existe en la cotización, los ítems se agregan a él y heredan su división y categoría (una sola por scope)
   let sc=scopes[scn.toLowerCase()];
-  if(div&&!dvm)err(r,'Division',`"${div}" is not a division. Valid: ${DIVS.join(', ')}.`);
   if(!sc){
    const exIdx=existing.findIndex(s=>s.name.toLowerCase()===scn.toLowerCase()),ex=exIdx>=0?existing[exIdx]:null;
-   let sdiv=ex?ex.div:'',scat=ex?ex.cat:'';
    if(!ex&&DIVS.some(d=>d.toLowerCase()===scn.toLowerCase()))err(r,'Scope','The scope name cannot be the same as a division name.');
-   // división
-   if(dvm){if(sdiv&&sdiv!==dvm)err(r,'Division',`Scope "${scn}" already has division ${sdiv}; a scope can only have one division.`);else if(!sdiv)sdiv=dvm;}
-   // categoría (producto): debe pertenecer a la división del scope
-   let catm=null;const dv=sdiv||dvm;
-   if(cat){catm=dv?(DIV_CATS[dv]||[]).find(z=>z.toLowerCase()===cat.toLowerCase()):null;
-    if(dv&&!catm)err(r,'Category',`"${cat}" is not a product of division ${dv}. Valid: ${(DIV_CATS[dv]||[]).join(', ')||'none defined'}.`);
-    else if(!dv)err(r,'Division','Division is required to set the category.');
-    else if(scat&&catm.toLowerCase()!==scat.toLowerCase())err(r,'Category',`Scope "${scn}" already has category "${scat}"; a scope can only have one category (all its items share it).`);
-    else if(!scat)scat=catm;}
-   if(!ex){if(!dvm&&!sdiv)err(r,'Division','Division is required for a new scope.');if(!cat)err(r,'Category','Category is required for a new scope.');}
-   sc={id:scn,name:ex?ex.name:scn,div:sdiv,cat:scat,desc:ex?(ex.desc||''):'',row:r,ok:true,items:[],exIdx,setDiv:ex&&!ex.div&&!!sdiv,setCat:ex&&!ex.cat&&!!scat};scopes[scn.toLowerCase()]=sc;res.scopes.push(sc);
-  }else{ // filas siguientes del mismo scope: vacías o iguales a la primera
-   if(div&&dvm&&dvm!==sc.div)err(r,'Division',`Scope "${scn}" has more than one division (${sc.div} and ${dvm}). A scope can only have one division.`);
-   if(cat&&sc.cat&&cat.toLowerCase()!==String(sc.cat).toLowerCase())err(r,'Category',`Scope "${scn}" has more than one category ("${sc.cat}" and "${cat}"). A scope can only have one category; all its items must share it.`);
-   else if(cat&&!sc.cat){const dv=sc.div||dvm,cm=dv?(DIV_CATS[dv]||[]).find(z=>z.toLowerCase()===cat.toLowerCase()):null;if(cm){sc.cat=cm;if(sc.exIdx>=0)sc.setCat=true;}else err(r,'Category',`"${cat}" is not a product of division ${dv||'-'}.`);}
+   sc={id:scn,name:ex?ex.name:scn,div:ex?ex.div:'',cat:ex?ex.cat:'',desc:ex?(ex.desc||''):'',row:r,ok:true,items:[],exIdx};scopes[scn.toLowerCase()]=sc;res.scopes.push(sc);
   }
   // --- fila solo con el scope (plantilla prellenada): no crea ítem
   if(!ref&&[sec,fam,name,unit,cur].every(v=>v==='')&&[w,q,cost].every(v=>v===null))continue;
