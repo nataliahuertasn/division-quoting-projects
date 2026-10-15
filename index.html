@@ -957,6 +957,48 @@ html #awd .aw-f .ok:disabled{background:#E3E7ED;color:#6B7685}
 .pd-it th{text-align:left;padding:6px 8px;font-size:10.5px;color:#757575;font-weight:500;border-bottom:1px solid #e0e0e0}
 .pd-it td{padding:7px 8px;border-top:1px solid #eee}
 .pd-se{font-size:12px;color:#9e9e9e;padding:14px 0}
+
+/* New Project: formulario más limpio (secciones, etiquetas arriba, campos con borde, scopes en tarjeta) */
+html #pmodal{width:520px;margin-left:-260px;font-family:'IBM Plex Sans',Roboto,sans-serif;color:#1B2430}
+html #pmodal .pm-h{height:64px;padding:0 20px;border-bottom:1px solid #E3E7ED;gap:6px}
+html #pmodal .pm-h h2{font-size:22px;font-weight:600;color:#1B2430}
+html #pmodal .pm-b{padding:6px 24px 16px}
+html #pm-b .pm-g{column-gap:16px;row-gap:0}
+#pm-b .pm-sec{grid-column:1/-1;margin:22px 0 12px;padding-bottom:8px;border-bottom:1px solid #E3E7ED;font-size:11px;font-weight:700;letter-spacing:.08em;color:#4A5565;text-transform:uppercase}
+html #pm-b .fld{height:auto;display:block;padding:0;margin-bottom:14px}
+#pm-b .fld>svg{display:none}
+html #pm-b .fld .c{display:flex;flex-direction:column-reverse;height:auto;border:0;margin:0;position:relative}
+html #pm-b .fld .c:hover,html #pm-b .fld .c:focus-within{border:0;margin:0}
+html #pm-b .fld.err .c{border:0}
+html #pm-b .fld label{position:static;font-size:12px;font-weight:600;color:#4A5565;margin:0 0 4px;pointer-events:auto}
+html #pm-b .fld.f label,html #pm-b .fld .c:focus-within label{position:static;font-size:12px}
+html #pm-b .fld input,html #pm-b .fld select{position:static;height:44px;width:100%;border:1px solid #B9C2CE;border-radius:6px;padding:0 12px;background:#fff;font-size:14px;color:#1B2430}
+#pm-b .fld input::placeholder{color:#9AA3AF}
+html #pm-b .fld input:focus,html #pm-b .fld select:focus{border-color:#1557B0;box-shadow:0 0 0 1px #1557B0}
+html #pm-b .fld.err input,html #pm-b .fld.err select{border-color:#f44336;box-shadow:0 0 0 1px #f44336}
+html #pm-b .fld.dd .c:after{right:14px;bottom:19px;border-top-color:#4A5565}
+html #pm-b .fld select{padding-right:32px}
+/* tarjeta de scopes */
+html #pm-b .scopes{background:#F4F7FB;border:1px solid #E3E7ED;border-radius:8px;margin:6px 0 4px;padding:14px 16px 12px}
+html #pm-b .scopes .sc-h{padding:0 0 6px}
+html #pm-b .scopes .sc-h>b{font-size:15px;font-weight:600}
+html #pm-b .sc-n{font-size:12px;color:#5B6573;padding:0 0 8px}
+html #pm-b .sc-n .wn{display:inline-block;background:#E6F4EA;color:#14532D;border-radius:999px;padding:2px 10px;font-size:11px;font-weight:600;margin-right:6px}
+html #pm-b .sc-t{background:none;padding:0}
+html #pm-b .sc-r.hd{display:none}
+html #pm-b .sc-r{display:grid;grid-template-columns:28px 1fr auto;column-gap:8px;align-items:center;min-height:52px;padding:0 10px;border-radius:6px;font-size:13px;cursor:pointer}
+html #pm-b .sc-r .ds{padding:0;font-weight:600;color:#1B2430}
+html #pm-b .sc-r .ds small{display:block;margin-top:2px;font-size:11px;font-weight:400;color:#6B7685}
+html #pm-b .sc-r .r{font-weight:600;color:#1B2430;white-space:nowrap}
+html #pm-b .sc-r:not(.hd):not(.dis):hover{background:#EAF0F8}
+html #pm-b .sc-r.on{background:#DCE9F9}
+html #pm-b .sc-r.dis{opacity:.55;cursor:default}
+html #pm-b .sc-f{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding:12px 4px 0;border-top:1px solid #E3E7ED;font-size:12px;color:#5B6573}
+html #pm-b .sc-f b{font-size:14px;color:#1B2430}
+html #pm-b .sc-r input{accent-color:#1557B0;width:18px;height:18px;margin:0}
+/* pie */
+html #pmodal .pm-f{border-top:1px solid #E3E7ED;padding:14px 24px;gap:10px}
+html #pmodal .pm-f button.ok{height:40px;border-radius:4px;box-shadow:none}
 </style>
 </head>
 <body>
@@ -2074,7 +2116,7 @@ const FI={
  list:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h2v2H3zm4 0h14v2H7zM3 11h2v2H3zm4 0h14v2H7zM3 17h2v2H3zm4 0h14v2H7z"/></svg>',
  chart:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17l5-6 4 4 6-8 3 3v-5h-5l1.800 1.800L12 12l-4-4-5 6z"/></svg>'
 };
-const fld=(id,ic,lab,type,opts,req,full)=>`<div class="fld${opts?' dd':''}${full?' full':''}" data-fid="${id}">${FI[ic]}<div class="c">${opts?`<select id="np-${id}"><option value=""></option>${opts.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="np-${id}" ${type?`inputmode="${type}"`:''} autocomplete="off">`}<label>${lab}${req?' *':''}</label></div></div>`;
+const fld=(id,ic,lab,type,opts,req,full)=>`<div class="fld${opts?' dd':''}${full?' full':''}" data-fid="${id}">${FI[ic]}<div class="c">${opts?`<select id="np-${id}"><option value="">Select</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="np-${id}" ${type?`inputmode="${type}"`:''} autocomplete="off">`}<label>${lab}${req?' *':''}</label></div></div>`;
 function closeNewProj(){$('#pov').classList.remove('on');}
 const qLabel=c=>`(${c[0]}) ${c[2]}`;
 const allCards=()=>COLS.flatMap(c=>c.cards);
@@ -2085,16 +2127,22 @@ function openNewProj(pre,won,preset){
  NP={card:null,sel:new Set(),nameAuto:true,won:!!won};
  $('#pm-b').innerHTML=`<div class="pm-g">${fld('q','doc','Quotes','',quotes,false,true)}
  <div class="scopes" id="np-scopes" style="display:none"></div>
+ <div class="pm-sec">Project details</div>
  ${fld('name','doc','Name','',null,true)}${fld('ref','doc','Reference')}
  ${fld('sap','bar','SAP Code')}${fld('offer','doc','Offer')}
+ <div class="pm-sec">Team</div>
  ${fld('am','per','Account Manager','',OPT.am,true)}${fld('pm','per','Project Manager','',OPT.pm,true)}
  ${fld('col','grp','Collaborators','',OPT.col)}${fld('dm','per','Design Managers','',OPT.pm)}
+ <div class="pm-sec">Client</div>
  ${fld('client','doc','Client','',OPT.client,true)}${fld('cc','doc','Client Contacts','',['Wilfredo Pons','Andrea Salazar'])}
+ <div class="pm-sec">Location</div>
  ${fld('country','glb','Country','',OPT.country)}${fld('state','pin','State')}
  ${fld('city','pin','City')}${fld('addr','pin','Address')}
+ <div class="pm-sec">Financials</div>
  ${fld('cur','cash','Currency','',OPT.cur,true)}${fld('price','cash','Price','decimal')}
  ${fld('cls','list','Classification','',OPT.cls)}${fld('mar','chart','Estimated Margin','decimal')}</div>
  <div class="gp"><button class="sw" id="np-gen"><i></i></button>Set As Generic Project</div><small>* indicates required field</small>`;
+ {const ph={sap:'Enter SAP code',offer:'Enter offer',name:'Enter name',ref:'Enter reference',state:'Enter state',city:'Enter city',addr:'Enter address',price:'Enter price',mar:'Enter margin'};Object.keys(ph).forEach(k=>{const e=$('#np-'+k);if(e)e.placeholder=ph[k];});}
  $('#np-cls').value='Exportación';$('#np-cls').closest('.fld').classList.add('f');
  $('#np-name').addEventListener('input',()=>{NP.nameAuto=false;});
  $('#pov').classList.add('on');$('#pm-b').scrollTop=0;
@@ -2131,15 +2179,15 @@ function renderScopes(){
  box.innerHTML=`<div class="sc-h"><b>Scopes</b><div class="dsel"><select id="sc-div" aria-label="Select division"><option value="">Select division</option>${divs.length>1?`<option value="*">All (${free.length})</option>`:''}${divs.map(d=>`<option value="${d}">${d} (${free.filter(s=>s.div===d).length})</option>`).join('')}<option value="-">Clear selection</option></select></div></div>
  ${note}
  <div class="sc-t"><div class="sc-r hd"><span></span><span>Scope</span><span>Division</span><span>Project</span><span class="r">Value</span></div>
- ${sc.map(s=>{const dis=s.prj||!s.div||!s.n;return `<label class="sc-r${dis?' dis':''}"><input type="checkbox" data-sc="${s.i}" ${dis?'disabled':''}><span class="ds">${s.desc}</span><span>${s.div||"No division"}</span><span class="spj">${s.prj||(s.n?"":"No items")}</span><span class="r">${n0(s.val)} ${cur}</span></label>`}).join('')}</div>
- <div class="sc-f"><span></span><b id="sc-val"></b></div>`;
+ ${sc.map(s=>{const dis=s.prj||!s.div||!s.n;return `<label class="sc-r${dis?' dis':''}"><input type="checkbox" data-sc="${s.i}" ${dis?'disabled':''}><span class="ds">${s.desc}<small>${s.div||"No division"}${s.prj?' · In project '+s.prj:(s.n?'':' · No items')}</small></span><span class="r">${n0(s.val)} ${cur}</span></label>`}).join('')}</div>
+ <div class="sc-f"><span>Project value</span><b id="sc-val"></b></div>`;
  updScopes();
 }
 function updScopes(){
  const q=NP.card,sc=scopesOf(q),cur=q[4].includes('$')?'USD':'COP';
  const pick=sc.filter(s=>NP.sel.has(s.i)),sum=pick.reduce((a,s)=>a+s.val,0),divs=[...new Set(pick.map(s=>s.div))];
  $$('#np-scopes .sc-r:not(.hd)').forEach(r=>r.classList.toggle('on',r.querySelector('input').checked));
- $('#sc-val').textContent=`Project Value: ${n0(sum)} ${cur}`;
+ $('#sc-val').textContent=`${n0(sum)} ${cur}`;
  setF('price',sum?String(Math.round(sum)):'');
  if(NP.nameAuto)setF('name',q[2]+(pick.length===1?' - '+pick[0].desc:(divs.length===1?' - '+divs[0]:'')));
 }
