@@ -322,7 +322,7 @@ td.div select.divsel:hover,td.div select.divsel:focus{border-bottom-color:#9e9e9
 .pk-d{display:none;padding:18px 0 22px 68px;border-top:1px solid #e0e0e0}
 .pk-q.open .pk-d{display:block}
 .pk-t{max-width:1260px;border-radius:4px;overflow:hidden;background:#fff}
-.pk-g{display:grid;grid-template-columns:44px 1.6fr 140px 160px 92px 160px 190px 150px;align-items:center;column-gap:6px;min-height:54px;padding:0 10px;font-size:14px;border-bottom:1px solid #e6e6e6;background:#fff}
+.pk-g{display:grid;grid-template-columns:96px 1.6fr 140px 160px 92px 160px 190px 150px;align-items:center;column-gap:6px;min-height:54px;padding:0 10px;font-size:14px;border-bottom:1px solid #e6e6e6;background:#fff}
 .pk-g .r{text-align:right}
 .pk-g.hd{background:#eee;min-height:54px;font-size:12px;font-weight:500;color:#424242;text-transform:uppercase;border-bottom:0}
 .pk-g.ft{background:#eee;font-weight:700;border-bottom:0}
@@ -1765,10 +1765,11 @@ function normSecs(secs){ // asegura las 7 secciones de costo en orden; conserva 
 const textToHtml=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\r?\n/g,'<br>');
 const esc=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 // Una sola hoja ("costs"). Orden de columnas: el scope (con su división y categoría, que valen también para sus ítems), el ítem, y una fila por material
-// (Type = sección de costos del ítem: Materials, Engineering & Design, ...; Typeitem = nombre del material), con moneda y el margen del ítem.
+// (Type = sección de costos del ítem: Materials, Engineering & Design, ...; Costo Item = nombre del material), con moneda y el margen del ítem.
 // La plantilla se descarga con los scopes que la cotización ya tiene (con su división y categoría); las filas que el usuario agregue a un scope existente se suman a ese scope.
 // Medida y unidades del ítem no vienen en el archivo: se completan al abrir el ítem.
-const BK_COLS=['Scope','Division','Category','Item','Type','Family','Typeitem','Weight','Quantity','Unit','Cost','Currency','Margin'];
+const BK_COLS=['Scope','Division','Category','Item','Type','Family','Costo Item','Weight','Quantity','Unit','Cost','Currency','Margin'];
+const BK_ALIAS={'costo item':['typeitem']}; // encabezados anteriores que se siguen aceptando al cargar
 const BK_SHEET='costs';
 // Monedas aceptadas en la carga. Maqueta: tasas estandarizadas en COP por unidad (el software trabaja siempre en pesos y convierte a la moneda de la cotización).
 const ENG_ITEMS=['DESIGN (Shopdrawings & fabrication Drawings)','ENGINEERING (Calculations)','PROJECT MANAGEMENT (Coordination)','STAMP (Sign & Seal)'];   // parametrizado: el estimador no lo escribe
@@ -1812,8 +1813,8 @@ function buildTemplate(x){
  list('B',`Lists!$D$2:$D$${1+DIVS.length}`,'Choose a division from the list.');
  for(let rr=BK_FIRST;rr<=last;rr++)C.getCell('C'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`INDIRECT("cat_"&SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B${rr}," ","_"),"&","_"),"-","_"))`],showErrorMessage:true,errorStyle:'stop',errorTitle:'Invalid category',error:'Choose a category of the selected division (select the division first).'};
  list('E',`Lists!$A$2:$A$${1+SEC_NAMES.length}`,'Choose a cost type from the list.');
- // Typeitem: si el Type es Engineering & Design se ofrece la lista parametrizada (INDIRECT sobre un nombre definido)
- for(let rr=BK_FIRST;rr<=last;rr++)C.getCell('G'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`IFERROR(INDIRECT("ti_"&SUBSTITUTE(SUBSTITUTE($E${rr}," ","_"),"&","_")),INDIRECT("no_items"))`],showErrorMessage:true,errorStyle:'warning',errorTitle:'Typeitem',error:'For this Type choose the item from the list.'};
+ // Costo Item: si el Type es parametrizado se ofrece la lista (INDIRECT sobre un nombre definido)
+ for(let rr=BK_FIRST;rr<=last;rr++)C.getCell('G'+rr).dataValidation={type:'list',allowBlank:true,formulae:[`IFERROR(INDIRECT("ti_"&SUBSTITUTE(SUBSTITUTE($E${rr}," ","_"),"&","_")),INDIRECT("no_items"))`],showErrorMessage:true,errorStyle:'warning',errorTitle:'Costo Item',error:'For this Type choose the item from the list.'};
  num('H','greaterThanOrEqual',0,'Weight must be a number >= 0.');
  num('I','greaterThan',0,'Quantity must be a number greater than 0.');
  list('J',`Lists!$B$2:$B$${1+CL_UNITS.length}`,'Choose a unit from the list.');
@@ -1842,7 +1843,7 @@ async function parseWorkbook(buf){
  const ws=wb.getWorksheet(SH)||wb.worksheets.find(w=>w.name.toLowerCase()===SH);
  if(!ws){res.errors.push({sheet:'File',row:'-',field:SH,msg:`Sheet "${SH}" is missing. The file does not match the template; download it again.`});return res;}
  const hs=BK_COLS.map((h,i)=>cellText(ws.getCell(1,i+1)).replace(/\*/g,'').trim().toLowerCase());
- const badH=BK_COLS.findIndex((h,i)=>hs[i]!==h.toLowerCase());
+ const badH=BK_COLS.findIndex((h,i)=>hs[i]!==h.toLowerCase()&&!(BK_ALIAS[h.toLowerCase()]||[]).includes(hs[i]));
  if(badH>=0){err(1,BK_COLS[badH],`Column ${badH+1} header must be "${BK_COLS[badH]}". Do not rename or move the template columns.`);return res;}
  const xq=current&&current.x,existing=(xq&&xq._scopes)||[];
  const scopes={},items={};
@@ -1889,8 +1890,8 @@ async function parseWorkbook(buf){
   let ok=true;
   const sm=SEC_NAMES.find(s=>s.toLowerCase()===sec.toLowerCase());
   if(!sec){err(r,'Type','Type is required.');ok=false;}else if(!sm){err(r,'Type',`"${sec}" is not a cost type. Valid: ${SEC_NAMES.join(', ')}.`);ok=false;}
-  if(!name){err(r,'Typeitem','Typeitem is required.');ok=false;}
-  else if(sm&&TYPE_ITEMS[sm]){if(!typeItem(sm,name)){err(r,'Typeitem',`For ${sm} the Typeitem must be chosen from the drop-down list (e.g. ${TYPE_ITEMS[sm].slice(0,3).join(' | ')} | ...).`);ok=false;}}
+  if(!name){err(r,'Costo Item','Costo Item is required.');ok=false;}
+  else if(sm&&TYPE_ITEMS[sm]){if(!typeItem(sm,name)){err(r,'Costo Item',`For ${sm} the Costo Item must be chosen from the drop-down list (e.g. ${TYPE_ITEMS[sm].slice(0,3).join(' | ')} | ...).`);ok=false;}}
   const um=CL_UNITS.find(u=>u.toLowerCase()===unit.toLowerCase());
   if(!unit){err(r,'Unit','Unit is required.');ok=false;}else if(!um){err(r,'Unit',`"${unit}" is not valid. Use ${CL_UNITS.join(', ')}.`);ok=false;}
   if(q===null){err(r,'Quantity','Quantity is required.');ok=false;}else if(isNaN(q)||q<=0){err(r,'Quantity','Quantity must be a number greater than 0.');ok=false;}
@@ -2381,7 +2382,8 @@ function renderPQuotes(ref){ // pestaña "Scopes" del proyecto: un renglón por 
  const p=PROJ.find(x=>String(x[0])===String(ref)),cur=p[8],qs=quotesOf(p),rr=rnd(+ref+7);let grand=0;
  const c0=n=>n0(n)+' '+(cur==='USD'?'$':'COP'),c2=n=>n2(n)+' '+(cur==='USD'?'$':'COP');
  const body=projScopes(p).map(e=>{
-  const mine=[];e.srcs.forEach(({c,si})=>{c._sp=c._sp||{};const its=itemsOf(c);scopesOf(c).filter(s=>s.i===si).forEach(s=>s.idx.filter(i=>String(c._sp[i])===String(ref)).forEach(i=>mine.push(its[i])));});
+  // Item ID = id de la cotización + posición del ítem dentro de su scope en la cotización (p. ej. 9351.03.02)
+  const mine=[],iids=[];e.srcs.forEach(({c,si})=>{c._sp=c._sp||{};const its=itemsOf(c);scopesOf(c).filter(s=>s.i===si).forEach(s=>s.idx.filter(i=>String(c._sp[i])===String(ref)).forEach(i=>{mine.push(its[i]);iids.push(c[0]+'.'+String(s.idx.indexOf(i)+1).padStart(2,'0'));}));});
   if(!mine.length)return '';
   const sc=mine.reduce((a,b)=>a+b.sale,0),C=mine.reduce((a,b)=>a+b.cost,0),G=mine.reduce((a,b)=>a+b.gm,0);grand+=sc;
   const cards=[...new Set(e.srcs.map(z=>z.c))];
@@ -2390,12 +2392,12 @@ function renderPQuotes(ref){ // pestaña "Scopes" del proyecto: un renglón por 
   return `<div class="pk-q" data-qi="${qi}">
   <div class="pk-h"><span class="pk-c"><button class="pk-b" aria-label="Expand">${chvI}</button></span><span>${ids[0]}${ids.length>1?` <small>+${ids.length-1}</small>`:''}</span><span class="pk-n"><a title="Open the quote as the estimator sees it">${esc(e.name)}</a></span><span class="pk-r">${c0(sc)}</span><span>${ocs.join(', ')}</span><span class="pk-a"><button class="ib" data-toast="Quitar scope del proyecto">${delI}</button></span></div>
   <div class="pk-d"><div class="pk-t">
-   <div class="pk-g hd"><span>Row</span><span>Description</span><span>Qty</span><span class="r">Cost</span><span class="r">Margin</span><span class="r">Gross margin</span><span>Price per quantity</span><span class="r">Sale price</span></div>
-   ${mine.map((it,k)=>`<div class="pk-g"><span>${k+1}</span><span>${esc(it.desc)}</span><span>${+it.qty.toFixed(2)}</span><span class="r">${c2(it.cost)}</span><span class="r">${it.m.toFixed(2)}%</span><span class="r">${c2(it.gm)}</span><span>${it.ppq<100?c2(it.ppq):c0(it.ppq)} / ${it.unit}</span><span class="r">${c0(it.sale)}</span></div>`).join('')}
+   <div class="pk-g hd"><span>Item ID</span><span>Description</span><span>Qty</span><span class="r">Cost</span><span class="r">Margin</span><span class="r">Gross margin</span><span>Price per quantity</span><span class="r">Sale price</span></div>
+   ${mine.map((it,k)=>`<div class="pk-g"><span>${iids[k]}</span><span>${esc(it.desc)}</span><span>${+it.qty.toFixed(2)}</span><span class="r">${c2(it.cost)}</span><span class="r">${it.m.toFixed(2)}%</span><span class="r">${c2(it.gm)}</span><span>${it.ppq<100?c2(it.ppq):c0(it.ppq)} / ${it.unit}</span><span class="r">${c0(it.sale)}</span></div>`).join('')}
    <div class="pk-g ft"><span></span><span>TOTAL</span><span></span><span class="r">${c2(C)}</span><span class="r">${sc?(G/sc*100).toFixed(2):'0.00'}%</span><span class="r">${c2(G)}</span><span></span><span class="r">${c0(sc)}</span></div>
   </div></div></div>`;}).join('');
  $('#pd-body').innerHTML=`<div class="pk"><div class="pk-top"><h3>Scopes</h3><button class="pillb" data-toast="Agregar scope al proyecto"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>Add</button></div>
- <div class="pk-hd pk-row"><span></span><span>ID</span><span>Name</span><span class="pk-r">Price</span><span>OC</span><span>Action</span></div>
+ <div class="pk-hd pk-row"><span></span><span>Scope ID</span><span>Name</span><span class="pk-r">Price</span><span>OC</span><span>Action</span></div>
  ${body||'<div class="pk-q"><div class="pk-h"><span></span><span></span><span class="pk-n">No scopes associated yet.</span></div></div>'}
  <div class="pk-tt"><span>TOTAL</span><b>${c0(grand)}</b></div></div>`;
 }
