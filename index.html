@@ -942,6 +942,8 @@ html #awd .aw-f{display:flex;align-items:center;justify-content:space-between;pa
 html #awd .aw-f .lk{color:#1557B0;font-weight:700;letter-spacing:.04em;font-size:14px}
 html #awd .aw-f .ok{height:44px;padding:0 28px;border-radius:4px;background:#1557B0;color:#fff;font-weight:700;letter-spacing:.04em}
 html #awd .aw-f .ok:disabled{background:#E3E7ED;color:#6B7685}
+html #awd .aw-f .lk:disabled{color:#9AA3AF;cursor:default}
+html #awd .aw-sm{font-size:12px;color:#B3261E;padding:0 12px}
 
 /* Project Details > Scopes */
 .pd-sc{margin:26px 0 30px}.pd-sc h4{margin:0 0 10px;font-size:15px;font-weight:500;color:#212121}
@@ -2143,7 +2145,10 @@ const FI={
  chart:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17l5-6 4 4 6-8 3 3v-5h-5l1.800 1.800L12 12l-4-4-5 6z"/></svg>'
 };
 const fld=(id,ic,lab,type,opts,req,full)=>`<div class="fld${opts?' dd':''}${full?' full':''}" data-fid="${id}">${FI[ic]}<div class="c">${opts?`<select id="np-${id}"><option value="">Select</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="np-${id}" ${type?`inputmode="${type}"`:''} autocomplete="off">`}<label>${lab}${req?' *':''}</label></div></div>`;
-function closeNewProj(){$('#pov').classList.remove('on');}
+function closeNewProj(force){ // cotización ganada: no se cierra mientras queden scopes sin proyecto
+ const n=!force&&NP&&NP.won&&NP.card?awPending(NP.card):0;
+ if(n){toast(`Quote won: ${n} scope${n>1?'s':''} still without project. Assign all scopes before closing.`);$('#np-scopes').scrollIntoView({block:'nearest'});return;}
+ $('#pov').classList.remove('on');}
 const qLabel=c=>`(${c[0]}) ${c[2]}`;
 const allCards=()=>COLS.flatMap(c=>c.cards);
 let NP=null;
@@ -2247,12 +2252,14 @@ function createProject(sel,name,useRef){
 function saveNewProj(another){
  if(!validNP(['name','am','pm','client','cur']))return;
  if(NP.card&&!NP.sel.size){toast('Seleccione al menos un Scope para el proyecto');$('#np-scopes').scrollIntoView({block:'nearest'});return;}
+ if(NP.won&&NP.card)NP.card._won=true;
  const ref=createProject(new Set(NP.sel),npv('name'),true);
  renderKpi();renderProj();$('.ptab').scrollTop=0;retireQuote(NP.card);
- if(!another){closeNewProj();toast('Proyecto '+ref+' creado');return;}
+ if(NP.won&&NP.card&&awPending(NP.card))another=true;   // ganada con scopes pendientes: el formulario sigue abierto con los que faltan
+ if(!another){closeNewProj(true);toast('Proyecto '+ref+' creado');return;}
  if(!NP.card){['name','ref','sap','offer','price'].forEach(id=>setF(id,''));toast('Proyecto '+ref+' creado · formulario listo para el siguiente');return;}
  const free=scopesOf(NP.card).filter(s=>s.div&&!s.prj&&s.n);
- if(!free.length){closeNewProj();toast('Proyecto '+ref+' creado · todos los scopes de la cotización ya tienen proyecto');return;}
+ if(!free.length){closeNewProj(true);toast('Proyecto '+ref+' creado · todos los scopes de la cotización ya tienen proyecto');return;}
  NP.sel.clear();NP.nameAuto=true;['ref','sap','offer'].forEach(id=>setF(id,''));
  renderScopes();selGroup(free[0].div,true);$('#pm-b').scrollTop=0;
  toast('Proyecto '+ref+' creado · faltan '+free.length+' scope'+(free.length>1?'s':'')+' por asignar');
@@ -2262,8 +2269,9 @@ function createAll(){
  if(!validNP(['am','pm','client','cur']))return;
  const free=scopesOf(NP.card).filter(s=>s.div&&!s.prj&&s.n),divs=[...new Set(free.map(s=>s.div))];
  if(!divs.length){toast('No hay scopes pendientes');return;}
+ if(NP.won)NP.card._won=true;
  const refs=divs.map(d=>createProject(new Set(free.filter(s=>s.div===d).map(s=>s.i)),NP.card[2]+' - '+d,false));
- renderKpi();renderProj();$('.ptab').scrollTop=0;retireQuote(NP.card);closeNewProj();
+ renderKpi();renderProj();$('.ptab').scrollTop=0;retireQuote(NP.card);closeNewProj(true);
  toast(refs.length+' proyectos creados: '+refs.join(', '));
 }
 document.addEventListener('click',e=>{
@@ -2606,7 +2614,7 @@ document.addEventListener('click',e=>{
 let OCQ=null;
 let AWQ=null,AWM={};   // AWM: índice de scope -> '' | 'new' | ref de proyecto existente
 function ocGo(skip){
- if(!OCQ)return;const card=OCQ,v=skip?'':$('#oc-i').value.trim();card._oc=v;card._won=true;OCQ=null;$('#ocd').classList.remove('on');
+ if(!OCQ)return;const card=OCQ,v=skip?'':$('#oc-i').value.trim();card._oc=v;OCQ=null;$('#ocd').classList.remove('on');   // queda ganada solo al asignar sus scopes (awardApply)
  openAward(card);
 }
 /* Una cotización ganada con todos sus scopes en proyectos sale del tablero y queda solo en sus proyectos */
@@ -2654,12 +2662,16 @@ function renderAward(){
   return `<div class="aw2-row">${info}<div class="aw2-fields">${fields}</div></div>`;
  }).join('');
  $('#aw-b').innerHTML=`<div class="aw2-quote"><div class="aw2-name">${qLabel(q)}</div><div class="aw2-total">Quote total <strong>${n0(total)} ${cur}</strong></div></div>${rows}`;
- const el=sc.filter(elig),done=el.filter(s=>AWM[s.i].project&&AWM[s.i].scope).length;
- $('#aw-s').disabled=!el.length||done<el.length;
+ // todos los scopes deben quedar en un proyecto: uno con ítems y sin división bloquea la adjudicación
+ const el=sc.filter(elig),done=el.filter(s=>AWM[s.i].project&&AWM[s.i].scope).length,nodiv=sc.filter(s=>!s.div&&s.n).length;
+ $('#aw-s').disabled=!!nodiv||!el.length||done<el.length;
+ $('#aw-new').disabled=!!nodiv||done===el.length;
+ $('#aw-sum').textContent=nodiv?`${nodiv} scope${nodiv>1?'s':''} without division: assign a division in Costs first`:(done<el.length?`${el.length-done} of ${el.length} scopes pending: assign them or create new projects`:'');
 }
+const awPending=c=>scopesOf(c).filter(s=>s.div&&!s.prj&&s.n).length;
 function awardApply(createNew){
  const card=AWQ;if(!card)return;
- const sc=scopesOf(card);card._sp=card._sp||{};
+ const sc=scopesOf(card);card._sp=card._sp||{};card._won=true;
  const byProj={},news=[];
  sc.forEach(s=>{if(!(s.div&&!s.prj&&s.n))return;const st=AWM[s.i];
   if(st&&st.project&&st.scope)(byProj[st.project]=byProj[st.project]||[]).push({s,scope:st.scope});else if(createNew)news.push(s.i);});
@@ -2686,7 +2698,7 @@ function awardApply(createNew){
 }
 document.addEventListener('click',e=>{
  if(e.target.closest('#aw-x')||e.target.id==='awd'){$('#awd').classList.remove('on');AWQ=null;}
- if(e.target.closest('#aw-new')&&AWQ)awardApply(true);
+ if(e.target.closest('#aw-new')&&AWQ&&!$('#aw-new').disabled)awardApply(true);
  const tg=e.target.closest('[data-awtg]');if(tg&&AWQ){const[k,i]=tg.dataset.awtg.split(':'),st=AWM[+i];if(k==='o')st.open=!st.open;else st.sopen=!st.sopen;renderAward();}
  if(e.target.closest('#aw-s')&&!$('#aw-s').disabled)awardApply(false);
 });
