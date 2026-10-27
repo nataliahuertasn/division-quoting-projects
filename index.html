@@ -875,7 +875,7 @@ table.scopet thead th.c{text-align:center}
 .menu.on{display:block}
 .menu div{padding:10px 16px;cursor:pointer;font-size:14px}
 .menu div:hover{background:var(--gray)}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#323232;color:#fff;padding:12px 20px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast{position:fixed;z-index:100;left:50%;bottom:24px;transform:translateX(-50%);background:#323232;color:#fff;padding:12px 20px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
 .items h4 .bulkbtn{position:relative;cursor:pointer;color:#424242}
 .items h4 .bulkbtn:hover{color:var(--blue)}
@@ -1239,6 +1239,7 @@ html #pmodal .pm-f button.ok{height:40px;border-radius:4px;box-shadow:none}
 </div></div>
 <div class="dlg" id="dlg"><div class="bx"><h3 id="dlg-t">New Division</h3><input id="dlg-i" placeholder="Division" autocomplete="off"><div class="cat-l">Products <small>(items offered by this division)</small></div><div class="cat-box" id="dlg-cats"></div><input id="dlg-ci" placeholder="Add a product and press Enter" autocomplete="off"><div class="er" id="dlg-e"></div><div class="bt"><button id="dlg-c">Cancel</button><button class="ok" id="dlg-s">Save</button></div></div></div>
 <div class="dlg" id="cfm"><div class="bx"><h3>Eliminar división</h3><div style="font-size:16px;color:#424242;line-height:1.5">¿Está seguro de eliminar la división <b id="cfm-n"></b>?<br><span style="font-size:14px;color:#757575">Los ítems que la tengan asignada quedarán sin división.</span></div><div class="bt" style="margin-top:18px"><button id="cfm-c">Cancel</button><button class="ok" id="cfm-ok" style="color:#f44336">Delete</button></div></div></div>
+<div class="dlg" id="npc"><div class="bx"><h3>Scopes pending</h3><div style="font-size:16px;color:#424242;line-height:1.5">This quote was marked as won and <b id="npc-n"></b> still without a project.<br><span style="font-size:14px;color:#757575">All scopes must be assigned. If you cancel, the award is undone and the quote goes back to Follow Up.</span></div><div class="bt" style="margin-top:18px"><button id="npc-c" style="color:#f44336">Cancel award</button><button class="ok" id="npc-k">Keep assigning</button></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -2145,10 +2146,24 @@ const FI={
  chart:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17l5-6 4 4 6-8 3 3v-5h-5l1.800 1.800L12 12l-4-4-5 6z"/></svg>'
 };
 const fld=(id,ic,lab,type,opts,req,full)=>`<div class="fld${opts?' dd':''}${full?' full':''}" data-fid="${id}">${FI[ic]}<div class="c">${opts?`<select id="np-${id}"><option value="">Select</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input id="np-${id}" ${type?`inputmode="${type}"`:''} autocomplete="off">`}<label>${lab}${req?' *':''}</label></div></div>`;
-function closeNewProj(force){ // cotización ganada: no se cierra mientras queden scopes sin proyecto
+function closeNewProj(force){ // cotización ganada: no se cierra mientras queden scopes sin proyecto; se pregunta si seguir o deshacer
  const n=!force&&NP&&NP.won&&NP.card?awPending(NP.card):0;
- if(n){toast(`Quote won: ${n} scope${n>1?'s':''} still without project. Assign all scopes before closing.`);$('#np-scopes').scrollIntoView({block:'nearest'});return;}
- $('#pov').classList.remove('on');}
+ if(n){$('#npc-n').textContent=`${n} scope${n>1?'s are':' is'}`;$('#npc').classList.add('on');return;}
+ AWSNAP=null;$('#pov').classList.remove('on');}
+/* Deshacer una adjudicación a medias: foto de la cotización, los proyectos y los KPI antes de asignar */
+let AWSNAP=null;
+function awSnap(card){card._sp=card._sp||{};return{card,sp:{...card._sp},won:!!card._won,proj:PROJ.slice(),
+ pj:PROJ.map(p=>({p,v:[p[7],p[10],p[12]],ps:p._ps&&p._ps.map(e=>({...e,srcs:e.srcs.slice()})),psn:p._psn,q:p._q&&p._q.slice()})),kpi:JSON.stringify(KPI)};}
+function awUndo(){
+ const s=AWSNAP;if(!s)return;AWSNAP=null;
+ s.card._sp=s.sp;s.card._won=s.won;PROJ.length=0;PROJ.push(...s.proj);
+ s.pj.forEach(o=>{[o.p[7],o.p[10],o.p[12]]=o.v;o.p._ps=o.ps;o.p._psn=o.psn;o.p._q=o.q;});
+ Object.assign(KPI,JSON.parse(s.kpi));renderKpi();renderProj();
+}
+document.addEventListener('click',e=>{
+ if(e.target.closest('#npc-k')||e.target.id==='npc'){$('#npc').classList.remove('on');$('#np-scopes').scrollIntoView({block:'nearest'});}
+ if(e.target.closest('#npc-c')){$('#npc').classList.remove('on');awUndo();closeNewProj(true);toast('Award cancelled · the quote is back in Follow Up');}
+});
 const qLabel=c=>`(${c[0]}) ${c[2]}`;
 const allCards=()=>COLS.flatMap(c=>c.cards);
 let NP=null;
@@ -2276,7 +2291,7 @@ function createAll(){
 }
 document.addEventListener('click',e=>{
  if(e.target.closest('#nav-pboard'))location.hash='#/projects';
- if(e.target.closest('#mn-won')&&current){const lb=qLabel(current.x);openNewProj(lb,true);}
+ if(e.target.closest('#mn-won')&&current){const lb=qLabel(current.x);AWSNAP=awSnap(current.x);openNewProj(lb,true);}
  if(e.target.closest('#mn-create')&&current){const lb=qLabel(current.x);openNewProj(lb);}
  const pt=e.target.closest('#pj-tabs .tab');if(pt)setProjTab(pt.dataset.pt);
  if(e.target.closest('#pj-new'))openNewProj();
@@ -2671,6 +2686,7 @@ function renderAward(){
 const awPending=c=>scopesOf(c).filter(s=>s.div&&!s.prj&&s.n).length;
 function awardApply(createNew){
  const card=AWQ;if(!card)return;
+ AWSNAP=createNew?awSnap(card):null;   // si sigue al formulario de proyecto nuevo, se puede deshacer todo desde allí
  const sc=scopesOf(card);card._sp=card._sp||{};card._won=true;
  const byProj={},news=[];
  sc.forEach(s=>{if(!(s.div&&!s.prj&&s.n))return;const st=AWM[s.i];
